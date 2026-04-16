@@ -32,7 +32,7 @@
 
   /* ─ Fluid Layout: skaliert proportional mit Viewport-Breite ─ */
   /* Sidebar: min 200px · 20vw · max 320px */
-  --md-sidebar-width:   clamp(280px, 28vw, 480px);
+  --md-sidebar-width:   clamp(320px, 22vw, 460px);
   /* Content-Breite: min 480px · 72vw · max 1100px */
   --ki-content-max:     clamp(480px, 72vw, 1100px);
   /* Content-Padding X: min 1rem · 3.5vw · max 4rem */
@@ -129,9 +129,12 @@ mark { background: #fef08a; border-radius: 2px; }
    ══════════════════════════════════════════════════════════════════════════ */
 .md-sidebar--primary {
   background-color: var(--ki-sb);
+  width: clamp(320px, 22vw, 460px) !important;   /* direkt — überschreibt Material */
+  min-width: 320px !important;
 }
 .md-sidebar--primary .md-sidebar__scrollwrap {
   background-color: var(--ki-sb);
+  width: clamp(320px, 22vw, 460px) !important;
 }
 
 /* Sidebar Scrollbar */
@@ -205,6 +208,12 @@ mark { background: #fef08a; border-radius: 2px; }
    ══════════════════════════════════════════════════════════════════════════ */
 .md-content {
   background-color: var(--ki-bg);
+}
+/* Sicherstellen dass Content-Bereich nicht hinter Sidebar versteckt wird */
+@media screen and (min-width: 76.25em) {
+  .md-main__inner {
+    margin-left: clamp(320px, 22vw, 460px) !important;
+  }
 }
 .md-content__inner {
   max-width: var(--ki-content-max);
@@ -615,7 +624,7 @@ pre.mermaid {
 /* Tablet / kleines Laptop (< 1220px) */
 @media screen and (max-width: 76.1875em) {
   :root {
-    --md-sidebar-width:   clamp(260px, 30vw, 420px);
+    --md-sidebar-width:   clamp(280px, 24vw, 420px);
     --ki-content-max:     90vw;
     --ki-content-pad-x:   clamp(1rem, 2.5vw, 2.5rem);
   }
@@ -643,7 +652,7 @@ pre.mermaid {
 /* Großer Monitor (> 1600px) — mehr Luft */
 @media screen and (min-width: 100em) {
   :root {
-    --md-sidebar-width:   clamp(340px, 24vw, 520px);
+    --md-sidebar-width:   clamp(360px, 22vw, 480px);
     --ki-content-max:     clamp(900px, 68vw, 1300px);
     --ki-content-pad-x:   clamp(3rem, 4vw, 5rem);
   }
@@ -652,7 +661,7 @@ pre.mermaid {
 /* Ultra-Wide (> 2000px) */
 @media screen and (min-width: 125em) {
   :root {
-    --md-sidebar-width:   clamp(380px, 22vw, 580px);
+    --md-sidebar-width:   clamp(380px, 20vw, 500px);
     --ki-content-max:     clamp(1000px, 62vw, 1500px);
   }
 }
