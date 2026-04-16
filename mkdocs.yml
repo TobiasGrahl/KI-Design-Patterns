@@ -19,3 +19,6 @@ markdown_extensions:
 # Mermaid wird heute einfach über dieses Plugin aktiviert
 plugins:
   - search
+  
+extra_javascript:  
+- https://unpkg.com
