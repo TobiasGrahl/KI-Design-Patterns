@@ -1,0 +1,14 @@
+site_name: Design Patterns
+theme:
+  name: material
+  language: de
+  palette:
+    primary: white
+    accent: indigo
+  features:
+    - navigation.sections
+
+nav:
+  - Home: index.md
+  - Design Patterns: 
+    - Übersicht: KI-Design-Patterns.md
