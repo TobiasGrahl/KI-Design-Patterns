@@ -8,17 +8,11 @@ theme:
   font:
     text: Crimson Text
     code: Roboto Mono
-  features:
-    - content.code.copy
 
 markdown_extensions:
   - admonition
   - pymdownx.details
-  - pymdownx.superfences # Hier keine weiteren Unterpunkte für Mermaid nötig!
+  - pymdownx.superfences
 
-# Mermaid wird heute einfach über dieses Plugin aktiviert
-plugins:
-  - search
-  
-extra_javascript:  
-- https://unpkg.com
+extra_javascript:
+  - https://unpkg.com
