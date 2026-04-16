@@ -6,28 +6,31 @@ theme:
   name: material
   language: de
   palette:
-    # Kein Toggle — festes helles Schema mit dunklem Sidebar via CSS
     - scheme: default
       primary: custom
       accent: custom
   font:
-    text: Georgia           # Serif-Buch-Look — wie im HTML-Design
-    code: JetBrains Mono    # Monospace für Code & Nav-Details
+    text: Georgia
+    code: JetBrains Mono
   features:
     - navigation.sections
     - navigation.expand
-    - navigation.top        # "Back to top"-Pfeil
-    - navigation.tracking   # Aktive Sektion im URL-Hash
+    - navigation.top
+    - navigation.tracking
     - content.code.copy
-    - toc.integrate         # TOC in linke Sidebar integrieren
+    - toc.integrate
     - search.highlight
     - search.share
+
+nav:
+  - Start: index.md
+  - KI Design Patterns (DE): KI-Design-Patterns_DE.md
+  - KI Design Patterns (v2): KI-Design-Patterns-v2.md
 
 extra_css:
   - stylesheets/extra.css
 
 extra_javascript:
-  # Mermaid 10 — wird durch pymdownx.superfences gesteuert
   - https://unpkg.com/mermaid@10/dist/mermaid.min.js
 
 markdown_extensions:
@@ -49,10 +52,3 @@ markdown_extensions:
   - toc:
       permalink: true
       toc_depth: 3
-
-# Optionale Seitenstruktur — Datei docs/index.md umbenennen oder hier anpassen
-# nav:
-#   - Startseite: index.md
-
-nav:
-  - KI Design Patterns: KI-Design-Patterns-v2.md
