@@ -9,15 +9,16 @@ theme:
     text: Crimson Text
     code: Roboto Mono
 
-nav:
-  - Home: index.md
-  - KI Design Patterns: KI-Design-Patterns.md
-
 markdown_extensions:
   - admonition
   - pymdownx.details
   - pymdownx.superfences:
+      # Wir nutzen jetzt die neue, sichere Standard-Methode für Mermaid
       custom_fences:
         - name: mermaid
           class: mermaid
-          format: !!python/name:pymdownx.superfences.mermaid_format
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+# Mermaid muss hier zusätzlich als Plugin oder Script aktiviert werden
+extra_javascript:
+  - https://unpkg.com
