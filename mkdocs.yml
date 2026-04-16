@@ -53,3 +53,6 @@ markdown_extensions:
 # Optionale Seitenstruktur — Datei docs/index.md umbenennen oder hier anpassen
 # nav:
 #   - Startseite: index.md
+
+nav:
+  - KI Design Patterns: KI-Design-Patterns.md
