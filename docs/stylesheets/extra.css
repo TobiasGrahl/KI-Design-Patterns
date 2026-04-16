@@ -7,28 +7,38 @@
 
 /* ── Design-Tokens ──────────────────────────────────────────────────────── */
 :root {
-  --ki-bg:       #f8f7f4;   /* Seiten-Hintergrund: warmes Creme */
+  --ki-bg:       #f8f7f4;
   --ki-surface:  #ffffff;
-  --ki-sb:       #1a1a2e;   /* Sidebar/Header: dunkles Navy */
-  --ki-sb-text:  #c8c8d8;   /* Sidebar-Text: helles Grau */
-  --ki-act:      #a78bfa;   /* Aktive Nav-Elemente: Lila-Hell */
+  --ki-sb:       #1a1a2e;
+  --ki-sb-text:  #c8c8d8;
+  --ki-act:      #a78bfa;
   --ki-act-bg:   rgba(167,139,250,.12);
-  --ki-acc:      #6d28d9;   /* Akzent: Lila */
-  --ki-al:       #ede9fe;   /* Lila-Hell (Blockquote-BG) */
-  --ki-am:       #c4b5fd;   /* Lila-Mittel (Blockquote-Border) */
-  --ki-tx:       #1e1e2e;   /* Fließtext */
-  --ki-mt:       #64748b;   /* Muted-Text */
-  --ki-bd:       #e2e8f0;   /* Borders */
-  --ki-cb:       #f1f5f9;   /* Inline-Code-BG */
-  --ki-code-bg:  #1e1e2e;   /* Code-Block-BG */
-  --ki-code-fg:  #cdd6f4;   /* Code-Block-Text */
-  --ki-green-bg: #065f46;   /* Tabellen-Erstspalte */
+  --ki-acc:      #6d28d9;
+  --ki-al:       #ede9fe;
+  --ki-am:       #c4b5fd;
+  --ki-tx:       #1e1e2e;
+  --ki-mt:       #64748b;
+  --ki-bd:       #e2e8f0;
+  --ki-cb:       #f1f5f9;
+  --ki-code-bg:  #1e1e2e;
+  --ki-code-fg:  #cdd6f4;
+  --ki-green-bg: #065f46;
   --ki-green-fg: #d1fae5;
-  --ki-amber-bg: #78350f;   /* Tabellen-Letzte Spalte */
+  --ki-amber-bg: #78350f;
   --ki-amber-fg: #fef3c7;
-  --ki-ib:       #faf5ff;   /* Intent-Box-BG */
-  --ki-ibd:      #7c3aed;   /* Intent-Box-Border */
-  --ki-ibt:      #3b0764;   /* Intent-Box-Text */
+  --ki-ib:       #faf5ff;
+  --ki-ibd:      #7c3aed;
+  --ki-ibt:      #3b0764;
+
+  /* ─ Fluid Layout: skaliert proportional mit Viewport-Breite ─ */
+  /* Sidebar: min 200px · 20vw · max 320px */
+  --md-sidebar-width:   clamp(200px, 20vw, 320px);
+  /* Content-Breite: min 480px · 72vw · max 1100px */
+  --ki-content-max:     clamp(480px, 72vw, 1100px);
+  /* Content-Padding X: min 1rem · 3.5vw · max 4rem */
+  --ki-content-pad-x:   clamp(1rem, 3.5vw, 4rem);
+  /* Content-Padding Top */
+  --ki-content-pad-top: clamp(1.5rem, 3vh, 3.5rem);
 }
 
 /* ── Material-Theme-Variablen überschreiben ─────────────────────────────── */
@@ -197,8 +207,11 @@ mark { background: #fef08a; border-radius: 2px; }
   background-color: var(--ki-bg);
 }
 .md-content__inner {
-  max-width: 880px;
-  padding: 48px 52px 100px;
+  max-width: var(--ki-content-max);
+  padding: var(--ki-content-pad-top) var(--ki-content-pad-x) 6rem;
+  /* Sicherstellen dass der Content den verfügbaren Platz nutzt */
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* ── Überschriften ── */
@@ -472,12 +485,51 @@ pre.mermaid {
 /* ══════════════════════════════════════════════════════════════════════════
    RESPONSIVE — Mobile: Sidebar ausblenden
    ══════════════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Tablet / kleines Laptop (< 1220px) */
 @media screen and (max-width: 76.1875em) {
+  :root {
+    --md-sidebar-width:   clamp(180px, 22vw, 260px);
+    --ki-content-max:     90vw;
+    --ki-content-pad-x:   clamp(1rem, 2.5vw, 2.5rem);
+  }
   .md-nav--primary {
     background-color: var(--ki-sb);
   }
   .md-nav--primary .md-nav__title {
     background-color: #0f0f1a;
     color: #fff;
+  }
+}
+
+/* Mobile (< 960px) — Sidebar als Overlay */
+@media screen and (max-width: 60em) {
+  :root {
+    --ki-content-max:     100%;
+    --ki-content-pad-x:   1.25rem;
+    --ki-content-pad-top: 1.25rem;
+  }
+  .md-content__inner {
+    padding: 1.25rem 1.25rem 4rem;
+  }
+}
+
+/* Großer Monitor (> 1600px) — mehr Luft */
+@media screen and (min-width: 100em) {
+  :root {
+    --md-sidebar-width:   clamp(260px, 18vw, 380px);
+    --ki-content-max:     clamp(900px, 68vw, 1300px);
+    --ki-content-pad-x:   clamp(3rem, 4vw, 5rem);
+  }
+}
+
+/* Ultra-Wide (> 2000px) */
+@media screen and (min-width: 125em) {
+  :root {
+    --md-sidebar-width:   clamp(300px, 16vw, 420px);
+    --ki-content-max:     clamp(1000px, 62vw, 1500px);
   }
 }
