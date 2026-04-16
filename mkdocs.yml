@@ -6,8 +6,16 @@ theme:
     primary: white
     accent: grey
   font:
-    text: Crimson Text
+    text: Crimson Text  # Klassische Buch-Serifenschrift
     code: Roboto Mono
+  features:
+    - navigation.sections
+    - navigation.expand
+    - content.code.copy
+    - toc.integrate # Integriert das Inhaltsverzeichnis links/rechts für mehr Ruhe
+
+extra_css:
+  - stylesheets/extra.css
 
 markdown_extensions:
   - admonition
