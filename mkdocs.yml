@@ -23,8 +23,8 @@ theme:
 
 nav:
   - Start: index.md
-  - KI Design Patterns (DE): KI-Design-Patterns_DE.md
-  - KI Design Patterns (v2): KI-Design-Patterns-v2.md
+  - KI Design Patterns (DE): KI-Design-Patterns-DE.md
+  - KI Design Patterns (EN): KI-Design-Patterns-EN.md
 
 extra_css:
   - stylesheets/extra.css
