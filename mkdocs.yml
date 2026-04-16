@@ -12,3 +12,8 @@ nav:
   - Home: index.md
   - Design Patterns: 
     - Übersicht: KI-Design-Patterns.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
