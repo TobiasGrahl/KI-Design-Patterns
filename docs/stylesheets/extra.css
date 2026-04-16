@@ -32,7 +32,7 @@
 
   /* ─ Fluid Layout: skaliert proportional mit Viewport-Breite ─ */
   /* Sidebar: min 200px · 20vw · max 320px */
-  --md-sidebar-width:   clamp(200px, 20vw, 320px);
+  --md-sidebar-width:   clamp(280px, 28vw, 480px);
   /* Content-Breite: min 480px · 72vw · max 1100px */
   --ki-content-max:     clamp(480px, 72vw, 1100px);
   /* Content-Padding X: min 1rem · 3.5vw · max 4rem */
@@ -453,6 +453,70 @@ pre.mermaid {
   text-align: center;
 }
 
+/* ── Mermaid Kontrast-Fixes ── */
+
+/* Knoten-Hintergrund: dunkles Navy für hohen Kontrast */
+.mermaid svg .node rect,
+.mermaid svg .node circle,
+.mermaid svg .node ellipse,
+.mermaid svg .node polygon,
+.mermaid svg .node path {
+  fill: #1e1b4b !important;        /* dunkles Indigo */
+  stroke: #a78bfa !important;      /* Lila-Rand */
+  stroke-width: 1.5px !important;
+}
+
+/* Subgraph-Rahmen */
+.mermaid svg .cluster rect {
+  fill: #f5f3ff !important;        /* sehr helles Lila */
+  stroke: #7c3aed !important;
+  stroke-width: 1.5px !important;
+}
+.mermaid svg .cluster span,
+.mermaid svg .cluster text {
+  fill: #3730a3 !important;
+  font-weight: 600 !important;
+}
+
+/* Knoten-Text: Weiß auf dunklem Hintergrund */
+.mermaid svg .node .label,
+.mermaid svg .nodeLabel,
+.mermaid svg .node text,
+.mermaid svg text.nodeLabel {
+  fill: #ffffff !important;
+  color: #ffffff !important;
+  font-family: "JetBrains Mono", monospace !important;
+  font-size: 12px !important;
+}
+
+/* Kanten / Pfeile */
+.mermaid svg .edgePath path,
+.mermaid svg .flowchart-link {
+  stroke: #6d28d9 !important;
+  stroke-width: 1.5px !important;
+}
+.mermaid svg .edgeLabel,
+.mermaid svg .edgeLabel rect {
+  fill: #ede9fe !important;
+  color: #3730a3 !important;
+}
+.mermaid svg .edgeLabel span {
+  color: #3730a3 !important;
+  font-family: "JetBrains Mono", monospace !important;
+  font-size: 11px !important;
+}
+
+/* Pfeilspitzen */
+.mermaid svg marker path {
+  fill: #6d28d9 !important;
+  stroke: #6d28d9 !important;
+}
+
+/* Datenbank-Zylinderform */
+.mermaid svg .node .label foreignObject div {
+  color: #ffffff !important;
+}
+
 /* ══════════════════════════════════════════════════════════════════════════
    PROGRESS-LEISTE oben (Material nutzt eigene — hier Farbe überschreiben)
    ══════════════════════════════════════════════════════════════════════════ */
@@ -485,6 +549,65 @@ pre.mermaid {
 /* ══════════════════════════════════════════════════════════════════════════
    RESPONSIVE — Mobile: Sidebar ausblenden
    ══════════════════════════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TWISTY — Auf-/Zuklappen der Hauptkapitel in der linken Sidebar
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Pfeil-Icon neben jedem klappbaren Kapitel */
+.md-nav--primary .md-nav__icon {
+  color: var(--ki-sb-text);
+  font-size: .75rem;
+  transition: transform .2s ease, color .15s;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* Pfeil dreht sich beim Aufklappen */
+.md-nav--primary .md-nav__toggle:checked ~ .md-nav__link .md-nav__icon,
+.md-nav--primary .md-nav__item--nested > .md-nav__link .md-nav__icon {
+  color: var(--ki-act);
+}
+
+/* Kapitel-Label: Pfeil rechts, Text links — als Flex-Zeile */
+.md-nav--primary > .md-nav__list > .md-nav__item--nested > .md-nav__link {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Aktives/geöffnetes Kapitel — Pfeil lila */
+.md-nav--primary .md-nav__item--active > .md-nav__link .md-nav__icon,
+.md-nav--primary .md-nav__toggle:checked ~ .md-nav__link .md-nav__icon {
+  color: var(--ki-act) !important;
+  transform: rotate(90deg);
+}
+
+/* Hover auf Kapitel-Label — Pfeil aufhellen */
+.md-nav--primary > .md-nav__list > .md-nav__item--nested > .md-nav__link:hover .md-nav__icon {
+  color: #ffffff;
+}
+
+/* Unterpunkte: sanfte Ein-/Ausblend-Animation */
+.md-nav--primary .md-nav__item--nested .md-nav {
+  overflow: hidden;
+  transition: max-height .25s ease;
+}
+
+/* Eingeklappter Zustand: kein Padding, keine Lücke */
+.md-nav--primary .md-nav__item--nested:not(.md-nav__item--active) > .md-nav {
+  display: none;
+}
+
+/* Trennlinie zwischen Hauptkapiteln */
+.md-nav--primary > .md-nav__list > .md-nav__item--nested {
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.md-nav--primary > .md-nav__list > .md-nav__item--nested:first-child {
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+
 /* ══════════════════════════════════════════════════════════════════════════
    RESPONSIVE BREAKPOINTS
    ══════════════════════════════════════════════════════════════════════════ */
@@ -492,7 +615,7 @@ pre.mermaid {
 /* Tablet / kleines Laptop (< 1220px) */
 @media screen and (max-width: 76.1875em) {
   :root {
-    --md-sidebar-width:   clamp(180px, 22vw, 260px);
+    --md-sidebar-width:   clamp(260px, 30vw, 420px);
     --ki-content-max:     90vw;
     --ki-content-pad-x:   clamp(1rem, 2.5vw, 2.5rem);
   }
@@ -520,7 +643,7 @@ pre.mermaid {
 /* Großer Monitor (> 1600px) — mehr Luft */
 @media screen and (min-width: 100em) {
   :root {
-    --md-sidebar-width:   clamp(260px, 18vw, 380px);
+    --md-sidebar-width:   clamp(340px, 24vw, 520px);
     --ki-content-max:     clamp(900px, 68vw, 1300px);
     --ki-content-pad-x:   clamp(3rem, 4vw, 5rem);
   }
@@ -529,7 +652,7 @@ pre.mermaid {
 /* Ultra-Wide (> 2000px) */
 @media screen and (min-width: 125em) {
   :root {
-    --md-sidebar-width:   clamp(300px, 16vw, 420px);
+    --md-sidebar-width:   clamp(380px, 22vw, 580px);
     --ki-content-max:     clamp(1000px, 62vw, 1500px);
   }
 }
