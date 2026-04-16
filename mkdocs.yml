@@ -1,19 +1,18 @@
-site_name: Design Patterns
+site_name: KI Design Patterns
 theme:
   name: material
   language: de
   palette:
-    primary: white
+    primary: white  # Klassisch weißer Hintergrund
     accent: indigo
   features:
     - navigation.sections
 
+markdown_extensions:
+  - admonition       # Ermöglicht die Infoboxen (Zweck, Motivation)
+  - pymdownx.details
+  - pymdownx.superfences # Für Code-Blöcke und Diagramme
+
 nav:
   - Home: index.md
-  - Design Patterns: 
-    - Übersicht: KI-Design-Patterns.md
-
-markdown_extensions:
-  - admonition
-  - pymdownx.details
-  - pymdownx.superfences
+  - Patterns: KI-Design-Patterns.md
