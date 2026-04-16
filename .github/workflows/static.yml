@@ -1,25 +1,49 @@
-name: deploy
+name: Deploy MkDocs to GitHub Pages
+
 on:
   push:
     branches: [main]
+  workflow_dispatch:   # Manueller Trigger über GitHub UI
+
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
+
+# Verhindert parallele Deployments
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          python-version: 3.x
-      - run: pip install mkdocs-material
-      - run: mkdocs build
-      - name: Upload artifact
+          fetch-depth: 0   # Für git-revision-date-Plugin falls gewünscht
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install \
+            mkdocs-material \
+            pymdown-extensions
+
+      - name: Build site
+        run: mkdocs build --strict --verbose
+
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./site
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -27,5 +51,6 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - id: deployment
+      - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
