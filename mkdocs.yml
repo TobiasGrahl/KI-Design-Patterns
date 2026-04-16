@@ -8,9 +8,6 @@ theme:
   font:
     text: Crimson Text
     code: Roboto Mono
-  features:
-    - navigation.sections
-    - content.code.copy
 
 nav:
   - Home: index.md
@@ -24,8 +21,3 @@ markdown_extensions:
         - name: mermaid
           class: mermaid
           format: !!python/name:pymdownx.superfences.mermaid_format
-
-extra_javascript:
-  - https://unpkg.com
-extra_css:
-  - https://googleapis.com
