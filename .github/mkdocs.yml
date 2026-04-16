@@ -1,0 +1,14 @@
+site_name: Design Patterns Dokumentation
+docs_dir: '.'  # <--- Diese Zeile ist entscheidend! Sie sagt: Markdown liegt hier.
+
+theme:
+  name: material
+  language: de
+  palette:
+    primary: white
+    accent: indigo
+
+# Achte darauf, dass die Pfade hier mit deinen Dateinamen übereinstimmen
+nav:
+  - Home: index.md
+  - Mein Pattern: dein-dateiname.md 
