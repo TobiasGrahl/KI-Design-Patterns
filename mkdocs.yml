@@ -12,7 +12,6 @@ theme:
     - navigation.sections
     - content.code.copy
 
-# Hier definierst du die Struktur deiner Webseite
 nav:
   - Home: index.md
   - KI Design Patterns: KI-Design-Patterns.md
