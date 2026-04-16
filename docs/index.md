@@ -1,22 +1,6 @@
-# Singleton (Einzelstück)
+KI-Muster-Bibliothek — Best Practices für KI-intensive Backend-Systeme
+Ein opinionierter Leitfaden für Software-Ingenieure und Software-Architekten, die produktionsreife KI-Backends bauen. Kein Überblick, keine Theorie — konkrete Muster mit vollständigem Code, klaren Trade-offs und Entscheidungsregeln für den Alltag.
 
-!!! info "Zweck (Intent)"
-    Sichert zu, dass eine Klasse genau ein Exemplar besitzt, und stellt einen globalen Zugriffspunkt darauf bereit.
+Jedes Muster folgt dem Schema: Problem → Lösung → vollständiger Code → Wann einsetzen / Wann nicht.
 
-## Motivation
-Manchmal ist es wichtig, dass von einer Klasse nur genau eine Instanz existiert (z. B. ein Log-Manager oder ein Datenbank-Verbindungspool).
-
-## Anwendbarkeit
-Verwenden Sie das Singleton-Muster, wenn:
-*   es von einer Klasse genau eine Instanz geben darf.
-*   dieses Exemplar über einen bekannten Zugriffspunkt für Klienten verfügbar sein muss.
-
-## Struktur
-```mermaid
-classDiagram
-    class Singleton {
-      -static instance: Singleton
-      -Singleton()
-      +static getInstance() Singleton
-    }
-
+© amkat.de 2026
