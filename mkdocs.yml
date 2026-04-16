@@ -1,30 +1,55 @@
 site_name: KI Design Patterns
+site_description: Best Practices für KI-intensive Backend-Systeme
+site_author: amkat.de
+
 theme:
   name: material
   language: de
   palette:
-    primary: white
-    accent: grey
+    # Kein Toggle — festes helles Schema mit dunklem Sidebar via CSS
+    - scheme: default
+      primary: custom
+      accent: custom
   font:
-    text: Crimson Text  # Klassische Buch-Serifenschrift
-    code: Roboto Mono
+    text: Georgia           # Serif-Buch-Look — wie im HTML-Design
+    code: JetBrains Mono    # Monospace für Code & Nav-Details
   features:
     - navigation.sections
     - navigation.expand
+    - navigation.top        # "Back to top"-Pfeil
+    - navigation.tracking   # Aktive Sektion im URL-Hash
     - content.code.copy
-    - toc.integrate # Integriert das Inhaltsverzeichnis links/rechts für mehr Ruhe
+    - toc.integrate         # TOC in linke Sidebar integrieren
+    - search.highlight
+    - search.share
 
 extra_css:
   - stylesheets/extra.css
 
+extra_javascript:
+  # Mermaid 10 — wird durch pymdownx.superfences gesteuert
+  - https://unpkg.com/mermaid@10/dist/mermaid.min.js
+
 markdown_extensions:
   - admonition
   - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 3
 
-extra_javascript:
-  - https://unpkg.com
+# Optionale Seitenstruktur — Datei docs/index.md umbenennen oder hier anpassen
+# nav:
+#   - Startseite: index.md
