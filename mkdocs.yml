@@ -13,12 +13,11 @@ markdown_extensions:
   - admonition
   - pymdownx.details
   - pymdownx.superfences:
-      # Wir nutzen jetzt die neue, sichere Standard-Methode für Mermaid
       custom_fences:
         - name: mermaid
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
 
-# Mermaid muss hier zusätzlich als Plugin oder Script aktiviert werden
-extra_javascript:
-  - https://unpkg.com
+# Mermaid Support aktivieren
+plugins:
+  - search
