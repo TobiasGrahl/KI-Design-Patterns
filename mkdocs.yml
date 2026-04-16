@@ -14,7 +14,6 @@ theme:
     code: JetBrains Mono
   features:
     - navigation.sections
-    - navigation.expand
     - navigation.top
     - navigation.tracking
     - content.code.copy
@@ -24,14 +23,15 @@ theme:
 
 nav:
   - Start: index.md
-  - KI Design Patterns (DE): KI-Design-Patterns-DE.md
-  - KI Design Patterns (EN): KI-Design-Patterns-EN.md
+  - KI Design Patterns (DE): KI-Design-Patterns_DE.md
+  - KI Design Patterns (v2): KI-Design-Patterns-v2.md
 
 extra_css:
   - stylesheets/extra.css
 
 extra_javascript:
   - https://unpkg.com/mermaid@10/dist/mermaid.min.js
+  - javascripts/mermaid-init.js
 
 markdown_extensions:
   - admonition
