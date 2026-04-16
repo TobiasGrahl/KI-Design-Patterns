@@ -1,52 +1,124 @@
-/* Grunddesign für Tabellen im GoF-Stil */
-.md-typeset table:not([class]) {
-    border-collapse: collapse;
-    display: table; /* Verhindert das Scrollen, falls nicht nötig */
-    width: 100%;
+/* --- 1. GRUNDDESIGN (BUCH-LOOK) --- */
+body, .md-typeset {
+    font-family: "Crimson Text", "Georgia", serif;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #222;
+    background-color: #fff;
 }
 
-/* Der typische dunkle Header für Tabellen */
+/* Header schlicht halten (Weiß mit Linie) */
+.md-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+    color: #000;
+}
+
+.md-header__title {
+    color: #000 !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Navigation & Sidebar Schrift anpassen */
+.md-nav__link, .md-nav__title {
+    font-family: "Crimson Text", serif;
+    color: #333 !important;
+}
+
+/* --- 2. TABELLEN (GOF-STIL) --- */
+.md-typeset table:not([class]) {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
 .md-typeset table:not([class]) thead th {
-    background-color: #3e3e3e; /* Dunkles GoF-Grau/Schwarz */
+    background-color: #3e3e3e; /* Standard Dunkelgrau */
     color: white;
     font-weight: bold;
     text-transform: uppercase;
     padding: 10px;
+    border: 1px solid #333;
 }
 
-/* Spezifische Farben für Infoboxen (Admonitions) */
-
-/* 1. Zweck / Motivation (Klassisch Grau/Schwarz) */
-.md-typeset .admonition.info {
-    border-left: 0.2rem solid #333;
+.md-typeset table:not([class]) td {
+    border: 1px solid #ddd;
+    padding: 8px;
 }
+
+/* --- 3. INFOBOXEN / ADMONITIONS (GOF-FARBEN) --- */
+.md-typeset .admonition {
+    border-radius: 0;
+    border-left: none;
+    border: 1px solid #ccc;
+    margin-top: 1.5rem;
+}
+
+.md-typeset .admonition-title {
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 8px 12px;
+    margin: 0 !important;
+}
+
+/* Zweck / Motivation (Klassisch Schwarz) */
+.md-typeset .admonition.info { border: 1px solid #333; }
 .md-typeset .info > .admonition-title {
-    background-color: #333 !important; /* Schwarz/Dunkelgrau */
+    background-color: #333 !important;
+    color: white !important;
 }
 
-/* 2. Erzeugungsmuster (Braun-Ton) */
-.md-typeset .admonition.abstract {
-    border-left: 0.2rem solid #8b5a2b;
-}
+/* Erzeugungsmuster (Braun) */
+.md-typeset .admonition.abstract { border: 1px solid #8b5a2b; }
 .md-typeset .abstract > .admonition-title {
-    background-color: #8b5a2b !important; /* Klassisches Braun */
+    background-color: #8b5a2b !important;
     color: white !important;
 }
 
-/* 3. Strukturmuster (Grün-Ton) */
-.md-typeset .admonition.success {
-    border-left: 0.2rem solid #4a6741;
-}
+/* Strukturmuster (Grün) */
+.md-typeset .admonition.success { border: 1px solid #4a6741; }
 .md-typeset .success > .admonition-title {
-    background-color: #4a6741 !important; /* GoF Dunkelgrün */
+    background-color: #4a6741 !important;
     color: white !important;
 }
 
-/* 4. Verhaltensmuster (Dunkelblau/Grau) */
-.md-typeset .admonition.note {
-    border-left: 0.2rem solid #2f4f4f;
-}
+/* Verhaltensmuster (Dunkelgrau/Blau) */
+.md-typeset .admonition.note { border: 1px solid #2f4f4f; }
 .md-typeset .note > .admonition-title {
-    background-color: #2f4f4f !important; /* Dark Slate Gray */
+    background-color: #2f4f4f !important;
     color: white !important;
+}
+
+/* --- 4. MERMAID DIAGRAMME ANPASSEN --- */
+.mermaid {
+    background-color: #fcfcfc;
+    padding: 10px;
+    border: 1px solid #eee;
+    margin: 1rem 0;
+}
+
+/* Erzeugungs-Diagramme (Braun-Thema via Container) */
+.creational-diag .node rect, 
+.creational-diag .node polygon,
+.creational-diag .node circle {
+    fill: #fdf5e6 !important;
+    stroke: #8b5a2b !important;
+    stroke-width: 2px !important;
+}
+
+/* Struktur-Diagramme (Grün-Thema via Container) */
+.structural-diag .node rect, 
+.structural-diag .node polygon,
+.structural-diag .node circle {
+    fill: #f0f4ef !important;
+    stroke: #4a6741 !important;
+    stroke-width: 2px !important;
+}
+
+/* Linien & Pfeile (Tusch-Optik) */
+.mermaid .edgePath path {
+    stroke: #333 !important;
+    stroke-width: 1.5px !important;
 }
