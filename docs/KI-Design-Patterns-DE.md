@@ -8,6 +8,18 @@ Jedes technische Muster folgt dem Schema: **Problem → Lösung → vollständig
 
 ---
 
+## Changelog
+
+| Version | Datum | Änderungen |
+|---|---|---|
+| 1.3 | 2026-04 | Produkt-unabhängige Konzept-Code-Schicht für 7.1, 6.1, 7.2, 3.2, 9.1 (Konzept + Produkt-Mapping-Tabelle); Migrations-Leitfaden ergänzt; Lösung-Abschnitte mit Warum-Erklärungen erweitert; Ghost-Header bereinigt; veraltete 20.3-Referenz entfernt |
+| 1.2 | 2026-04 | Sektionsnummern bereinigt (18=Kosten, 19=Multi-Tenancy); vollständige Master-Referenztabelle (82 Muster); Anti-Patterns-Sektion (18 Einträge in 7 Kategorien); Schnelldiagnose-Tabelle erweitert (5 neue Zeilen); fehlende ## Sektions-Header ergänzt; Business-Muster-Intro präzisiert |
+| 1.1 | 2026-04 | Zielgruppen-Sektion, Tech-Stack, Quick-Start, Systemarchitektur-Diagramm, Schwierigkeitsgrade, Anti-Pattern-Callouts, rollenbasierte Navigation; Sektionen 18 (Kosten-Management), 19 (Multi-Tenancy) ergänzt; frühere Sektion 18 (Allgemeine Backend-Muster) entfernt; PII-Redaktion (4.2) ergänzt |
+| 1.0 | 2026-01 | Erstveröffentlichung — 17 Sektionen, 14 Business-Muster, 39+ technische Muster |
+
+---
+
+
 ## Für wen ist dieses Dokument?
 
 **Software-Ingenieure**, die KI-Komponenten implementieren: Prompts schreiben, LLM-Calls absichern, RAG-Pipelines bauen, strukturierte Ausgaben validieren. Hier findest du produktionserprobte Implementierungen, nicht Tutorials.
@@ -15,24 +27,6 @@ Jedes technische Muster folgt dem Schema: **Problem → Lösung → vollständig
 **Software-Architekten**, die KI-Systeme entwerfen: Welche Fähigkeit für welchen Use-Case? Wie werden Resilienz, Observability und Testbarkeit sichergestellt? Welche Muster bilden das Fundament, welche kommen später?
 
 > **Nicht das richtige Dokument** für: erste Schritte mit LLMs, Einführung in Python, allgemeines Machine Learning.
-
----
-
-## Technologie-Stack & Voraussetzungen
-
-Die Codebeispiele setzen folgende Technologien voraus. Muster sind übertragbar, Syntax muss ggf. angepasst werden.
-
-| Schicht | Technologie | Zweck |
-|---|---|---|
-| **Sprachen** | Python 3.11+ | Backend-Services · Workflows |
-| **LLM-Clients** | Anthropic SDK · OpenAI SDK · `instructor` | LLM-Calls · Structured Generation |
-| **Datenbank** | PostgreSQL + pgvector | Hauptdatenbank + Vektorsuche |
-| **Cache / Queue** | Redis | Caching · Pub/Sub · Rate Limiting |
-| **Vektordatenbank** | Qdrant | Semantische Suche · Embeddings |
-| **Workflow-Engine** | Temporal | Durable Execution für lange Pipelines |
-| **Observability** | OpenTelemetry · Prometheus · Grafana/Loki/Tempo | Metrics · Logs · Traces |
-| **Schema-Validierung** | Pydantic v2 | Typsicherheit für LLM-Ausgaben |
-| **Containerisierung** | Docker Compose | Lokale Entwicklung · Deployment |
 
 ---
 
@@ -55,21 +49,6 @@ Die Codebeispiele setzen folgende Technologien voraus. Muster sind übertragbar,
 
 ---
 
-## Changelog
-
-| Version | Datum | Änderungen |
-|---|---|---|
-| 1.3 | 2026-04 | v4: Produkt-unabhängige Konzept-Code-Schicht für 7.1, 6.1, 7.2, 3.2, 9.1 (Konzept + Produkt-Mapping-Tabelle); Migrations-Leitfaden ergänzt; Lösung-Abschnitte mit Warum-Erklärungen erweitert; Ghost-Header bereinigt; veraltete 20.3-Referenz entfernt |
-| 1.2 | 2026-04 | v3: Sektionsnummern bereinigt (18=Kosten, 19=Multi-Tenancy); vollständige Master-Referenztabelle (82 Muster); Anti-Patterns-Sektion (18 Einträge in 7 Kategorien); Schnelldiagnose-Tabelle erweitert (5 neue Zeilen); fehlende ## Sektions-Header ergänzt; Business-Muster-Intro präzisiert |
-| 1.1 | 2026-04 | Zielgruppen-Sektion, Tech-Stack, Quick-Start, Systemarchitektur-Diagramm, Schwierigkeitsgrade, Anti-Pattern-Callouts, rollenbasierte Navigation; Sektionen 18 (Kosten-Management), 19 (Multi-Tenancy) ergänzt; frühere Sektion 18 (Allgemeine Backend-Muster) entfernt; PII-Redaktion (4.2) ergänzt |
-| 1.0 | 2026-01 | Erstveröffentlichung — 17 Sektionen, 14 Business-Muster, 39+ technische Muster |
-
----
-
-> **Scope & Versionierung:** Die Muster fokussieren auf Python 3.11+, Anthropic/OpenAI SDK, PostgreSQL+pgvector, Qdrant, Redis und Temporal. Nicht behandelt: Fine-Tuning, Kubernetes-Deployment, A/B-Tests, Rechtsberatung. Stand April 2026 — Architektur-Muster sind stabiler als konkrete API-Calls. Bei Änderungen an Provider-APIs zählt die offizielle Dokumentation.
-
-
-
 ## Quick-Start: Die Fundament-Muster für ein neues KI-Projekt
 
 > **Schwierigkeitsgrade:** 🟢 Einstieg — direkt anwendbar · 🟡 Fortgeschritten — etwas Vorkenntnisse nötig · 🔴 Expert — tiefes Systemverständnis erforderlich · ⚠️ Pflicht-Muster — vor Produktions-Deployment
@@ -90,320 +69,7 @@ Nicht alle Muster sind gleich wichtig. Diese acht sollten **von Anfang an** impl
 > **Reihenfolge:** 1–3 vor dem ersten Produktions-Deployment · 4–6 spätestens nach Sprint 1 · 7–8 parallel zum Feature-Aufbau
 
 ---
----
 
-## Migrations-Leitfaden — Vom einfachen LLM-Call zum produktionsreifen Stack
-
-> Für Teams die bereits einen LLM-basierten Service haben und schrittweise stabilisieren wollen — ohne einen Big-Bang-Rewrite.
-
-**Ausgangspunkt — typischer Tag-1-Code:**
-
-```python
-import json
-from anthropic import Anthropic
-
-client = Anthropic()
-
-def extract_metadata(text: str) -> dict:
-    response = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=1000,
-        messages=[{"role": "user", "content": f"Extrahiere als JSON: {text}"}]
-    )
-    return json.loads(response.content[0].text)  # Bricht regelmäßig in Produktion
-```
-
-**Was hier auf dich wartet:** kein Schema-Schutz (JSON-Parsing bricht), kein Caching (jeder Call kostet), kein Monitoring (Fehler sind unsichtbar), kein Resilenz (API-Ausfall = Service-Ausfall), Vendor-Lock-in (from anthropic überall).
-
----
-
-### Schritt 1 — Structured Generation *(~2 Stunden)*
-
-**Problem:** `json.loads()` bricht auf Markdown-Wrapper, fehlende Felder, falsche Typen.  
-**Fix:** `instructor` + Pydantic-Schema → typsicherer Output, automatischer Retry.
-
-```python
-import instructor
-from anthropic import Anthropic
-from pydantic import BaseModel
-
-class Metadata(BaseModel):
-    title: str
-    category: str
-    date: str | None = None
-
-client = instructor.from_anthropic(Anthropic())
-
-def extract_metadata(text: str) -> Metadata:
-    return client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=1000,
-        response_model=Metadata,          # Schema-Validierung + Retry automatisch
-        messages=[{"role": "user", "content": text}],
-    )
-```
-
-→ Muster: [14.2 Schema-First Generation](#142-schema-first-generation-pattern-instructor)
-
----
-
-### Schritt 2 — LLM Gateway *(~1 Tag)*
-
-**Problem:** `from anthropic import Anthropic` in 20 Dateien = Provider-Wechsel kostet Wochen.  
-**Fix:** Zentraler Gateway-Endpunkt. Alle Services sprechen nur den Gateway an.
-
-```python
-# gateway/client.py — einzige Stelle mit Provider-Import
-import instructor
-from anthropic import Anthropic
-from pydantic import BaseModel
-from functools import lru_cache
-
-@lru_cache(maxsize=1)
-def get_llm_client():
-    return instructor.from_anthropic(Anthropic())
-
-# Alle anderen Module importieren NUR das:
-# from gateway.client import get_llm_client
-```
-
-→ Muster: [7.2 LLM Gateway Pattern](#72-llm-gateway-pattern)
-
----
-
-### Schritt 3 — Exaktes Caching *(~2 Stunden)*
-
-**Problem:** Während der Entwicklung werden dieselben Dokumente 50× verarbeitet — volle Kosten jedes Mal.  
-**Fix:** SHA256-Hash des (Prompt + Input) als Redis-Cache-Key.
-
-```python
-import hashlib, json
-import redis.asyncio as redis
-
-cache = redis.from_url("redis://localhost:6379")
-
-async def cached_extract(text: str, prompt: str) -> dict:
-    key = hashlib.sha256(f"{prompt}:{text}".encode()).hexdigest()
-    if hit := await cache.get(key):
-        return json.loads(hit)
-    result = extract_metadata(text)
-    await cache.setex(key, 3600, result.model_dump_json())
-    return result.model_dump()
-```
-
-→ Muster: [13.1 Exact Hash Cache Pattern](#131-exact-hash-cache-pattern)
-
----
-
-### Schritt 4 — Prompt-Injection-Defense *(~4 Stunden, wenn externe Daten verarbeitet)*
-
-**Problem:** Dokumente oder Nutzer-Input können `Ignoriere alle vorherigen Anweisungen` enthalten.  
-**Fix:** Mehrschichtige Sanitisierung vor dem LLM-Call. Nur relevant wenn externes Material verarbeitet wird.
-
-```python
-import re, unicodedata
-
-def sanitize_external_input(text: str) -> str:
-    # Unsichtbare Unicode-Steuerzeichen entfernen
-    text = "".join(c for c in text if unicodedata.category(c) not in ("Cf", "Cc"))
-    # Bekannte Injection-Muster
-    for pattern in [r"ignore (all )?previous", r"system prompt", r"\[INST\]"]:
-        text = re.sub(pattern, "[REMOVED]", text, flags=re.IGNORECASE)
-    return f"<external_data>{text}</external_data>"
-
-# Verwendung:
-safe_text = sanitize_external_input(user_document)
-result = extract_metadata(safe_text)
-```
-
-→ Muster: [4.1 Prompt Injection Defense Pattern](#41-prompt-injection-defense-pattern)
-
----
-
-### Schritt 5 — Observability *(~1 Tag)*
-
-**Problem:** LLM-Fehler, Latenz-Spitzen und Kostenexplosionen sind ohne Monitoring unsichtbar.  
-**Fix:** structlog für strukturierte Logs, prometheus_client für Metriken.
-
-```python
-import structlog, time
-from prometheus_client import Counter, Histogram
-
-logger = structlog.get_logger()
-llm_calls = Counter("llm_calls_total", "LLM calls", ["status"])
-llm_latency = Histogram("llm_latency_seconds", "LLM latency", buckets=[1,3,5,10,30,60])
-
-async def extract_with_metrics(text: str) -> dict:
-    start = time.time()
-    try:
-        result = await cached_extract(text, PROMPT)
-        llm_calls.labels(status="success").inc()
-        logger.info("extract.ok", duration=time.time()-start, chars=len(text))
-        return result
-    except Exception as e:
-        llm_calls.labels(status="error").inc()
-        logger.error("extract.failed", error=str(e), duration=time.time()-start)
-        raise
-    finally:
-        llm_latency.observe(time.time() - start)
-```
-
-→ Muster: [9.1 Full Observability Stack Pattern](#91-full-observability-stack-pattern)
-
----
-
-### Schritt 6 — Concurrency-Kontrolle *(~2 Stunden, wenn Batches verarbeitet werden)*
-
-**Problem:** `asyncio.gather()` auf 500 Dokumenten = sofortige Rate-Limit-Errors (429).  
-**Fix:** Sliding Window Executor — hält exakt N Tasks gleichzeitig in-flight.
-
-```python
-from sliding_window import sliding_window  # Implementierung → 5.1
-
-async def process_batch(documents: list[str]) -> list[dict]:
-    results, errors = await sliding_window(
-        items=documents,
-        fn=extract_with_metrics,
-        concurrency=10,           # Immer genau 10 gleichzeitig
-    )
-    return results
-```
-
-→ Muster: [5.1 Sliding Window Executor Pattern](#51-sliding-window-executor-pattern)
-
----
-
-### Schritt 7 — Resilenz: Circuit Breaker *(~4 Stunden)*
-
-**Problem:** Bei Anthropic-Ausfall hängen alle Requests bis zum Timeout → System unresponsiv.  
-**Fix:** Circuit Breaker + Exponential Backoff. Nach 5 Fehlern: Fail-Fast für 60 Sekunden.
-
-```python
-from circuit_breaker import CircuitBreaker  # Implementierung → 17.5
-
-cb = CircuitBreaker(failure_threshold=5, recovery_timeout=60.0)
-
-async def resilient_extract(text: str) -> dict:
-    for attempt in range(3):
-        try:
-            return await cb.call_async(extract_with_metrics, text)
-        except CircuitBreakerOpenError:
-            raise  # Offen → sofort fehlschlagen, kein Retry
-        except Exception:
-            if attempt < 2:
-                await asyncio.sleep(2 ** attempt)  # 1s, 2s, 4s
-    raise RuntimeError("Max retries exceeded")
-```
-
-→ Muster: [17.5 Circuit Breaker Pattern](#175-circuit-breaker-pattern)
-
----
-
-### Schritt 8 — Durable Execution *(2–3 Tage, nur wenn Pipeline > 5 Minuten)*
-
-**Problem:** 30-minütige Pipeline, Server-Restart in Minute 25 → alles verloren.  
-**Nur relevant wenn:** Pipeline-Dauer > 5 Minuten, oder Pipelines > 50 Dokumente pro Batch.
-
-```python
-# Konzept: jeder Schritt wird als Checkpoint gespeichert
-# Produkt-Optionen: Temporal, Prefect, Celery — siehe 7.1 Produkt-Mapping
-
-class DocumentPipeline(DurableWorkflow):
-    async def run(self, doc_id: str) -> Result:
-        text  = await self.execute_activity(extract_text,     doc_id, max_retries=3)
-        meta  = await self.execute_activity(extract_metadata, text,   max_retries=3)
-        index = await self.execute_activity(index_document,   meta,   max_retries=5)
-        return Result(metadata=meta, indexed=True)
-```
-
-→ Muster: [7.1 Durable Workflow Pattern](#71-durable-workflow-pattern)
-
----
-
-**Zusammenfassung: Migrations-Reihenfolge**
-
-| Schritt | Aufwand | Wann zwingend |
-|---|---|---|
-| 1 — Structured Generation | 2h | Sofort — schützt vor JSON-Parsing-Fehlern |
-| 2 — LLM Gateway | 1 Tag | Sofort — verhindert Provider-Lock-in |
-| 3 — Exaktes Caching | 2h | Sprint 1 — spart 40–70 % Entwicklungskosten |
-| 4 — Prompt-Injection-Defense | 4h | Vor Produktion wenn externe Daten verarbeitet werden |
-| 5 — Observability | 1 Tag | Vor Produktion — ohne ist Debugging unmöglich |
-| 6 — Concurrency-Kontrolle | 2h | Vor Produktion wenn Batches > 50 Items |
-| 7 — Circuit Breaker | 4h | Vor Produktion — verhindert Cascading Failures |
-| 8 — Durable Execution | 2–3 Tage | Nur wenn Pipeline > 5 Minuten |
-
-
-
-## Systemarchitektur-Überblick
-
-Wie die Muster dieses Dokuments in einem typischen KI-Backend zusammenspielen:
-
-```mermaid
-graph TB
-    subgraph CLIENT["🖥️ Client-Schicht"]
-        UI[Frontend / API-Consumer]
-    end
-
-    subgraph GATEWAY["🚦 Gateway-Schicht (Sektion 4, 7.2)"]
-        GW[LLM-Gateway · Rate Limiter · Prompt-Injection-Defense]
-    end
-
-    subgraph PIPELINE["⚙️ Pipeline-Schicht (Sektionen 2, 3, 5, 6, 14, 15, 16)"]
-        QE[Query-Expansion · Boosting · 16.2/16.3]
-        RAG[Hybrid-RAG · BM25 + pgvector · 16.1]
-        LLM[LLM-Call · Structured Generation · 14.x]
-        VAL[Validator + Auto-Repair · 17.1/17.2]
-        CONF[Confidence-Scoring · 17.3]
-    end
-
-    subgraph RESILIENCE["🛡️ Resilienz-Schicht (Sektionen 7, 17)"]
-        CB[Circuit Breaker · 17.5]
-        WF[Workflow-Engine · 7.1]
-        FB[Fallback-Hierarchie · 17.6]
-    end
-
-    subgraph CACHE["⚡ Cache-Schicht (Sektion 13)"]
-        EXACT[Exakter Hash-Cache · 13.1]
-        SEM[Semantischer Cache · 13.2]
-        EMB[Embedding-Cache · 13.3]
-    end
-
-    subgraph STORAGE["🗄️ Datenhaltung"]
-        PG[(PostgreSQL + pgvector)]
-        RD[(Redis)]
-        QD[(Qdrant)]
-        S3[(Object Storage)]
-    end
-
-    subgraph OBS["📊 Observability (Sektion 9)"]
-        OT[OpenTelemetry · Prometheus · Grafana]
-    end
-
-    UI --> GW
-    GW --> QE
-    QE --> RAG
-    RAG --> CACHE
-    CACHE -->|Miss| LLM
-    LLM --> CB
-    CB --> VAL
-    VAL --> CONF
-    CONF --> WF
-    WF --> FB
-
-    RAG --> PG
-    RAG --> QD
-    EXACT --> RD
-    SEM --> QD
-    WF --> S3
-
-    PIPELINE -.-> OT
-    RESILIENCE -.-> OT
-```
-
-*Diagramm: Vollständige Systemarchitektur — Client-Requests durchlaufen Gateway (Sicherheit + Rate Limiting) → Pipeline (Query-Enhancement, RAG, LLM, Validierung) → Resilienz-Schicht (Circuit Breaker, Workflow-Engine, Fallbacks) → Cache-Schicht. Alle Schichten berichten an den Observability-Stack.*
-
----
 
 ## Schnelldiagnose — Welches Muster löst mein Problem?
 
@@ -444,8 +110,6 @@ graph TB
 
 > **Schwierigkeitsgrade:** 🟢 Einstieg — direkt anwendbar · 🟡 Fortgeschritten — etwas Vorkenntnisse nötig · 🔴 Expert — tiefes Systemverständnis erforderlich · ⚠️ Pflicht-Muster — vor Produktions-Deployment
 
-**Orientierung & Einstieg:**
-- [Migrations-Leitfaden](#migrations-leitfaden--vom-einfachen-llm-call-zum-produktionsreifen-stack)
 
 **Einstiegsschicht — Use-Case-Orientierung:**
 1. [Business-Muster](#1-business-muster) — Welche KI-Fähigkeit für welchen Use-Case?
