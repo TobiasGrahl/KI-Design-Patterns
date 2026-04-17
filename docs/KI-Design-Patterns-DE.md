@@ -2,7 +2,7 @@
 
 Ein opinionierter Leitfaden für **Software-Ingenieure und Software-Architekten**, die produktionsreife KI-Backends bauen. Kein Überblick, keine Theorie — konkrete Muster mit vollständigem Code, klaren Trade-offs und Entscheidungsregeln für den Alltag.
 
-Jedes Muster folgt dem Schema: **Problem → Lösung → vollständiger Code → Wann einsetzen / Wann nicht**.
+Jedes technische Muster folgt dem Schema: **Problem → Lösung → vollständiger Python-Code → Wann einsetzen / Wann nicht**. Business-Muster (Sektion 1) folgen dem Schema: **Use-Case → Governance-Profil → Implementierungs-Verweis**.
 
 © amkat.de 2026
 
@@ -14,7 +14,7 @@ Jedes Muster folgt dem Schema: **Problem → Lösung → vollständiger Code →
 
 **Software-Architekten**, die KI-Systeme entwerfen: Welche Fähigkeit für welchen Use-Case? Wie werden Resilienz, Observability und Testbarkeit sichergestellt? Welche Muster bilden das Fundament, welche kommen später?
 
-> **Nicht das richtige Dokument** für: erste Schritte mit LLMs, Einführung in Python/TypeScript, allgemeines Machine Learning.
+> **Nicht das richtige Dokument** für: erste Schritte mit LLMs, Einführung in Python, allgemeines Machine Learning.
 
 ---
 
@@ -48,7 +48,7 @@ Die Codebeispiele setzen folgende Technologien voraus. Muster sind übertragbar,
 | **Engineer** · LLM-Output strukturieren | → [Sektion 14 (Structured Generation)](#14-structured-generation) + [Sektion 17.1 (Response Validator)](#17-llm-robustheit--qualitätssicherung) |
 | **Engineer** · Agent bauen | → [Sektion 15 (Agent-Patterns)](#15-agent-patterns) · zuerst [Entscheidungsregel](#agent-vs-deterministischer-prozess--entscheidungsregel) lesen |
 | **Engineer** · LLM-Stack absichern | → [Sektion 4 (Sicherheit)](#4-sicherheit--prompt-schutz) + [Sektion 17.5 (Circuit Breaker)](#17-llm-robustheit--qualitätssicherung) |
-| **Engineer** · Performance / Kosten | → [Sektion 13 (Caching)](#13-caching) + [Sektion 5 (Concurrency)](#5-concurrency--rate-limiting) |
+| **Engineer** · Performance / Kosten | → [Sektion 13 (Caching)](#13-caching) + [Sektion 5 (Concurrency)](#5-concurrency--rate-limiting) + [Sektion 18 (Kosten-Management)](#18-llm-kosten-management) |
 | **Engineer** · Prompts testen | → [Sektion 12 (Evals)](#12-evals--llm-testing) + [Sektion 11 (Prompt Engineering)](#11-prompt-engineering) |
 
 > 💡 **Tipp:** Die Bewertungs-Symbole in jedem Muster-Header (🔄 🎯 🔍 👤 🔒 📊) sind im [Muster-Bewertungs-Framework](#muster-bewertungs-framework-6-attribute) erklärt.
@@ -59,10 +59,9 @@ Die Codebeispiele setzen folgende Technologien voraus. Muster sind übertragbar,
 
 | Version | Datum | Änderungen |
 |---|---|---|
-| 1.1 | 2026-04 | Zielgruppe SW-Ingenieure/Architekten: Zielgruppen-Sektion, Tech-Stack, Quick-Start, Systemarchitektur-Diagramm, Schwierigkeitsgrade, Anti-Pattern-Callouts, rollenbasierte Navigation; Sektionen 19 (Kosten-Management), 20 (Multi-Tenancy) ergänzt; Sektion 18 (Allgemeine Backend-Muster) entfernt; PII-Redaktion (4.2) ergänzt |
-| 1.0 | 2026-01 | Erstveröffentlichung — 18 Sektionen, 14 Business-Muster, 39+ technische Muster |
-
----
+| 1.2 | 2026-04 | v3: Sektionsnummern bereinigt (18=Kosten, 19=Multi-Tenancy); vollständige Master-Referenztabelle (82 Muster); Anti-Patterns-Sektion (18 Einträge in 7 Kategorien); Schnelldiagnose-Tabelle erweitert (5 neue Zeilen); fehlende ## Sektions-Header ergänzt; Business-Muster-Intro präzisiert |
+| 1.1 | 2026-04 | Zielgruppen-Sektion, Tech-Stack, Quick-Start, Systemarchitektur-Diagramm, Schwierigkeitsgrade, Anti-Pattern-Callouts, rollenbasierte Navigation; Sektionen 18 (Kosten-Management), 19 (Multi-Tenancy) ergänzt; frühere Sektion 18 (Allgemeine Backend-Muster) entfernt; PII-Redaktion (4.2) ergänzt |
+| 1.0 | 2026-01 | Erstveröffentlichung — 17 Sektionen, 14 Business-Muster, 39+ technische Muster |
 
 ---
 
@@ -187,6 +186,11 @@ graph TB
 | Top-5-Retrieval-Qualität ist gut aber nicht gut genug für LLM-Antwortqualität | Cross-Encoder Reranking (Two-Stage Retrieval) | 16.8 |
 | Vektorsuche ist langsam oder Recall < 95% trotz korrekter Embeddings | HNSW / ANN Index Tuning | 16.9 |
 | LLM-Output-Qualität ist nicht messbar / vergleichbar | LLM-as-Judge, Multi-Dimensional Confidence Scorer | 12.1, 17.3 |
+| Personenbezogene Daten (PII) werden ungefiltert an externen LLM-Provider gesendet | PII-Redaktion vor LLM-Call | 4.2 |
+| LLM-Kosten sind unsichtbar, kein Alert bei Budget-Überschreitung | LLM-Cost-Tracking (Prometheus) | 18.1 |
+| Ein Nutzer verbraucht unverhältnismäßig viel LLM-Budget | Per-User Budget Limits | 18.3 |
+| Daten eines Tenants gelangen in den Kontext eines anderen | Tenant-Isolierung in LLM-Pipelines | 19.1 |
+| Verschiedene Kunden brauchen unterschiedliches LLM-Verhalten ohne Code-Deployment | Tenant-spezifisches Prompt-Management | 19.2 |
 
 
 ---
@@ -215,8 +219,8 @@ graph TB
 15. [Agent-Patterns](#15-agent-patterns)
 16. [Erweiterte RAG-Muster](#16-erweiterte-rag-muster) — inkl. 16.8 Cross-Encoder Reranking · 16.9 HNSW Index Tuning
 17. [LLM-Robustheit & Qualitätssicherung](#17-llm-robustheit--qualitätssicherung)
-19. [LLM-Kosten-Management](#19-llm-kosten-management)
-20. [Multi-Tenancy & Mandantentrennung](#20-multi-tenancy--mandantentrennung)
+18. [LLM-Kosten-Management](#18-llm-kosten-management)
+19. [Multi-Tenancy & Mandantentrennung](#19-multi-tenancy--mandantentrennung)
 
 ---
 
@@ -226,7 +230,9 @@ graph TB
 
 > **Kategorie:** K · Business-Muster
 
-Business-Muster beschreiben KI-Fähigkeiten auf Anwendungsebene: *Was kann KI für diesen Use-Case leisten?* Sie sind orthogonal zu den technischen Implementierungsmustern (Sektionen 2–18) und dienen als Entscheidungsschicht — welche KI-Fähigkeit für welchen Anwendungsfall, mit welchen Governance-Anforderungen.
+Business-Muster beschreiben KI-Fähigkeiten auf Anwendungsebene: *Was kann KI für diesen Use-Case leisten?* Sie sind orthogonal zu den technischen Implementierungsmustern (Sektionen 2–19) und dienen als Entscheidungsschicht — welche KI-Fähigkeit für welchen Anwendungsfall, mit welchen Governance-Anforderungen.
+
+> **Hinweis:** Business-Muster enthalten Governance-Profile und Entscheidungsregeln statt Implementierungscode — für die konkrete Umsetzung verweist jedes Muster auf die technischen Sektionen (2–19).
 
 Jedes Muster enthält die **6 Bewertungs-Attribute** (→ [Muster-Bewertungs-Framework](#muster-bewertungs-framework-6-attribute)) sowie Verweise auf relevante technische Implementierungsmuster.
 ### Alle 14 Business-Muster im Überblick
@@ -1558,6 +1564,10 @@ async def run_pipeline(claim: Claim, chunks: list[Chunk]) -> PipelineResult:
 
 ---
 
+## 3. Datenverarbeitungs-Muster
+
+> 🟢 **Einstieg** — 3.2 (Pass-by-Reference) · 🟡 **Fortgeschritten** — 3.1 (Rich Chunk Metadaten), 3.3 (Strukturelle Textdekonstruktion)
+
 ### 3.1 Rich Chunk Metadata Pattern
 
 > **Kategorie:** A · RAG & Retrieval
@@ -1818,6 +1828,10 @@ graph TD
 
 
 ---
+
+## 4. Sicherheit & Prompt-Schutz
+
+> ⚠️ **Pflicht-Muster — vor Produktions-Deployment:** 4.1 Prompt Injection Defense · 4.2 PII-Redaktion
 
 ### 4.1 Prompt Injection Defense Pattern
 
@@ -2480,6 +2494,10 @@ result = await llm_pool.call("screening", messages)
 
 ---
 
+## 6. Retrieval-Augmented Generation (RAG)
+
+> 🟢 **Einstieg** — 6.1 (Failure-Isolated Indexing) · 🟡 **Fortgeschritten** — 6.2 (Domain-Specific Chunk Types)
+
 ### 6.1 Failure-Isolated Indexing Pattern
 
 > **Kategorie:** I · Betrieb & Infrastruktur
@@ -2654,6 +2672,10 @@ async def process_chunk(raw_chunk: RawChunk) -> Chunk:
 
 
 ---
+
+## 7. Workflow-Engine & Resilienz
+
+> 🟡 **Fortgeschritten** — 7.2 (LLM Gateway) · 🔴 **Expert** — 7.1 (Durable Workflow)
 
 ### 7.1 Durable Workflow Pattern
 
@@ -2860,6 +2882,10 @@ async def call_llm(messages: list[dict]) -> str:
 
 ---
 
+## 8. Infrastruktur & Deployment
+
+> 🟢 **Einstieg** — 8.1 (Two-Layer Compose), 8.2 (Secrets Management)
+
 ### 8.1 Two-Layer Compose Pattern
 
 > **Kategorie:** I · Betrieb & Infrastruktur
@@ -3045,6 +3071,10 @@ echo "Done. Secrets created — never commit this script's output!"
 
 ---
 
+## 9. Observability
+
+> 🟡 **Fortgeschritten** — 9.1 (Full Observability Stack) ⚠️
+
 ### 9.1 Full Observability Stack Pattern
 
 > **Kategorie:** I · Betrieb & Infrastruktur
@@ -3053,6 +3083,9 @@ echo "Done. Secrets created — never commit this script's output!"
 
 
 #### Problem
+
+
+Standard-Monitoring (HTTP-Statuscodes, Response-Time) reicht für LLM-intensive Systeme nicht. LLM-spezifische Probleme — Halluzinationen, Token-Kostenexplosionen, Rate-Limit-Häufungen, Circuit-Breaker-Zustandswechsel — sind ohne spezialisierte Metriken und strukturierte Logs unsichtbar. Nachträgliches Einbauen kostet Wochen; von Anfang an kostet es einen halben Tag.
 
 
 #### Struktur
@@ -3166,6 +3199,10 @@ with llm_latency.labels(model="sonnet", task_type="extraction").time():
 
 ---
 
+## 10. Code-Organisation
+
+> 🟢 **Einstieg** — 10.1 (Monorepo Workspace), 10.2 (Living README)
+
 ### 10.1 Monorepo Workspace Pattern
 
 > **Kategorie:** I · Betrieb & Infrastruktur
@@ -3254,6 +3291,9 @@ llm-client       = { workspace = true }
 
 
 #### Problem
+
+
+In Monorepos mit mehreren Services wissen neue Entwickler oft nicht, wie ein Service gestartet wird, welche ENV-Variablen er braucht und welche Queue-Namen er erwartet. Dieses Wissen liegt verstreut in Köpfen, Slack-Nachrichten oder veraltetem Wiki. Ohne Mindestandard entstehen serviceübergreifend inkonsistente Dokumentationsinseln.
 
 
 #### Konsequenzen
@@ -3968,6 +4008,10 @@ async def run_eval_pipeline(prompt_version: str) -> EvalReport:
 
 
 ---
+
+## 13. Caching
+
+> 🟢 **Einstieg** — 13.1 (Exact Hash Cache), 13.3 (Embedding Cache) · 🟡 **Fortgeschritten** — 13.2 (Semantisches Caching) · 🔴 **Expert** — 13.4 (Cache-Invalidierung)
 
 ### 13.1 Exact Hash Cache Pattern
 
@@ -6408,6 +6452,10 @@ def measure_recall(
 
 ---
 
+## 17. LLM-Robustheit & Qualitätssicherung
+
+> 🟢 **Einstieg** — 17.5 (Circuit Breaker), 17.6 (Fallback Hierarchy), 17.7 (Fail-Fast Policy) · 🟡 **Fortgeschritten** — 17.1 (LLM Response Validator), 17.2 (Validation Feedback Loop), 17.4 (Semantic Deduplication), 17.8 (LLM Metrics) · 🔴 **Expert** — 17.3 (Multi-Dimensional Confidence Scorer), 17.9 (Document-Context Classification)
+
 ### 17.1 LLM Response Validator Pattern
 
 > **Kategorie:** C · LLM-Output-Verarbeitung
@@ -7224,11 +7272,11 @@ class PatternHierarchyClassifier:
 
 ---
 
-## 19. LLM-Kosten-Management
+## 18. LLM-Kosten-Management
 
-> ⚠️ **Produktions-Pflicht:** Ohne Kosten-Tracking und Budget-Limits explodieren LLM-Kosten bei Scale ohne Warnung. · 🟢 **Einstieg** — 19.1 (Cost Tracking), 19.2 (Model Routing) · 🟡 **Fortgeschritten** — 19.3 (Per-User Budgets)
+> ⚠️ **Produktions-Pflicht:** Ohne Kosten-Tracking und Budget-Limits explodieren LLM-Kosten bei Scale ohne Warnung. · 🟢 **Einstieg** — 18.1 (Cost Tracking), 18.2 (Model Routing) · 🟡 **Fortgeschritten** — 18.3 (Per-User Budgets)
 
-### 19.1 LLM-Cost-Tracking Pattern
+### 18.1 LLM-Cost-Tracking Pattern
 
 > **Kategorie:** I · Betrieb & Infrastruktur
 
@@ -7345,11 +7393,11 @@ async def tracked_llm_call(
 #### Verwandte Muster
 
 
-→ [Model Routing Pattern](#192-model-routing-nach-kosten) · [Per-User Budget Pattern](#193-per-user-budget-limits) · [Observability Stack Pattern](#91-vollstndiger-observability-stack)
+→ [Model Routing Pattern](#182-model-routing-nach-kosten) · [Per-User Budget Pattern](#183-per-user-budget-limits) · [Observability Stack Pattern](#91-vollstndiger-observability-stack)
 
 ---
 
-### 19.2 Model Routing nach Kosten
+### 18.2 Model Routing nach Kosten
 
 > **Kategorie:** D · LLM-Integration & Routing
 
@@ -7448,11 +7496,11 @@ async def call_with_routing(
 #### Verwandte Muster
 
 
-→ [LLM-Cost-Tracking Pattern](#191-llm-cost-tracking-pattern) · [Model Priority Chain Pattern](#164-model-priority-chain) · [Golden Dataset & Regression Pattern](#122-golden-dataset--regression-testing)
+→ [LLM-Cost-Tracking Pattern](#181-llm-cost-tracking-pattern) · [Model Priority Chain Pattern](#164-model-priority-chain) · [Golden Dataset & Regression Pattern](#122-golden-dataset--regression-testing)
 
 ---
 
-### 19.3 Per-User Budget Limits
+### 18.3 Per-User Budget Limits
 
 > **Kategorie:** I · Betrieb & Infrastruktur
 
@@ -7558,16 +7606,16 @@ class BudgetManager:
 #### Verwandte Muster
 
 
-→ [LLM-Cost-Tracking Pattern](#191-llm-cost-tracking-pattern) · [Multi-Tenancy Pattern](#20-multi-tenancy--mandantentrennung) · [Thread-Safe Rate Limiter Pattern](#52-thread-safe-async-rate-limiter)
+→ [LLM-Cost-Tracking Pattern](#181-llm-cost-tracking-pattern) · [Multi-Tenancy Pattern](#19-multi-tenancy--mandantentrennung) · [Thread-Safe Rate Limiter Pattern](#52-thread-safe-async-rate-limiter)
 
 
 ---
 
-## 20. Multi-Tenancy & Mandantentrennung
+## 19. Multi-Tenancy & Mandantentrennung
 
-> 🟡 **Fortgeschritten** — 20.1 (Tenant-Isolierung), 20.2 (Prompt-Trennung) · 🔴 **Expert** — 20.3 (Daten-Isolation)
+> 🟡 **Fortgeschritten** — 19.1 (Tenant-Isolierung), 19.2 (Prompt-Trennung) · 🔴 **Expert** — 20.3 (Daten-Isolation)
 
-### 20.1 Tenant-Isolierung in LLM-Pipelines
+### 19.1 Tenant-Isolierung in LLM-Pipelines
 
 > **Kategorie:** I · Betrieb & Infrastruktur | J · Sicherheit
 
@@ -7676,13 +7724,13 @@ def get_tenant_rate_limit(tenant_tier: str) -> int:
 #### Verwandte Muster
 
 
-→ [Per-User Budget Pattern](#193-per-user-budget-limits) · [Prompt Injection Defense Pattern](#41-prompt-injection-defense-pattern) · [Exact Hash Cache Pattern](#131-exact-hash-cache-pattern) · [Observability Stack Pattern](#91-vollstndiger-observability-stack)
+→ [Per-User Budget Pattern](#183-per-user-budget-limits) · [Prompt Injection Defense Pattern](#41-prompt-injection-defense-pattern) · [Exact Hash Cache Pattern](#131-exact-hash-cache-pattern) · [Observability Stack Pattern](#91-vollstndiger-observability-stack)
 
 > ❌ **Häufiger Fehler:** Tenant-Isolierung nur auf Anwendungsebene (z.B. WHERE tenant_id = ?) aber nicht im Vektordatenbank-Filter. Semantic-Search-Queries ohne Tenant-Filter können Chunks anderer Tenants zurückliefern — ein stilles Datenleck das in Logs nicht sichtbar ist.
 
 ---
 
-### 20.2 Tenant-spezifisches System-Prompt-Management
+### 19.2 Tenant-spezifisches System-Prompt-Management
 
 > **Kategorie:** B · Prompt Engineering | I · Betrieb & Infrastruktur
 
@@ -7752,7 +7800,7 @@ async def get_system_prompt(task_type: str) -> str:
 #### Verwandte Muster
 
 
-→ [Versioned Prompt Management Pattern](#166-versioned-prompt-management-pattern) · [Golden Dataset & Regression Pattern](#122-golden-dataset--regression-testing) · [Tenant-Isolierung Pattern](#201-tenant-isolierung-in-llm-pipelines)
+→ [Versioned Prompt Management Pattern](#166-versioned-prompt-management-pattern) · [Golden Dataset & Regression Pattern](#122-golden-dataset--regression-testing) · [Tenant-Isolierung Pattern](#191-tenant-isolierung-in-llm-pipelines)
 
 
 
@@ -7760,11 +7808,11 @@ async def get_system_prompt(task_type: str) -> str:
 
 ## Master-Referenztabelle — Alle Muster auf einen Blick
 
-> 🟢 Einstieg · 🟡 Fortgeschritten · 🔴 Expert | Impact: Hoch / Mittel / Gering | Aufwand: Niedrig / Mittel / Hoch
+> 🟢 Einstieg · 🟡 Fortgeschritten · 🔴 Expert · ⚠️ Pflicht vor Produktions-Deployment
 
 ### Business-Muster (Sektion 1)
 
-| # | Muster | HitL | DSGVO | Niveau |
+| # | Muster | HitL | DSGVO-Risiko | Niveau |
 |---|---|---|---|---|
 | 1.1 | Semantic Search Pattern | Optional | Niedrig | 🟢 |
 | 1.2 | Classification & Routing Pattern | Empfohlen | Mittel | 🟢 |
@@ -7772,165 +7820,267 @@ async def get_system_prompt(task_type: str) -> str:
 | 1.4 | Generation & Drafting Pattern | Pflicht | Mittel | 🟡 |
 | 1.5 | Summarization Pattern | Empfohlen | Mittel | 🟢 |
 | 1.6 | Autonomous Agent Pattern | Pflicht | Hoch | 🔴 |
-| 1.7 | Anomaly Detection Pattern | Empfohlen | Hoch | 🔴 |
-| 1.8 | Forecast Pattern | Empfohlen | Mittel | 🔴 |
+| 1.7 | Anomaly Detection Pattern | Empfohlen | Mittel | 🟡 |
+| 1.8 | Forecast Pattern | Empfohlen | Niedrig | 🟡 |
 | 1.9 | Process Automation Pattern | Optional | Niedrig | 🟢 |
-| 1.10 | Multimodal Analysis Pattern | Empfohlen | Hoch | 🔴 |
+| 1.10 | Multimodal Analysis Pattern | Empfohlen | Hoch | 🟡 |
 | 1.11 | Document Comparison Pattern | Optional | Niedrig | 🟢 |
 | 1.12 | Validation & Plausibility Pattern | Optional | Niedrig | 🟢 |
-| 1.13 | Ranking & Recommendation Pattern | Empfohlen | Mittel | 🟡 |
+| 1.13 | Ranking & Recommendation Pattern | Empfohlen | Niedrig | 🟡 |
 | 1.14 | Translation & Simplification Pattern | Empfohlen | Niedrig | 🟢 |
 
-### Kern-Muster — Hoher Impact, sofort anwendbar (Sektionen 2–13)
+### KI & LLM-Muster (Sektion 2)
 
 | # | Muster | Aufwand | Impact | Niveau |
 |---|---|---|---|---|
-| 2.1 | Map-Reduce Extraction | Mittel | Hoch | 🟡 |
-| 2.2 | Evidence + Source Pattern | Niedrig | Hoch | 🟢 |
-| 2.3 | Recall-First Screening | Niedrig | Mittel | 🟢 |
-| 2.4 | HyDE — Hypothetical Document Embeddings | Mittel | Hoch | 🟡 |
+| 2.1 | Map-Reduce Extraction Pattern | Mittel | Hoch | 🟡 |
+| 2.2 | Evidence + Source Pattern | Niedrig | Hoch | 🟢 ⚠️ |
+| 2.3 | Recall-First Screening Pattern | Niedrig | Hoch | 🟢 |
+| 2.4 | Hypothetical Questions (HyDE) Pattern | Mittel | Hoch | 🟡 |
 | 2.5 | Closed Taxonomy Pattern | Niedrig | Mittel | 🟢 |
-| 4.1 | Prompt Injection Defense | Mittel | Hoch | 🟡 ⚠️ |
-| 5.1 | Sliding Window Executor | Niedrig | Mittel | 🟡 |
-| 6.x | RAG-Pipeline | Mittel | Hoch | 🟡 |
-| 7.1 | Durable Workflow | Hoch | Hoch | 🔴 |
-| 7.2 | LLM-Gateway | Niedrig | Hoch | 🟢 ⚠️ |
-| 9.1 | Observability Stack (OTel + Prometheus + Grafana) | Mittel | Hoch | 🟡 |
-| 12.1 | LLM-as-Judge | Mittel | Hoch | 🟡 |
-| 12.2 | Golden Dataset + Regression Tests | Mittel | Hoch | 🟢 |
-| 13.1 | Exaktes Hash-Caching | Niedrig | Hoch | 🟢 ⚠️ |
-| 13.2 | Semantisches Caching | Mittel | Mittel | 🔴 |
-| 13.3 | Embedding-Cache | Niedrig | Mittel | 🟡 |
+| 2.6 | Multi-Stage KI-Pipeline Pattern | Hoch | Hoch | 🔴 |
 
-### Structured Generation & Agent-Muster (Sektionen 14–15)
+### Datenverarbeitungs-Muster (Sektion 3)
 
 | # | Muster | Aufwand | Impact | Niveau |
 |---|---|---|---|---|
-| 14.1 | JSON-Schema Constraints | Niedrig | Hoch | 🟢 ⚠️ |
-| 14.2 | Instructor / Schema-Validierung First | Niedrig | Hoch | 🟢 ⚠️ |
-| 14.3 | Schema Design für Structured Generation | Niedrig | Mittel | 🟢 |
-| 15.1 | ReAct — Reason + Act Loop | Mittel | Hoch | 🟡 |
-| 15.2 | Tool Registry mit Validierung | Mittel | Mittel | 🟡 |
-| 15.3 | Human-in-the-Loop Checkpoints | Niedrig | Hoch | 🟡 |
-| 15.4 | Agent Memory (3 Ebenen) | Hoch | Mittel | 🔴 |
+| 3.1 | Rich Chunk Metadata Pattern | Mittel | Hoch | 🟡 ⚠️ |
+| 3.2 | Pass-by-Reference Pattern | Niedrig | Mittel | 🟢 |
+| 3.3 | Structural Text Deconstruction Pattern | Mittel | Mittel | 🟡 |
 
-### Erweiterte RAG & Robustheit (Sektionen 16–17)
+### Sicherheits-Muster (Sektion 4)
+
+| # | Muster | Aufwand | Impact | Niveau |
+|---|---|---|---|---|
+| 4.1 | Prompt Injection Defense Pattern | Mittel | Hoch | 🟡 ⚠️ |
+| 4.1b | Output Guardrails | Mittel | Hoch | 🟡 ⚠️ |
+| 4.2 | PII-Redaktion vor dem LLM-Call | Mittel | Hoch | 🟡 ⚠️ |
+
+### Concurrency-Muster (Sektion 5)
+
+| # | Muster | Aufwand | Impact | Niveau |
+|---|---|---|---|---|
+| 5.1 | Sliding Window Executor Pattern | Niedrig | Hoch | 🟡 ⚠️ |
+| 5.2 | Thread-Safe Rate Limiter Pattern | Niedrig | Mittel | 🟡 |
+| 5.3 | Per-Model Throttling Pattern | Niedrig | Mittel | 🟢 |
+
+### RAG-Muster (Sektion 6)
+
+| # | Muster | Aufwand | Impact | Niveau |
+|---|---|---|---|---|
+| 6.1 | Failure-Isolated Indexing Pattern | Mittel | Hoch | 🟡 |
+| 6.2 | Domain-Specific Chunk Types Pattern | Mittel | Mittel | 🟡 |
+
+### Workflow-Engine & Resilienz (Sektion 7)
+
+| # | Muster | Aufwand | Impact | Niveau |
+|---|---|---|---|---|
+| 7.1 | Durable Workflow Pattern | Hoch | Hoch | 🔴 ⚠️ |
+| 7.2 | LLM Gateway Pattern | Niedrig | Hoch | 🟢 ⚠️ |
+
+### Infrastruktur & Deployment (Sektion 8)
+
+| # | Muster | Aufwand | Impact | Niveau |
+|---|---|---|---|---|
+| 8.1 | Two-Layer Compose Pattern | Niedrig | Mittel | 🟢 |
+| 8.2 | Secrets Management Pattern | Niedrig | Hoch | 🟢 ⚠️ |
+
+### Observability (Sektion 9)
+
+| # | Muster | Aufwand | Impact | Niveau |
+|---|---|---|---|---|
+| 9.1 | Full Observability Stack Pattern (OTel) | Mittel | Hoch | 🟡 ⚠️ |
+
+### Code-Organisation (Sektion 10)
+
+| # | Muster | Aufwand | Impact | Niveau |
+|---|---|---|---|---|
+| 10.1 | Monorepo Workspace Pattern (uv) | Niedrig | Mittel | 🟢 |
+| 10.2 | Living Service README Pattern | Niedrig | Mittel | 🟢 |
+
+### Prompt Engineering (Sektion 11)
+
+| # | Muster | Aufwand | Impact | Niveau |
+|---|---|---|---|---|
+| 11.1 | Positive + Negative Examples Pattern | Niedrig | Hoch | 🟢 |
+| 11.2 | Structured Output Constraints Pattern | Niedrig | Hoch | 🟢 |
+| 11.3 | Domain Context Pattern | Niedrig | Mittel | 🟢 |
+| 11.4 | Edge Case Constraints Pattern | Niedrig | Mittel | 🟡 |
+| 11.5 | Batch Count Control Pattern | Niedrig | Mittel | 🔴 |
+| 11.6 | Prefill-Muster | Niedrig | Niedrig | 🟢 |
+
+### Evals & LLM-Testing (Sektion 12)
+
+| # | Muster | Aufwand | Impact | Niveau |
+|---|---|---|---|---|
+| 12.1 | LLM-as-Judge Pattern | Mittel | Hoch | 🟡 |
+| 12.2 | Golden Dataset & Regression Pattern | Mittel | Hoch | 🟢 ⚠️ |
+| 12.3 | Behavioral Testing Pattern | Mittel | Mittel | 🟡 |
+| 12.4 | Automated Eval Pipeline Pattern | Hoch | Hoch | 🔴 |
+
+### Caching (Sektion 13)
+
+| # | Muster | Aufwand | Impact | Niveau |
+|---|---|---|---|---|
+| 13.1 | Exact Hash Cache Pattern | Niedrig | Hoch | 🟢 ⚠️ |
+| 13.2 | Semantic Cache Pattern | Mittel | Hoch | 🟡 |
+| 13.3 | Embedding Cache Pattern | Niedrig | Mittel | 🟢 |
+| 13.4 | Cache Invalidation Pattern | Mittel | Mittel | 🔴 |
+| 13.5 | Server-seitiges Prompt-Caching | Niedrig | Hoch | 🟢 |
+
+### Structured Generation (Sektion 14)
+
+| # | Muster | Aufwand | Impact | Niveau |
+|---|---|---|---|---|
+| 14.1 | Tool Use / Function Calling Pattern | Niedrig | Hoch | 🟢 |
+| 14.2 | Schema-First Generation Pattern (Instructor) | Niedrig | Hoch | 🟢 ⚠️ |
+| 14.3 | Schema Design Pattern | Niedrig | Hoch | 🟡 |
+| 14.4 | Streaming Structured Generation Pattern | Mittel | Mittel | 🔴 |
+
+### Agent-Patterns (Sektion 15)
+
+| # | Muster | Aufwand | Impact | Niveau |
+|---|---|---|---|---|
+| 15.1 | ReAct Loop Pattern | Mittel | Hoch | 🟡 |
+| 15.2 | Tool Registry Pattern | Mittel | Mittel | 🟡 |
+| 15.3 | Human-in-the-Loop Checkpoint Pattern | Niedrig | Hoch | 🟡 ⚠️ |
+| 15.4 | Agent Memory Pattern (3 Ebenen) | Hoch | Mittel | 🔴 |
+| 15.5 | Agent Evaluation Pattern | Mittel | Mittel | 🟡 |
+| 15.6 | Multi-Turn Memory Management | Mittel | Mittel | 🟡 |
+
+### Erweiterte RAG-Muster (Sektion 16)
 
 | # | Muster | Aufwand | Impact | Niveau |
 |---|---|---|---|---|
 | 16.1 | Hybrid-RAG mit Reciprocal Rank Fusion | Mittel | Hoch | 🔴 |
-| 16.2 | Adaptives Query-Boosting | Niedrig | Mittel | 🟡 |
-| 16.3 | LLM Query Expansion mit Budget-Tracking | Mittel | Mittel | 🟡 |
-| 16.4 | Model Priority Chain | Niedrig | Hoch | 🟡 |
-| 16.5 | Token-Budget-Management | Niedrig | Hoch | 🟡 |
-| 16.6 | Versioniertes System-Prompt-Management | Mittel | Hoch | 🔴 |
-| 16.8 | Cross-Encoder Reranking (Two-Stage Retrieval) | Mittel | Hoch | 🔴 |
-| 16.9 | HNSW / ANN Index Tuning | Mittel | Hoch | 🔴 |
-| 17.1 | LLM Response Validator + Auto-Repair | Niedrig | Hoch | 🟡 ⚠️ |
+| 16.2 | Adaptive Query Boosting Pattern | Niedrig | Hoch | 🟡 |
+| 16.3 | LLM Query Expansion Pattern | Mittel | Hoch | 🟡 |
+| 16.4 | Model Priority Chain Pattern | Niedrig | Hoch | 🟡 |
+| 16.5 | Token Budget Management Pattern | Niedrig | Hoch | 🟡 |
+| 16.6 | Versioned Prompt Management Pattern | Mittel | Hoch | 🔴 |
+| 16.7 | Model Capability Flags Pattern | Niedrig | Mittel | 🟡 |
+| 16.8 | Cross-Encoder Reranking Pattern | Mittel | Hoch | 🔴 |
+| 16.9 | HNSW / ANN Index Tuning Pattern | Mittel | Hoch | 🔴 |
+
+### LLM-Robustheit & Qualitätssicherung (Sektion 17)
+
+| # | Muster | Aufwand | Impact | Niveau |
+|---|---|---|---|---|
+| 17.1 | LLM Response Validator + Auto-Repair | Mittel | Hoch | 🟡 ⚠️ |
 | 17.2 | Validation Error Feedback Loop | Niedrig | Hoch | 🟡 |
 | 17.3 | Multi-Dimensional Confidence Scorer | Mittel | Hoch | 🔴 |
-| 17.4 | Semantic Deduplication | Mittel | Mittel | 🔴 |
-| 17.5 | Circuit Breaker für LLM-Calls | Mittel | Hoch | 🟡 |
-| 17.6 | 5-stufige Fallback-Hierarchie | Mittel | Hoch | 🔴 |
-| 17.7 | Fail-Fast Policy | Niedrig | Hoch | 🟢 |
-| 17.8 | Prometheus LLM-Metriken | Niedrig | Mittel | 🟢 |
-| 17.9 | Dokument-kontext-bewusste Klassifikation | Mittel | Mittel | 🟡 |
+| 17.4 | Semantic Deduplication Pattern | Mittel | Mittel | 🔴 |
+| 17.5 | Circuit Breaker Pattern | Mittel | Hoch | 🟡 ⚠️ |
+| 17.6 | Fallback Hierarchy Pattern | Mittel | Hoch | 🟡 |
+| 17.7 | Fail-Fast Policy Pattern | Niedrig | Hoch | 🟢 |
+| 17.8 | LLM Metrics Pattern (Prometheus) | Niedrig | Hoch | 🟡 ⚠️ |
+| 17.9 | Document-Context Classification Pattern | Mittel | Mittel | 🟡 |
+| 17.10 | File-Based Chunk Cache Pattern | Niedrig | Mittel | 🟢 |
 
-### Kosten-Management (Sektion 19)
-
-| # | Muster | Aufwand | Impact | Niveau |
-|---|---|---|---|---|
-| 19.1 | LLM-Cost-Tracking (Prometheus) | Niedrig | Hoch | 🟢 ⚠️ |
-| 19.2 | Model Routing nach Kosten | Niedrig | Hoch | 🟢 |
-| 19.3 | Per-User Budget Limits (Redis) | Mittel | Hoch | 🟡 |
-
-### Multi-Tenancy & Mandantentrennung (Sektion 20)
+### LLM-Kosten-Management (Sektion 18)
 
 | # | Muster | Aufwand | Impact | Niveau |
 |---|---|---|---|---|
-| 20.1 | Tenant-Isolierung in LLM-Pipelines | Mittel | Hoch | 🟡 ⚠️ |
-| 20.2 | Tenant-spezifisches Prompt-Management | Mittel | Mittel | 🟡 |
+| 18.1 | LLM-Cost-Tracking Pattern | Niedrig | Hoch | 🟢 ⚠️ |
+| 18.2 | Model Routing nach Kosten | Niedrig | Hoch | 🟢 |
+| 18.3 | Per-User Budget Limits | Mittel | Hoch | 🟡 |
+
+### Multi-Tenancy & Mandantentrennung (Sektion 19)
+
+| # | Muster | Aufwand | Impact | Niveau |
+|---|---|---|---|---|
+| 19.1 | Tenant-Isolierung in LLM-Pipelines | Mittel | Hoch | 🟡 ⚠️ |
+| 19.2 | Tenant-spezifisches Prompt-Management | Mittel | Mittel | 🟡 |
 
 > ⚠️ = Pflicht-Muster — vor erstem Produktions-Deployment implementieren
 
----
-### Kern-Muster (hoher Impact, sofort anwendbar)
-
-| # | Idee | Aufwand | Impact | Niveau |
-|---|------|---------|--------|--------|
-| 1 | **Evidence+Source Pattern** — Jede LLM-Extraktion mit Quellzitat | Niedrig | Hoch | 🟢 |
-| 2 | **Structured Generation (Instructor)** — Schema-Validierung statt JSON-Parsing | Niedrig | Hoch | 🟢 |
-| 3 | **Prompt Injection Defense** — Unicode-Tags + Sanitisierung | Mittel | Hoch | 🟡 |
-| 3b | **PII-Redaktion (4.2)** — Presidio + Regex vor externem LLM-Call | Mittel | Hoch | 🟡 |
-| 4 | **LLM-Proxy** — Provider-Unabhängigkeit von Tag 1 | Niedrig | Hoch | 🟢 |
-| 5 | **HyDE-Fragen** — Besserer RAG-Recall durch generierte Fragen | Mittel | Hoch | 🟡 |
-| 6 | **Map-Reduce Extraktion** — Skalierbar auf große Dokumente | Mittel | Hoch | 🟡 |
-| 7 | **Reiche Chunk-Metadaten** — Vektordatenbank mit strukturierten Filtern | Mittel | Hoch | 🟡 |
-| 8 | **Exaktes Caching** — Hash-basiert, spart 40–70% LLM-Kosten | Niedrig | Hoch | 🟢 |
-### Qualität & Robustheit
-
-| # | Idee | Aufwand | Impact | Niveau |
-|---|------|---------|--------|--------|
-| 9 | **LLM-as-Judge** — Automatisierte Qualitätsbewertung | Mittel | Hoch | 🟡 |
-| 10 | **Golden Dataset + Regression Tests** — Prompt-Änderungen sicher testen | Mittel | Hoch | 🟢 |
-| 11 | **Recall-First Screening** — Explizite Fehlertoleranz-Strategie | Niedrig | Mittel | 🟢 |
-| 12 | **Geschlossene Taxonomie** — Kontrollierte, filterbare Klassifikation | Niedrig | Mittel | 🟢 |
-| 13 | **Semantisches Caching** — Ähnliche Queries wiederverwenden | Mittel | Mittel | 🔴 |
-### Skalierung & Betrieb
-
-| # | Idee | Aufwand | Impact | Niveau |
-|---|------|---------|--------|--------|
-| 14 | **Sliding Window Executor** — Echte N-in-flight Concurrency | Niedrig | Mittel | 🟡 |
-| 15 | **Per-Model Throttling** — Rate Limits pro Modell | Niedrig | Mittel | 🟢 |
-| 16 | **Durable Workflows (Workflow-Engine)** — Für Pipelines >5 Minuten | Hoch | Hoch | 🔴 |
-| 17 | **Zweischichtiges Docker Compose** — Infra- und App-Lebenszyklen trennen | Niedrig | Mittel | 🟢 |
-| 18 | **Vollständiger Observability-Stack** — OTel + Grafana von Anfang an | Mittel | Hoch | 🟡 |
-### Agent-Patterns
-
-| # | Idee | Aufwand | Impact | Niveau |
-|---|------|---------|--------|--------|
-| 19 | **ReAct-Loop** — Strukturiertes Reason+Act für mehrstufige Aufgaben | Mittel | Hoch | 🟡 |
-| 20 | **Human-in-the-Loop Checkpoints** — Kontrolle bei risikoreichen Aktionen | Niedrig | Hoch | 🟡 |
-| 21 | **Tool-Registry mit Validierung** — Typsichere Tool-Definition | Mittel | Mittel | 🟡 |
-| 22 | **Agent-Memory (3 Ebenen)** — Working / Episodisch / Semantisch | Hoch | Mittel | 🔴 |
-### KI-Muster aus der Anwendung (Abschnitt 15)
-
-| # | Idee | Aufwand | Impact | Niveau |
-|---|------|---------|--------|--------|
-| 23 | **Hybrid-RAG mit RRF** — BM25 + Vektordatenbank, `score = 1/(k+rank)` | Mittel | Hoch | 🔴 |
-| 24 | **Adaptives Query-Boosting** — Brand 4.0× / Mixed 3.0× / Semantic 2.2× | Niedrig | Mittel | 🟡 |
-| 25 | **LLM Query Expansion** — 3–5 Varianten generieren + Cache/Budget-Tracking | Mittel | Mittel | 🟡 |
-| 26 | **Model Priority-Chain** — 4-stufiger Fallback: Request → Config → Katalog → ENV | Niedrig | Hoch | 🟡 |
-| 27 | **Token-Budget-Management** — Tiktoken Singleton + Context-Limits + System-Msg-Priorisierung | Niedrig | Hoch | 🟡 |
-| 28 | **Versioniertes System-Prompt-Management** — role_type × language_code Matrix, Pointer-Rollback | Mittel | Hoch | 🔴 |
-| 29 | **LLM-Modell-Fähigkeits-Flags** — supportsVision, supportsFunctionCalling, fallbackModelId | Niedrig | Mittel | 🟡 |
-### KI-Muster aus dem Backend-Service (Abschnitt 16)
-
-| # | Idee | Aufwand | Impact | Niveau |
-|---|------|---------|--------|--------|
-| 30 | **LLM Response Validator + Auto-Repair** — Häufige LLM-Fehler vor Schema-Validierung reparieren | Niedrig | Hoch | 🟡 |
-| 31 | **Validation Error Feedback Loop** — Schema-Validierung-Fehler strukturiert zurück an LLM | Niedrig | Hoch | 🟡 |
-| 32 | **Multi-Dimensional Confidence Scorer** — 5 Dimensionen: Struktur, Semantik, Domäne, Quelle, Konsistenz | Mittel | Hoch | 🔴 |
-| 33 | **Embedding-basierte Semantic Deduplication** — Cosine Similarity, höchster Confidence Score gewinnt | Mittel | Mittel | 🔴 |
-| 34 | **Circuit Breaker für LLM-Calls** — 3 Zustände: CLOSED/OPEN/HALF_OPEN mit Auto-Recovery | Mittel | Hoch | 🟡 |
-| 35 | **5-stufige Fallback-Hierarchie** — Kritische Felder niemals null (LLM → PreVal → Val → Error → Pattern) | Mittel | Hoch | 🔴 |
-| 36 | **Fail-Fast Policy für KI-Pipelines** — Keine stillen Fallbacks, klare Exceptions | Niedrig | Hoch | 🟢 |
-| 37 | **Prometheus LLM-Metriken** — Latenz/Timeout/Circuit-Breaker-State pro Modell | Niedrig | Mittel | 🟢 |
-| 38 | **Dokument-kontext-bewusste Klassifikation** — DocumentContext für Confidence-Boost | Mittel | Mittel | 🟡 |
-| 39 | **File-basiertes Chunk-Caching** — TTL-Cache per (file_hash, chunk_index) für LLM-Extraktion | Niedrig | Hoch | 🟢 |
-### Allgemeine Backend-Muster (Abschnitt 18)
-
-| # | Idee | Aufwand | Impact | Niveau |
-|---|------|---------|--------|--------|
-| B1 | **SSE + AbortController-Chain** — Stream bei Client-Disconnect sauber abbrechen | Niedrig | Mittel | 🟡 |
-| B2 | **Event-getriebener Hot-Reload** — DB → Config-Datei → Service-API → WebSocket | Mittel | Mittel | 🟡 |
-| B3 | **Pub/Sub Event Bus** — Separate Connections für Publisher/Subscriber | Niedrig | Mittel | 🟢 |
-| B4 | **AES-256-GCM für sensible Felder** — IV + AuthTag + Ciphertext in einem DB-Feld | Niedrig | Hoch | 🟢 |
-| B5 | **3-Tier-Cache + HTTP-Diagnose-Header** — X-Cache-Tier / X-Cache-Hit-Ratio im Response | Mittel | Mittel | 🟡 |
-| B6 | **Exponential Backoff + Graceful Fallback** — 1s/2s/4s → optionaler Fallback-Wert | Niedrig | Hoch | 🟢 |
-| B7 | **Persistenter Subprozess-Worker-Pool** — UUID-IPC, Startup-Kosten einmalig | Mittel | Hoch | 🟡 |
 
 ---
+
+## Anti-Patterns — Häufige Fehler und wie man sie vermeidet
+
+> Diese Sektion sammelt die häufigsten Implementierungsfehler aus allen Sektionen an einem Ort. Jeder Eintrag verweist auf das zugehörige Muster.
+
+### Kategorie 1: RAG & Retrieval
+
+**❌ Nur den Chunk-Text embedden ohne hypothetische Fragen**
+→ Fachliche Dokumente verwenden andere Begriffe als Nutzer-Queries. HyDE-Fragen (→ 2.4) überbrücken diese Lücke direkt — besonders bei juristischen, technischen oder medizinischen Inhalten ist der Recall-Gewinn erheblich.
+
+**❌ Den Reranker direkt auf allen Dokumenten laufen lassen**
+→ Cross-Encoder skaliert O(n) — bei 100.000 Chunks ist das nicht akzeptabel. Stufe 1 (Bi-Encoder Top-50) ist immer der notwendige Vorfilter (→ 16.8).
+
+**❌ `ef_construction` nach dem Index-Build erhöhen wollen**
+→ Das hat keine Wirkung — der Index muss neu gebaut werden. `ef` (Suchzeit-Parameter) kann jederzeit geändert werden. Beides zu verwechseln kostet Zeit (→ 16.9).
+
+**❌ Die Reduce-Phase mit zu vielen Map-Ergebnissen überlasten**
+→ Faustregel: max. 50 Chunks pro Reduce-Call. Bei größeren Dokumenten Reduce in Stufen ausführen — hierarchisches Map-Reduce (→ 2.1).
+
+---
+
+### Kategorie 2: Sicherheit & Datenschutz
+
+**❌ Nur eine Sicherheitsschicht implementieren**
+→ Systeme die externen Content verarbeiten (Dokumente, Nutzer-Uploads) brauchen zwingend beide Schichten: Injection-Defense für den Input (→ 4.1) und Guardrails für den Output (→ 4.1b). Eine Schicht alleine reicht nicht.
+
+**❌ DSGVO als rein organisatorisches Thema behandeln**
+→ PII-Redaktion (→ 4.2) ist eine konkrete, implementierbare technische Maßnahme — kein vollständiger DSGVO-Compliance-Ersatz, aber ein unverzichtbarer Baustein für Systeme die mit personenbezogenen Dokumenten arbeiten.
+
+**❌ Tenant-Isolierung nur auf Anwendungsebene implementieren**
+→ `WHERE tenant_id = ?` reicht nicht. Semantic-Search-Queries ohne Vektordatenbank-Filter können Chunks anderer Tenants zurückliefern — ein stilles Datenleck das in Logs nicht sichtbar ist (→ 19.1).
+
+---
+
+### Kategorie 3: LLM-Integration & Infrastruktur
+
+**❌ Provider-SDKs direkt in Business-Logik importieren**
+→ `from anthropic import Anthropic` überall verstreut bedeutet: Bei einem Provider-Wechsel oder API-Key-Rotation müssen Dutzende Stellen angefasst werden. Ein zentraler Gateway-Endpunkt kostet einen Tag und spart Wochen (→ 7.2).
+
+**❌ LLM-Calls ohne Circuit Breaker in Request-Handler einbauen**
+→ Bei einem API-Ausfall hängen alle laufenden Requests bis zum Timeout — das System wird unresponsiv. Circuit Breaker und Exponential Backoff gehören in jede LLM-Integration die in Produktion geht (→ 17.5).
+
+**❌ Stille Fallbacks verwenden: `except: return default_value`**
+→ In Entwicklung sieht alles gut aus, in Produktion liefert das System leise falsche Ergebnisse ohne jeden Hinweis. Fail-Fast macht Fehler sofort sichtbar — das ist eine Stärke, kein Mangel (→ 17.7).
+
+**❌ Lange Pipelines ohne Durable-Execution ausführen**
+→ Bei Server-Restart, Netzwerkfehler oder Timeout geht der gesamte Fortschritt verloren. Workflow-Engines wie Temporal speichern jeden Schritt persistent — ein Crash-Recovery ohne Datenverlust (→ 7.1).
+
+---
+
+### Kategorie 4: Structured Generation & Validierung
+
+**❌ Manuell `json.loads(response.text)` verwenden**
+→ In Produktion bricht das regelmäßig — durch Markdown-Wrapper, fehlende Felder oder falsche Typen. `instructor` oder Tool Use sind die robuste Alternative (→ 14.2).
+
+**❌ Pydantic direkt auf rohen LLM-Output anwenden ohne Vorverarbeitung**
+→ LLMs liefern konsistent bestimmte Fehler (fehlende Felder, falsche Listenformate, leere Strings statt null), die ein Validator zuverlässig repariert bevor die Schema-Validierung sie als harten Fehler behandelt (→ 17.1).
+
+---
+
+### Kategorie 5: Concurrency & Performance
+
+**❌ `asyncio.gather()` direkt auf einer großen Item-Liste verwenden**
+→ Bei 500+ LLM-Calls führt das sofort zu Rate-Limit-Errors und 429-Responses. Der Sliding-Window-Executor hält immer exakt N Tasks in-flight — ohne Batch-Pausen (→ 5.1).
+
+**❌ Den Cache ohne TTL betreiben oder bei Prompt-Änderungen nicht invalidieren**
+→ Das führt zu alten Antworten mit neuem Prompt-Verhalten. Immer die Prompt-Version in den Cache-Key einbauen (→ 13.4).
+
+---
+
+### Kategorie 6: Evals & Observability
+
+**❌ Prompts ohne Baseline-Vergleich in Produktion deployen**
+→ Was sich für den Entwickler besser liest, kann auf Edge Cases schlechter performen. Bereits 10–15 Golden Cases decken die häufigsten Regressionen ab und kosten weniger als 1 Stunde Aufwand (→ 12.2).
+
+**❌ Observability als "nice to have" behandeln**
+→ LLM-Systeme ohne strukturierte Logs und Traces sind kaum debuggbar — Latenzprobleme, Rate-Limit-Hits und Halluzinationen sind ohne Metrics unsichtbar. OTel von Tag 1 an einbauen kostet einen halben Tag; nachträglich sind es Wochen (→ 9.1).
+
+---
+
+### Kategorie 7: Agent-Design
+
+**❌ Einen Agent bauen, weil es modern klingt**
+→ Obwohl ein deterministischer Workflow mit 4–5 Schritten ausreichend wäre. Agents sind schwerer zu testen, debuggen und auditieren. Die Entscheidungsregel in Sektion 15 ist ernst gemeint: erst ab ≥ 5 variablen Verzweigungen lohnt sich ein Agent (→ 15.1).
+
 
 ## Hinweise zur Diagramm-Darstellung
 
