@@ -1,6 +1,6 @@
 # KI-Muster-Bibliothek — Best Practices für KI-intensive Backend-Systeme
 
-Ein opinionierter Leitfaden für **Software-Ingenieure und Software-Architekten**, die produktionsreife KI-Backends bauen. Kein Überblick, keine Theorie — konkrete Muster mit vollständigem Code, klaren Trade-offs und Entscheidungsregeln für den Alltag.
+Ein praktischer Leitfaden für **Software-Ingenieure und Software-Architekten**, die produktionsreife KI-Backends bauen. Kein Überblick, keine Theorie — konkrete Muster mit vollständigem Code, klaren Trade-offs und Entscheidungsregeln für den Alltag.
 
 Jedes technische Muster folgt dem Schema: **Problem → Lösung → vollständiger Python-Code → Wann einsetzen / Wann nicht**. Business-Muster (Sektion 1) folgen dem Schema: **Use-Case → Governance-Profil → Implementierungs-Verweis**.
 
@@ -59,6 +59,7 @@ Die Codebeispiele setzen folgende Technologien voraus. Muster sind übertragbar,
 
 | Version | Datum | Änderungen |
 |---|---|---|
+| 1.3 | 2026-04 | v4: Produkt-unabhängige Konzept-Code-Schicht für 7.1, 6.1, 7.2, 3.2, 9.1 (Konzept + Produkt-Mapping-Tabelle); Migrations-Leitfaden ergänzt; Lösung-Abschnitte mit Warum-Erklärungen erweitert; Ghost-Header bereinigt; veraltete 20.3-Referenz entfernt |
 | 1.2 | 2026-04 | v3: Sektionsnummern bereinigt (18=Kosten, 19=Multi-Tenancy); vollständige Master-Referenztabelle (82 Muster); Anti-Patterns-Sektion (18 Einträge in 7 Kategorien); Schnelldiagnose-Tabelle erweitert (5 neue Zeilen); fehlende ## Sektions-Header ergänzt; Business-Muster-Intro präzisiert |
 | 1.1 | 2026-04 | Zielgruppen-Sektion, Tech-Stack, Quick-Start, Systemarchitektur-Diagramm, Schwierigkeitsgrade, Anti-Pattern-Callouts, rollenbasierte Navigation; Sektionen 18 (Kosten-Management), 19 (Multi-Tenancy) ergänzt; frühere Sektion 18 (Allgemeine Backend-Muster) entfernt; PII-Redaktion (4.2) ergänzt |
 | 1.0 | 2026-01 | Erstveröffentlichung — 17 Sektionen, 14 Business-Muster, 39+ technische Muster |
@@ -89,6 +90,250 @@ Nicht alle Muster sind gleich wichtig. Diese acht sollten **von Anfang an** impl
 > **Reihenfolge:** 1–3 vor dem ersten Produktions-Deployment · 4–6 spätestens nach Sprint 1 · 7–8 parallel zum Feature-Aufbau
 
 ---
+---
+
+## Migrations-Leitfaden — Vom einfachen LLM-Call zum produktionsreifen Stack
+
+> Für Teams die bereits einen LLM-basierten Service haben und schrittweise stabilisieren wollen — ohne einen Big-Bang-Rewrite.
+
+**Ausgangspunkt — typischer Tag-1-Code:**
+
+```python
+import json
+from anthropic import Anthropic
+
+client = Anthropic()
+
+def extract_metadata(text: str) -> dict:
+    response = client.messages.create(
+        model="claude-sonnet-4-6",
+        max_tokens=1000,
+        messages=[{"role": "user", "content": f"Extrahiere als JSON: {text}"}]
+    )
+    return json.loads(response.content[0].text)  # Bricht regelmäßig in Produktion
+```
+
+**Was hier auf dich wartet:** kein Schema-Schutz (JSON-Parsing bricht), kein Caching (jeder Call kostet), kein Monitoring (Fehler sind unsichtbar), kein Resilenz (API-Ausfall = Service-Ausfall), Vendor-Lock-in (from anthropic überall).
+
+---
+
+### Schritt 1 — Structured Generation *(~2 Stunden)*
+
+**Problem:** `json.loads()` bricht auf Markdown-Wrapper, fehlende Felder, falsche Typen.  
+**Fix:** `instructor` + Pydantic-Schema → typsicherer Output, automatischer Retry.
+
+```python
+import instructor
+from anthropic import Anthropic
+from pydantic import BaseModel
+
+class Metadata(BaseModel):
+    title: str
+    category: str
+    date: str | None = None
+
+client = instructor.from_anthropic(Anthropic())
+
+def extract_metadata(text: str) -> Metadata:
+    return client.messages.create(
+        model="claude-sonnet-4-6",
+        max_tokens=1000,
+        response_model=Metadata,          # Schema-Validierung + Retry automatisch
+        messages=[{"role": "user", "content": text}],
+    )
+```
+
+→ Muster: [14.2 Schema-First Generation](#142-schema-first-generation-pattern-instructor)
+
+---
+
+### Schritt 2 — LLM Gateway *(~1 Tag)*
+
+**Problem:** `from anthropic import Anthropic` in 20 Dateien = Provider-Wechsel kostet Wochen.  
+**Fix:** Zentraler Gateway-Endpunkt. Alle Services sprechen nur den Gateway an.
+
+```python
+# gateway/client.py — einzige Stelle mit Provider-Import
+import instructor
+from anthropic import Anthropic
+from pydantic import BaseModel
+from functools import lru_cache
+
+@lru_cache(maxsize=1)
+def get_llm_client():
+    return instructor.from_anthropic(Anthropic())
+
+# Alle anderen Module importieren NUR das:
+# from gateway.client import get_llm_client
+```
+
+→ Muster: [7.2 LLM Gateway Pattern](#72-llm-gateway-pattern)
+
+---
+
+### Schritt 3 — Exaktes Caching *(~2 Stunden)*
+
+**Problem:** Während der Entwicklung werden dieselben Dokumente 50× verarbeitet — volle Kosten jedes Mal.  
+**Fix:** SHA256-Hash des (Prompt + Input) als Redis-Cache-Key.
+
+```python
+import hashlib, json
+import redis.asyncio as redis
+
+cache = redis.from_url("redis://localhost:6379")
+
+async def cached_extract(text: str, prompt: str) -> dict:
+    key = hashlib.sha256(f"{prompt}:{text}".encode()).hexdigest()
+    if hit := await cache.get(key):
+        return json.loads(hit)
+    result = extract_metadata(text)
+    await cache.setex(key, 3600, result.model_dump_json())
+    return result.model_dump()
+```
+
+→ Muster: [13.1 Exact Hash Cache Pattern](#131-exact-hash-cache-pattern)
+
+---
+
+### Schritt 4 — Prompt-Injection-Defense *(~4 Stunden, wenn externe Daten verarbeitet)*
+
+**Problem:** Dokumente oder Nutzer-Input können `Ignoriere alle vorherigen Anweisungen` enthalten.  
+**Fix:** Mehrschichtige Sanitisierung vor dem LLM-Call. Nur relevant wenn externes Material verarbeitet wird.
+
+```python
+import re, unicodedata
+
+def sanitize_external_input(text: str) -> str:
+    # Unsichtbare Unicode-Steuerzeichen entfernen
+    text = "".join(c for c in text if unicodedata.category(c) not in ("Cf", "Cc"))
+    # Bekannte Injection-Muster
+    for pattern in [r"ignore (all )?previous", r"system prompt", r"\[INST\]"]:
+        text = re.sub(pattern, "[REMOVED]", text, flags=re.IGNORECASE)
+    return f"<external_data>{text}</external_data>"
+
+# Verwendung:
+safe_text = sanitize_external_input(user_document)
+result = extract_metadata(safe_text)
+```
+
+→ Muster: [4.1 Prompt Injection Defense Pattern](#41-prompt-injection-defense-pattern)
+
+---
+
+### Schritt 5 — Observability *(~1 Tag)*
+
+**Problem:** LLM-Fehler, Latenz-Spitzen und Kostenexplosionen sind ohne Monitoring unsichtbar.  
+**Fix:** structlog für strukturierte Logs, prometheus_client für Metriken.
+
+```python
+import structlog, time
+from prometheus_client import Counter, Histogram
+
+logger = structlog.get_logger()
+llm_calls = Counter("llm_calls_total", "LLM calls", ["status"])
+llm_latency = Histogram("llm_latency_seconds", "LLM latency", buckets=[1,3,5,10,30,60])
+
+async def extract_with_metrics(text: str) -> dict:
+    start = time.time()
+    try:
+        result = await cached_extract(text, PROMPT)
+        llm_calls.labels(status="success").inc()
+        logger.info("extract.ok", duration=time.time()-start, chars=len(text))
+        return result
+    except Exception as e:
+        llm_calls.labels(status="error").inc()
+        logger.error("extract.failed", error=str(e), duration=time.time()-start)
+        raise
+    finally:
+        llm_latency.observe(time.time() - start)
+```
+
+→ Muster: [9.1 Full Observability Stack Pattern](#91-full-observability-stack-pattern)
+
+---
+
+### Schritt 6 — Concurrency-Kontrolle *(~2 Stunden, wenn Batches verarbeitet werden)*
+
+**Problem:** `asyncio.gather()` auf 500 Dokumenten = sofortige Rate-Limit-Errors (429).  
+**Fix:** Sliding Window Executor — hält exakt N Tasks gleichzeitig in-flight.
+
+```python
+from sliding_window import sliding_window  # Implementierung → 5.1
+
+async def process_batch(documents: list[str]) -> list[dict]:
+    results, errors = await sliding_window(
+        items=documents,
+        fn=extract_with_metrics,
+        concurrency=10,           # Immer genau 10 gleichzeitig
+    )
+    return results
+```
+
+→ Muster: [5.1 Sliding Window Executor Pattern](#51-sliding-window-executor-pattern)
+
+---
+
+### Schritt 7 — Resilenz: Circuit Breaker *(~4 Stunden)*
+
+**Problem:** Bei Anthropic-Ausfall hängen alle Requests bis zum Timeout → System unresponsiv.  
+**Fix:** Circuit Breaker + Exponential Backoff. Nach 5 Fehlern: Fail-Fast für 60 Sekunden.
+
+```python
+from circuit_breaker import CircuitBreaker  # Implementierung → 17.5
+
+cb = CircuitBreaker(failure_threshold=5, recovery_timeout=60.0)
+
+async def resilient_extract(text: str) -> dict:
+    for attempt in range(3):
+        try:
+            return await cb.call_async(extract_with_metrics, text)
+        except CircuitBreakerOpenError:
+            raise  # Offen → sofort fehlschlagen, kein Retry
+        except Exception:
+            if attempt < 2:
+                await asyncio.sleep(2 ** attempt)  # 1s, 2s, 4s
+    raise RuntimeError("Max retries exceeded")
+```
+
+→ Muster: [17.5 Circuit Breaker Pattern](#175-circuit-breaker-pattern)
+
+---
+
+### Schritt 8 — Durable Execution *(2–3 Tage, nur wenn Pipeline > 5 Minuten)*
+
+**Problem:** 30-minütige Pipeline, Server-Restart in Minute 25 → alles verloren.  
+**Nur relevant wenn:** Pipeline-Dauer > 5 Minuten, oder Pipelines > 50 Dokumente pro Batch.
+
+```python
+# Konzept: jeder Schritt wird als Checkpoint gespeichert
+# Produkt-Optionen: Temporal, Prefect, Celery — siehe 7.1 Produkt-Mapping
+
+class DocumentPipeline(DurableWorkflow):
+    async def run(self, doc_id: str) -> Result:
+        text  = await self.execute_activity(extract_text,     doc_id, max_retries=3)
+        meta  = await self.execute_activity(extract_metadata, text,   max_retries=3)
+        index = await self.execute_activity(index_document,   meta,   max_retries=5)
+        return Result(metadata=meta, indexed=True)
+```
+
+→ Muster: [7.1 Durable Workflow Pattern](#71-durable-workflow-pattern)
+
+---
+
+**Zusammenfassung: Migrations-Reihenfolge**
+
+| Schritt | Aufwand | Wann zwingend |
+|---|---|---|
+| 1 — Structured Generation | 2h | Sofort — schützt vor JSON-Parsing-Fehlern |
+| 2 — LLM Gateway | 1 Tag | Sofort — verhindert Provider-Lock-in |
+| 3 — Exaktes Caching | 2h | Sprint 1 — spart 40–70 % Entwicklungskosten |
+| 4 — Prompt-Injection-Defense | 4h | Vor Produktion wenn externe Daten verarbeitet werden |
+| 5 — Observability | 1 Tag | Vor Produktion — ohne ist Debugging unmöglich |
+| 6 — Concurrency-Kontrolle | 2h | Vor Produktion wenn Batches > 50 Items |
+| 7 — Circuit Breaker | 4h | Vor Produktion — verhindert Cascading Failures |
+| 8 — Durable Execution | 2–3 Tage | Nur wenn Pipeline > 5 Minuten |
+
+
 
 ## Systemarchitektur-Überblick
 
@@ -198,6 +443,9 @@ graph TB
 ## Inhaltsverzeichnis
 
 > **Schwierigkeitsgrade:** 🟢 Einstieg — direkt anwendbar · 🟡 Fortgeschritten — etwas Vorkenntnisse nötig · 🔴 Expert — tiefes Systemverständnis erforderlich · ⚠️ Pflicht-Muster — vor Produktions-Deployment
+
+**Orientierung & Einstieg:**
+- [Migrations-Leitfaden](#migrations-leitfaden--vom-einfachen-llm-call-zum-produktionsreifen-stack)
 
 **Einstiegsschicht — Use-Case-Orientierung:**
 1. [Business-Muster](#1-business-muster) — Welche KI-Fähigkeit für welchen Use-Case?
@@ -1042,6 +1290,8 @@ Ein LLM-Kontextfenster ist zu klein für große Dokumente. Alle relevanten Infor
 #### Lösung
 
 
+**Warum Map-Reduce?** Ein einzelner LLM-Call für ein großes Dokument scheitert an Kontextlimits — und selbst wenn er passt, leidet die Extraktionsqualität weil das Modell über zu viel Inhalt nachdenkt. Map-Reduce löst beide Probleme: Die Map-Phase parallelisiert die Verarbeitung auf kleine, fokussierte Chunks; die Reduce-Phase konsolidiert mit vollständigem Überblick — eine Aufgabe die ein einzelnes Modell gut löst.
+
 Zweiphasiges Map-Reduce-Verfahren:
 
 
@@ -1210,6 +1460,8 @@ In einer mehrstufigen Filter-Pipeline ist es teurer, relevante Treffer zu verpas
 
 #### Lösung
 
+
+**Warum Recall-First statt direkt hoher Precision?** In einer zweistufigen Pipeline ist Stufe 1 der Filter — was hier verworfen wird, kommt nie zur teuren Präzisionsanalyse. Ein Recall von 95%+ in Stufe 1 bedeutet: maximal 5% relevante Dokumente werden übersehen. Precision kann in Stufe 2 nachgeholt werden; verlorener Recall nicht. Die Asymmetrie ist bewusst — Falsch-Positive kosten Rechenzeit, Falsch-Negative kosten Qualität.
 
 Die erste Screening-Stufe wird explizit auf maximalen Recall optimiert.
 
@@ -1390,6 +1642,8 @@ Freie LLM-Kategorisierung führt zu inkonsistenten, schwer filterbaren Labels.
 
 #### Lösung
 
+
+**Warum geschlossene statt offener Klassifikation?** Offene Klassifikation ("Welches Thema?") produziert Freitext-Varianten: "Naturschutz", "Umweltschutz", "ökologische Fragen" — drei Labels für dasselbe Konzept, kein Index kann darauf filtern. Eine geschlossene Taxonomie mit enumerierten IDs macht das Ergebnis direkt filterbar, aggregierbar und testbar. Pflichtbestandteil: die Klasse `OTHER` für alle Fälle außerhalb der Taxonomie.
 
 Vordefinierte Taxonomie mit ID, Name und Beschreibung als geschlossene Auswahl.
 
@@ -1584,6 +1838,8 @@ Standard-RAG speichert nur Text + Embedding. Relevanz-Ranking und Filterung sind
 #### Lösung
 
 
+**Warum Metadaten statt reiner Vektorähnlichkeit?** Vektorähnlichkeit allein kann nicht filtern: "Zeig nur Artenschutz-Chunks aus Dokument X" ist mit reiner Semantik nicht lösbar — "Artenschutz" in Dokument X hat denselben Embedding-Vektor wie in Dokument Y. Strukturierte Metadaten (Dokumenttyp, Thema, Datum, Dokument-ID) ermöglichen kombinierte Filter-Suchen: Ähnlichkeit UND Metadaten-Constraint. Das reduziert Retrieval-Rauschen drastisch ohne den Recall zu verschlechtern.
+
 Jeder Chunk trägt reichhaltige strukturierte Metadaten.
 
 
@@ -1702,60 +1958,87 @@ Große Objekte in Object Storage (S3/MinIO) hochladen, nur UUID weitergeben.
 sequenceDiagram
     participant C as Client
     participant S as Service
-    participant T as Temporal
+    participant P as Pipeline / Queue
     participant W as Worker
-    participant S3 as MinIO / S3
+    participant OS as Object Store
 
     C->>S: POST /upload (Dokument, 50 MB)
-    S->>S3: put_object(file)
-    S3-->>S: OK
-    S-->>C: {"document_id": "uuid-xxx"}
+    S->>OS: put(key, bytes)
+    OS-->>S: OK
+    S-->>C: {"doc_key": "uuid/file.pdf"}
 
-    C->>T: workflow.start(doc_id="uuid-xxx")
-    Note over T: Payload: nur 36 Bytes UUID!
+    C->>P: process(doc_key="uuid/file.pdf")
+    Note over P: Payload: nur 36 Bytes UUID
 
-    T->>W: execute_activity(doc_id="uuid-xxx")
-    W->>S3: get_object("uuid-xxx")
-    S3-->>W: Dokument (50 MB)
+    P->>W: execute(doc_key="uuid/file.pdf")
+    W->>OS: get("uuid/file.pdf")
+    OS-->>W: Dokument (50 MB)
     W->>W: Verarbeitung...
-    W-->>T: Ergebnis
+    W-->>P: Ergebnis
 ```
 
-*Diagramm: Pass-by-Reference — Client lädt 50 MB Dokument hoch → Service speichert es in MinIO/S3 → gibt UUID zurück. Alle weiteren Schritte (Workflow-Engine, Worker) übergeben nur die UUID (36 Bytes). Der Worker lädt das Dokument selbst direkt aus dem Object Storage.*
+*Diagramm: Pass-by-Reference — Client lädt 50 MB Dokument hoch → Service speichert es im Object Store → gibt nur den Schlüssel (UUID) zurück. Alle weiteren Pipeline-Schritte übergeben ausschließlich den Schlüssel (36 Bytes). Der Worker holt das Dokument selbst direkt aus dem Object Store.*
 
 
 #### Implementierungshinweise
 
 
 ```python
-# Upload-Schritt (vor Workflow-Start)
-async def upload_document(file: bytes, filename: str) -> str:
-    doc_id = str(uuid4())
-    await s3.put_object(
-        Bucket="documents",
-        Key=f"{doc_id}/{filename}",
-        Body=file,
-    )
-    return doc_id  # Nur diese UUID geht in den Workflow
+# Konzept-Code — produkt-unabhängig
+# Kernidee: Großes Objekt einmalig im Store ablegen, nur den Schlüssel weitergeben.
 
-# Workflow — kein großes Objekt im Payload
-@workflow.defn
-class ProcessingWorkflow:
-    @workflow.run
-    async def run(self, doc_id: str) -> str:  # ← Nur UUID
-        # Activity lädt selbst herunter
-        result = await workflow.execute_activity(
-            extract_text,
-            doc_id,           # ← Nur UUID übergeben
-            schedule_to_close_timeout=timedelta(hours=1),
-        )
-        return result
+class ObjectStore(Protocol):
+    async def put(self, key: str, data: bytes) -> None: ...
+    async def get(self, key: str) -> bytes: ...
 
-# Activity — lädt Dokument selbst
-@activity.defn
-async def extract_text(doc_id: str) -> str:
-    file = await s3.get_object(Bucket="documents", Key=f"{doc_id}/original.pdf")
-    return await docling.convert(file["Body"])
+async def upload_for_pipeline(store: ObjectStore, file: bytes, name: str) -> str:
+    """Gibt nur den Schlüssel zurück — nie das Objekt selbst."""
+    key = f"{uuid4()}/{name}"
+    await store.put(key, file)
+    return key  # ← Dieser key wandert durch die gesamte Pipeline
+
+async def pipeline_step(store: ObjectStore, doc_key: str) -> str:
+    """
+    Empfängt nur den Schlüssel (Bytes: 36).
+    Holt das Objekt selbst aus dem Store — kein Payload-Limit-Problem.
+    """
+    raw_bytes = await store.get(doc_key)
+    return process(raw_bytes)
+```
+
+**Produkt-Mapping — Object Storage:**
+
+| Eigenschaft | MinIO (Self-hosted) | AWS S3 | Google Cloud Storage | Azure Blob | Lokales Filesystem |
+|---|---|---|---|---|---|
+| API-Kompatibilität | S3-kompatibel (boto3) | S3 nativ | eigene SDK | eigene SDK | `aiofiles` |
+| Lokale Entwicklung | ✅ Docker-Container | ❌ AWS-Account nötig | ❌ GCP-Account nötig | ❌ Azure-Account nötig | ✅ direkt |
+| Produktions-Eignung | ✅ On-Premise / Cloud | ✅ | ✅ | ✅ | ❌ kein Clustering |
+| Verschlüsselung at rest | Konfigurierbar | Standard (SSE-S3) | Standard | Standard | Manuell |
+
+> **Empfehlung:** MinIO für lokale Entwicklung + Self-hosted, S3/GCS/Azure für Cloud-Deployments. Das Muster ist identisch — nur die Initialisierung des `store`-Objekts ändert sich.
+
+```python
+# Konkrete Implementierung mit boto3 (S3 / MinIO)
+import aioboto3
+
+class S3ObjectStore:
+    def __init__(self, bucket: str, endpoint_url: str | None = None):
+        self.bucket = bucket
+        self.session = aioboto3.Session()
+        self.endpoint_url = endpoint_url  # None = AWS S3; URL = MinIO
+
+    async def put(self, key: str, data: bytes) -> None:
+        async with self.session.client("s3", endpoint_url=self.endpoint_url) as s3:
+            await s3.put_object(Bucket=self.bucket, Key=key, Body=data)
+
+    async def get(self, key: str) -> bytes:
+        async with self.session.client("s3", endpoint_url=self.endpoint_url) as s3:
+            resp = await s3.get_object(Bucket=self.bucket, Key=key)
+            return await resp["Body"].read()
+
+# MinIO (lokal):  S3ObjectStore("documents", endpoint_url="http://localhost:9000")
+# AWS S3:         S3ObjectStore("documents")
+# Filesystem:     FileSystemObjectStore("/tmp/documents")  — eigene Implementierung
 ```
 
 
@@ -1848,6 +2131,8 @@ Externes Nutzer-/Dokumenten-Content kann Anweisungen enthalten, die das LLM verw
 
 #### Lösung
 
+
+**Warum mehrschichtig?** Jede Einzelschicht hat blinde Flecken: Nur Unicode-Normalisierung übersieht neue Injection-Formulierungen; nur Keyword-Blocking übersieht verschachtelte Angriffe; nur Tagging übersieht Template-Injection. Mehrere orthogonale Schichten multiplizieren die Angriffshürde — ein Angreifer muss alle Schichten gleichzeitig überwinden. Verteidigungstiefe ist kein Luxus, sondern die einzige Strategie gegen eine stetig wachsende Angriffsfläche.
 
 Mehrschichtiges Verteidigungssystem.
 
@@ -2172,6 +2457,8 @@ def simple_redact(text: str) -> str:
 #### Lösung
 
 
+**Warum nicht einfach `asyncio.Semaphore`?** Ein Semaphore schützt, aber verursacht Batch-Pausen: Batch 1 wartet bis alle 10 Tasks fertig sind, bevor Batch 2 startet. Das produziert CPU-Leerlauf zwischen Batches. Der Sliding-Window-Executor füllt sofort nach — sobald ein Task endet, startet der nächste. Die API-Auslastung bleibt konstant auf N, nicht wellenförmig.
+
 Echter Sliding-Window-Executor — hält immer genau N Tasks in-flight.
 
 
@@ -2405,6 +2692,8 @@ Verschiedene LLM-Modelle/Endpunkte haben unterschiedliche Rate Limits. Globale D
 #### Lösung
 
 
+**Warum pro Modell statt global?** Verschiedene Modelle haben verschiedene Rate Limits: GPT-4o erlaubt weniger Requests pro Minute als Haiku, Enterprise-Tier mehr als Free-Tier. Ein globaler Limiter auf dem restriktivsten Modell drosselt alle anderen unnötig. Per-Modell-Throttling maximiert den Durchsatz: Haiku läuft auf 50 req/min während GPT-4o bei 10 bleibt — ohne dass sie sich gegenseitig blockieren.
+
 Separate Rate-Limiter-Instanz pro Modell oder Task-Typ.
 
 
@@ -2514,6 +2803,8 @@ Fehler beim Vektordatenbank-Indexieren sollen den Haupt-Workflow nicht abbrechen
 #### Lösung
 
 
+**Warum Isolation statt sequenzieller Verarbeitung?** Indexierung schlägt aus anderen Gründen fehl als Extraktion: Qdrant-Timeout, Embedding-API-Limit, Speichermangel. Wenn beides im selben Workflow läuft, bringt ein Indexierungsfehler die gesamte Extraktion zu Fall — obwohl das Kernresultat längst fertig war. Isolation gibt jedem Teil eine eigene Retry-Policy: Extraktion mit 3 Versuchen, Indexierung mit 5 Versuchen und 1h DLQ-Delay.
+
 Indexierung als separater, isolierter Workflow-Schritt (Workflow-Engine).
 
 
@@ -2531,47 +2822,48 @@ graph LR
     DLQ --> RETRY[Retry\nnach 1h]
 ```
 
-*Diagramm: Failure-isolierte Indexierung — Dokumente werden über eine Queue an Workers verteilt. Fehler landen in einer Dead Letter Queue und werden nach 1 Stunde erneut versucht; erfolgreiche Indexierungen gehen in den Index. Fehler im Indexierungspfad blockieren den Haupt-Workflow nicht.*
+*Diagramm: Failure-isolierte Indexierung — Dokumente werden über einen isolierten Task-Mechanismus (Queue, Child-Workflow, Background-Task) an Workers verteilt. Fehler landen in einer Dead Letter Queue und werden nach 1 Stunde erneut versucht; erfolgreiche Indexierungen gehen in den Index. Fehler im Indexierungspfad blockieren den Hauptprozess nicht.*
 
 
 #### Implementierungshinweise
 
 
 ```python
-@workflow.defn
-class DocumentProcessingWorkflow:
-    @workflow.run
-    async def run(self, doc_id: str) -> ProcessingResult:
-        # Kritischer Pfad — muss erfolgreich sein
-        text = await workflow.execute_activity(extract_text, doc_id)
-        metadata = await workflow.execute_activity(extract_metadata, doc_id)
+# Konzept-Code — produkt-unabhängig
+# Kernidee: Indexierung läuft in einem isolierten Prozess/Task.
+# Fehler dort erreichen den Haupt-Workflow nicht.
 
-        # Indexierung: Separater Workflow, nicht-blockierend
-        # Fehler hier brechen den Haupt-Workflow NICHT ab
-        await workflow.start_child_workflow(
-            IndexingWorkflow.run,
-            args=[doc_id, text],
-            id=f"indexing-{doc_id}",
-            parent_close_policy=ParentClosePolicy.ABANDON,  # Läuft weiter bei Parent-Ende
-        )
+async def process_document(doc_id: str, task_runner) -> ProcessingResult:
+    # Kritischer Pfad — Fehler hier brechen die Pipeline ab (erwünscht)
+    text     = await extract_text(doc_id)
+    metadata = await extract_metadata(doc_id)
 
-        # Weiter mit Kern-Ergebnis — unabhängig vom Indexierungsstatus
-        return ProcessingResult(metadata=metadata, status="processed")
+    # Indexierung: Isoliert delegieren — "fire and forget with retry"
+    # Fehler → Dead Letter Queue → automatischer Retry nach Delay
+    # Haupt-Pipeline läuft weiter, unabhängig vom Indexierungsstatus
+    await task_runner.spawn_isolated(
+        index_document, doc_id, text,
+        max_retries=5,
+        retry_delay_seconds=3600,   # 1h DLQ-Delay
+    )
 
-@workflow.defn
-class IndexingWorkflow:
-    @workflow.run
-    async def run(self, doc_id: str, text: str) -> None:
-        chunks = chunk_text(text)
-        questions = await workflow.execute_activity(
-            generate_questions, chunks,
-            retry_policy=RetryPolicy(max_attempts=5),  # Aggressiv retrying
-        )
-        await workflow.execute_activity(
-            upsert_to_qdrant, doc_id, chunks, questions,
-            retry_policy=RetryPolicy(max_attempts=5),
-        )
+    return ProcessingResult(metadata=metadata, status="processed")
+
+async def index_document(doc_id: str, text: str) -> None:
+    # Läuft isoliert — darf fehlschlagen ohne den Haupt-Prozess zu stören
+    chunks    = chunk_text(text)
+    questions = await generate_questions(chunks)
+    await upsert_to_qdrant(doc_id, chunks, questions)
 ```
+
+**Produkt-Mapping — Isolierter Hintergrund-Task:**
+
+| Konzept | Temporal | Celery | asyncio (einfach) | Sidekiq (Ruby) |
+|---|---|---|---|---|
+| Isolierter Task | `start_child_workflow()` mit `ABANDON` | `task.apply_async()` | `asyncio.create_task()` + Error-Handler | `.perform_async` |
+| Dead Letter Queue | Automatisch via Retry-Policy | `task_acks_on_failure_or_timeout=False` + DLQ-Queue | Manuell implementieren | ActiveJob DLQ |
+| Retry-Delay | `RetryPolicy(initial_interval=...)` | `countdown=3600` | `asyncio.sleep()` in Handler | `retry_in: 1.hour` |
+| Sichtbarkeit | Temporal UI | Flower / Admin | Logs | Web UI |
 
 
 #### Konsequenzen
@@ -2702,27 +2994,78 @@ Workflow-Engine als Workflow-Engine für durable Execution.
 ```mermaid
 sequenceDiagram
     participant C as Client
-    participant T as Temporal
+    participant WE as Workflow Engine
     participant W as Worker
 
-    C->>T: Workflow starten
-    T->>W: Activity 1 (LLM)
-    W-->>T: Ergebnis
-    Note over T: Checkpoint gespeichert
-    T->>W: Activity 2 (Embedding)
-    W--xT: Crash!
-    Note over T: Replay ab Checkpoint
-    T->>W: Activity 2 (Retry)
-    W-->>T: OK
+    C->>WE: Workflow starten
+    WE->>W: Activity 1 (LLM)
+    W-->>WE: Ergebnis
+    Note over WE: Checkpoint gespeichert
+    WE->>W: Activity 2 (Embedding)
+    W--xWE: Crash!
+    Note over WE: Replay ab Checkpoint
+    WE->>W: Activity 2 (Retry)
+    W-->>WE: OK
 ```
 
-*Diagramm: Durable Workflow — Client startet Workflow in der Workflow-Engine; Worker führt Activities aus (LLM, Embedding). Nach jedem Schritt wird ein Checkpoint gespeichert. Bei einem Worker-Crash wird der Workflow ab dem letzten Checkpoint fortgesetzt, nicht von vorne.*
+*Diagramm: Durable Workflow — Client startet Workflow in der Workflow-Engine; Worker führt Activities aus (LLM, Embedding). Nach jedem Schritt wird ein Checkpoint gespeichert. Bei einem Worker-Crash wird der Workflow ab dem letzten Checkpoint fortgesetzt, nicht von vorne. Das Muster gilt produkt-unabhängig: Temporal, Prefect, AWS Step Functions und andere implementieren dieselbe Semantik.*
 
 
 #### Implementierungshinweise
 
 
 ```python
+# Konzept-Code — produkt-unabhängig
+# Zeigt das Muster, nicht die Bibliothek
+
+class DurableWorkflow:
+    """
+    Kernidee: Jeder Schritt wird nach Abschluss persistent gespeichert
+    (Checkpoint). Bei Crash → Replay ab letztem Checkpoint, nicht von vorne.
+    Activities sind die wiederholbaren Einheiten; der Workflow koordiniert.
+    """
+
+    async def run(self, doc_id: str) -> AnalysisResult:
+        # Schritte werden sequenziell oder parallel ausgeführt.
+        # Jeder Schritt: automatisches Retry + Timeout konfigurierbar.
+        # Bei Server-Neustart: Fortsetzen ab dem letzten erfolgreichen Schritt.
+
+        extraction = await self.execute_activity(
+            extract_content, doc_id,
+            max_retries=3, timeout_hours=2,
+        )
+        plausibility = await self.execute_activity(
+            run_plausibility_check, extraction,
+            max_retries=3, timeout_hours=1,
+        )
+        return AnalysisResult(extraction=extraction, plausibility=plausibility)
+
+    async def execute_activity(self, fn, *args, max_retries=3, timeout_hours=1):
+        """
+        Führt fn(*args) aus.
+        — Ergebnis wird nach Erfolg persistent gespeichert (Checkpoint)
+        — Bei Fehler: max_retries Versuche mit exponentiellem Backoff
+        — Bei Worker-Crash: Replay bis zu diesem Checkpoint, dann weiter
+        Die konkrete Implementierung liefert die Workflow-Engine.
+        """
+        raise NotImplementedError
+```
+
+**Produkt-Mapping — Kernkonzepte des Musters:**
+
+| Konzept | Temporal | Prefect | Celery + Redis | AWS Step Functions | Airflow |
+|---|---|---|---|---|---|
+| Workflow-Definition | `@workflow.defn` class | `@flow` function | Kein nativer Typ — Tasks manuell verketten | State Machine (JSON) | DAG-Klasse |
+| Activity / Task | `@activity.defn` | `@task` | `@app.task` | Lambda / ECS Task | Operator |
+| Retry-Policy | `RetryPolicy(max_attempts=3)` | `@task(retries=3)` | `autoretry_for=(Exception,), max_retries=3` | `Retry`-State in JSON | `retries=3` auf Operator |
+| Crash-Recovery | Event Sourcing (Replay) | Checkpoints in DB | Task-State in Broker | Zustand in DynamoDB | Heartbeat-DB |
+| Sub-Workflow | `start_child_workflow()` | Sub-Flow-Aufruf | `chord()` / `group()` | Nested State Machine | SubDAG / TaskGroup |
+| Worker-Deployment | Separater Worker-Prozess | Agent | Celery Worker | Serverless | Worker-Node |
+
+> **Warum Temporal in den Implementierungsbeispielen dieses Dokuments?** Temporal ist der einzige vollständige Vertreter dieses Musters, der Durable Execution, Replay und starke Typen in einer Python-nativen API kombiniert. Das bedeutet keine Produktempfehlung — für Teams, die Celery oder Airflow bereits einsetzen, ist der Migration-Aufwand nicht gerechtfertigt wenn die Pipeline-Länge < 5 Minuten bleibt.
+
+```python
+# Temporal-Implementierung des Konzepts oben (Referenzimplementierung)
 from temporalio import workflow, activity
 from temporalio.common import RetryPolicy
 from datetime import timedelta
@@ -2730,53 +3073,18 @@ from datetime import timedelta
 @workflow.defn
 class DocumentAnalysisWorkflow:
     @workflow.run
-    async def run(self, input: AnalysisInput) -> AnalysisResult:
-        # Jede Activity: automatisches Retry, persistenter Zustand
-        # Bei Server-Crash: Workflow wird hier fortgesetzt, nicht von vorne
-
-        # Parallel ausführen
-        extraction, toc_check = await asyncio.gather(
-            workflow.execute_activity(
-                extract_content,
-                input.document_id,
-                retry_policy=RetryPolicy(
-                    initial_interval=timedelta(seconds=1),
-                    backoff_coefficient=3.0,
-                    max_attempts=3,
-                    non_retryable_error_types=["ValidationError"],
-                ),
-                schedule_to_close_timeout=timedelta(hours=2),
-            ),
-            workflow.execute_activity(
-                check_toc_completeness,
-                input.document_id,
-                schedule_to_close_timeout=timedelta(minutes=30),
-            ),
+    async def run(self, doc_id: str) -> AnalysisResult:
+        extraction = await workflow.execute_activity(
+            extract_content, doc_id,
+            retry_policy=RetryPolicy(max_attempts=3, backoff_coefficient=3.0,
+                                     non_retryable_error_types=["ValidationError"]),
+            schedule_to_close_timeout=timedelta(hours=2),
         )
-
-        # Sequentiell fortfahren
         plausibility = await workflow.execute_activity(
-            run_plausibility_check,
-            AnalysisContext(extraction=extraction, toc=toc_check),
+            run_plausibility_check, extraction,
             schedule_to_close_timeout=timedelta(hours=1),
         )
-
-        return AnalysisResult(
-            extraction=extraction,
-            toc_check=toc_check,
-            plausibility=plausibility,
-        )
-```
-
-```python
-# Separater Worker pro Modul — kein Resource-Contention
-worker = Worker(
-    client,
-    task_queue="modul-inhaltsextraktion",  # Isolierte Queue
-    workflows=[DocumentAnalysisWorkflow],
-    activities=[extract_content, check_toc_completeness],
-    max_concurrent_activities=5,  # Begrenzte Parallelität
-)
+        return AnalysisResult(extraction=extraction, plausibility=plausibility)
 ```
 
 
@@ -2854,14 +3162,35 @@ routing:
 ```
 
 ```python
-# Alle Services nutzen denselben Gateway-Endpunkt
-# Provider-Wechsel → nur Gateway-Konfiguration ändern
-client = LLMClient(base_url=settings.LLM_GATEWAY_URL)
+# Konzept-Code — der gesamte Anwendungscode kennt nur einen Endpunkt
+# Provider-Wechsel findet im Gateway statt, nicht in der Anwendung
 
-async def call_llm(messages: list[dict]) -> str:
-    response = await client.chat(model="primary", messages=messages)
-    return response.content
+# Alle Services im Projekt importieren NUR diesen Client — nie ein Provider-SDK
+llm = LLMGateway(base_url=settings.LLM_GATEWAY_URL)
+
+async def extract_metadata(text: str) -> dict:
+    response = await llm.complete(
+        model="extraction",        # Logischer Name — Provider-Mapping im Gateway
+        messages=[{"role": "user", "content": text}],
+    )
+    return parse(response.content)
+
+# Was sich bei einem Provider-Wechsel ändert:
+# 1. Gateway-Konfiguration (1 Stelle)
+# 2. Model-Mapping im Gateway ("extraction" → neues Modell)
+# Was sich NICHT ändert: kein einziger Zeile Anwendungscode
 ```
+
+**Produkt-Mapping — Gateway-Optionen:**
+
+| Option | Ansatz | Stärken | Schwächen |
+|---|---|---|---|
+| **LiteLLM** | OpenAI-kompatibler Proxy, 100+ Provider | Einfachste Einrichtung, OpenAI-SDK weiterverwendbar | Ein weiterer Service, Dependency |
+| **Eigener FastAPI-Proxy** | Dünne Wrapper-Schicht (100–200 Zeilen) | Volle Kontrolle, keine externe Dependency | Selbst warten |
+| **OpenRouter** | Hosted Multi-Provider-API | Kein eigener Infrastruktur-Aufwand | Drittanbieter, Datenschutz prüfen |
+| **Azure OpenAI / AWS Bedrock** | Cloud-Provider als Gateway | Compliance, SLAs, kein eigenes Deployment | Vendor Lock-in auf Cloud-Plattform |
+
+> **Kernregel:** Egal welche Option — `from anthropic import Anthropic` darf nur an **einer** Stelle im Projekt stehen: im Gateway selbst. Alle anderen Module importieren nur den Gateway-Client.
 
 
 #### Konsequenzen
@@ -3013,6 +3342,7 @@ docker compose -f docker-compose.services.yaml up -d --build agent-orchestrator
 
 #### Problem
 
+Passwörter, API-Keys und Datenbankverbindungen landen über `.env`-Dateien oder Inline-Strings unweigerlich im Git-Repository — oft erst beim ersten `git log` entdeckt. Einmal committed und gepusht sind Secrets kompromittiert, selbst nach einem späteren `git rm`.
 
 #### Struktur
 
@@ -3189,6 +3519,19 @@ with llm_latency.labels(model="sonnet", task_type="extraction").time():
 | Vollständige Sichtbarkeit: Logs + Traces + Metrics integriert | Erheblicher Setup-Aufwand (4 Services: OTel, Tempo, Loki, Prometheus) |
 | Automatische Instrumentierung ohne manuellen Span-Code | Speicherbedarf für Metriken und Traces wächst |
 
+> **Hinweis:** Der Python-Code oben (structlog, OpenTelemetry SDK, prometheus_client) ist produktunabhängig — er basiert auf CNCF-Standards. Was sich je nach Deployment ändert, ist das **Backend** wo Daten landen:
+
+**Backend-Mapping — gleicher Code, verschiedene Infrastruktur:**
+
+| Signaltyp | Dieses Dokument (Self-hosted) | Grafana Cloud | AWS | Azure |
+|---|---|---|---|---|
+| **Metrics** | Prometheus + Grafana | Grafana Cloud Metrics | CloudWatch | Azure Monitor |
+| **Logs** | Loki + Grafana | Grafana Cloud Logs | CloudWatch Logs | Log Analytics |
+| **Traces** | Tempo + Grafana | Grafana Cloud Traces | X-Ray | Application Insights |
+| **Collector** | OTel Collector | OTel Collector | OTel Collector (gleich) | OTel Collector (gleich) |
+
+> Der OTel Collector ist der entscheidende Entkopplungspunkt: Anwendungscode sendet immer an den Collector — nur dessen Konfiguration (`exporters`) bestimmt das Backend. Wechsel von Self-hosted Prometheus auf Grafana Cloud: 3 Zeilen in der Collector-Config.
+
 
 #### Verwandte Muster
 
@@ -3322,19 +3665,19 @@ In Monorepos mit mehreren Services wissen neue Entwickler oft nicht, wie ein Ser
 - **Workflows**: `[WorkflowName]`
 - **Activities**: `[activity_1]`, `[activity_2]`
 
-## Abhängigkeiten
+### Abhängigkeiten
 - **Datenbank**: `[db-name]` (Schema: siehe Migrationen)
 - **Object Storage**: Bucket `documents` (read), `results` (write)
 - **LLM-Gateway**: `http://llm-gateway:4000`
 
-## Konfiguration (ENV)
+### Konfiguration (ENV)
 | Variable | Beschreibung | Beispiel |
 |----------|-------------|---------|
 | `DATABASE_URL` | Datenbank-Verbindung | `postgresql+asyncpg://...` |
 | `WORKFLOW_HOST` | Workflow-Engine | `workflow-engine:7233` |
 | `LLM_GATEWAY_URL` | LLM-Proxy | `http://llm-gateway:4000/v1` |
 
-## Lokal starten
+### Lokal starten
 ```bash
 uv sync
 uv run python -m src.worker
@@ -3420,6 +3763,7 @@ Deine Antwort:
 
 #### Problem
 
+LLMs ignorieren implizite Formatanforderungen: Trotz der Bitte um reines JSON fügen sie Erklärungstexte, Markdown-Codeblöcke (` ```json `) oder abschließende Kommentare hinzu. Dieses Verhalten ist konsistent — kein Einzelfall-Bug, sondern Standardverhalten ohne explizite Verbote im Prompt.
 
 #### Implementierungshinweise
 
@@ -3462,6 +3806,7 @@ def parse_llm_json(response: str) -> dict:
 
 #### Problem
 
+LLMs ohne Domänenkontext greifen auf allgemeinen Sprachraum zurück: "Artenschutz" wird als allgemeines Umweltthema behandelt statt als Rechtsbegriff. "Prüfpflichtig" wird frei interpretiert statt klassifiziert. Das Ergebnis sind fachlich ungenaue Antworten, die im Downstream-System Fehler erzeugen.
 
 #### Konsequenzen
 
@@ -3489,6 +3834,7 @@ def parse_llm_json(response: str) -> dict:
 
 #### Problem
 
+Grenzfälle produzieren inkonsistente LLM-Entscheidungen: Ein Dokument ohne expliziten Verfasser erhält mal `null`, mal `"Unbekannt"`, mal `"Nicht angegeben"`. Ohne explizite Regel entscheidet das Modell jedes Mal neu — deterministisches Verhalten ist nur durch Enumeration der Grenzfälle im Prompt erreichbar.
 
 #### Konsequenzen
 
@@ -3848,6 +4194,8 @@ Golden Datasets decken nur bekannte Fälle ab — unbekannte Edge Cases werden n
 #### Lösung
 
 
+**Warum Eigenschaften statt exakter Werte?** LLMs sind nicht-deterministisch — derselbe Input produziert leicht unterschiedliche Outputs. Ein Test der exakt `"Lärmschutzwand"` erwartet, bricht bei minimaler Prompt-Änderung. Ein Eigenschaftstest der prüft "die Antwort enthält immer einen Zahlenbereich wenn Lärmpegel erwähnt werden" ist stabil gegenüber Formulierungsvarianten und deckt neue, unbekannte Edge Cases ab — ohne dass man jeden vorab kennen muss.
+
 Tests prüfen Eigenschaften der Ausgabe, nicht exakte Werte.
 
 
@@ -3931,6 +4279,10 @@ Manuelle Evaluation skaliert nicht bei vielen Prompt-Iterationen.
 
 #### Lösung
 
+
+**Warum Evals im CI statt als optionaler lokaler Schritt?** Evals die lokal laufen, werden unter Zeitdruck übersprungen — genau dann wenn sie am wichtigsten wären. CI-Integration macht Evals verpflichtend: ein Merge der die Pass-Rate unter den Schwellwert drückt, wird geblockt. Das verschiebt die Qualitätsentscheidung von "nach dem Deployment wenn Nutzer klagen" auf "vor dem Merge wenn der Fix noch einfach ist".
+
+**Warum Evals im CI statt als optionaler lokaler Schritt?** Evals die lokal laufen, werden übersprungen wenn Zeitdruck entsteht — genau dann wenn sie am wichtigsten wären. CI-Integration macht Evals verpflichtend: ein Merge der die Pass-Rate unter den Schwellwert drückt, wird geblockt. Das verschiebt den Zeitpunkt der Qualitätsentscheidung von "nach dem Deployment wenn Nutzer klagen" auf "vor dem Merge wenn der Fix noch einfach ist".
 
 Automatisierte Eval-Pipeline als CI-Schritt.
 
@@ -4029,6 +4381,8 @@ Identische LLM-Anfragen werden mehrfach ausgeführt — unnötige Kosten und Lat
 #### Lösung
 
 
+**Warum Hash-basiert statt einfach den Input als Key?** Rohe Texte können mehrere KB groß sein — als Redis-Key unhandlich und unsicher. Ein SHA256-Hash ist immer 64 Bytes, kollisionssicher und URL-sicher. Der System-Prompt muss zwingend Teil des Keys sein: identischer Input mit geändertem Prompt muss einen anderen Cache-Eintrag erzeugen, sonst werden nach Prompt-Updates veraltete Antworten ausgeliefert.
+
 SHA256-Hash des Prompts als Cache-Key in Redis.
 
 
@@ -4116,6 +4470,8 @@ class CachedLLMClient:
 
 #### Lösung
 
+
+**Warum semantisches Caching statt nur exaktem Hash?** "Wie hoch ist der Lärmpegel?" und "Was ist der gemessene Schallpegel?" sind inhaltlich identische Fragen — Hash-Caching hilft nicht. Embedding-Ähnlichkeit erkennt diese Äquivalenz. Der Schwellwert von 0,95 ist bewusst hoch: darunter riskiert man, semantisch ähnliche aber faktisch verschiedene Fragen mit derselben Antwort zu bedienen.
 
 Neue Query gegen gecachte Queries embedden und bei hoher Ähnlichkeit den Cache-Eintrag zurückgeben.
 
@@ -4333,6 +4689,8 @@ Gecachte Antworten werden veraltet wenn sich Prompts oder Modelle ändern.
 
 #### Lösung
 
+
+**Warum versions-basierte Keys statt TTL?** Ein TTL von 24h bedeutet: bis zu 24h liefert das System veraltete Antworten nach einer Prompt-Änderung — ohne sichtbaren Fehler. Versions-basierte Keys invalidieren sofort: ein neuer Prompt-Hash erzeugt automatisch einen neuen Key, der alte Eintrag verfällt natürlich. Kein manuelles Flush, keine Race-Condition zwischen Deployment und Cache-Expiry.
 
 Cache-Namespace mit Prompt-Version und Modell-Version.
 
@@ -4569,6 +4927,8 @@ Jedes LLM-Framework hat eine andere API für Structured Outputs.
 
 #### Lösung
 
+
+**Warum `instructor` statt manuell validieren?** Manuelles `json.loads(response.text)` scheitert an drei häufigen LLM-Fehlern: Markdown-Wrapper um das JSON, fehlende optionale Felder, und falsche Datentypen (Zahl als String). Diese selbst abzufangen ist repetitiver Boilerplate-Code der trotzdem Lücken hat. `instructor` löst alle drei automatisch und fügt Retry-Logik hinzu — der Prompt bekommt den Validierungsfehler als Kontext und korrigiert sich selbst.
 
 `instructor` als einheitliche Abstraktionsschicht über alle Provider.
 
@@ -4941,6 +5301,8 @@ Einstufige LLM-Calls reichen für komplexe Aufgaben nicht aus — der Agent muss
 #### Lösung
 
 
+**Warum explizites Reasoning vor jeder Aktion?** Ohne Thought-Schritt wählt das Modell Tools reaktiv — oft das erste passende statt das optimale. Der Thought-Schritt erzwingt Planung und macht Entscheidungen debuggbar. Sichtbares Reasoning reduziert halluzinierte Tool-Aufrufe deutlich: das Modell erkennt im Thought-Schritt selbst, wenn eine Aktion keinen Sinn ergibt.
+
 ReAct-Loop: Thought → Action → Observation → Thought → ...
 
 
@@ -5157,6 +5519,8 @@ Agents können Fehler machen — vor irreversiblen Aktionen soll der Nutzer best
 
 #### Lösung
 
+
+**Warum nicht den Agent immer autonom laufen lassen?** Agents sind nicht-deterministisch und können bei mehrstufigen Aufgaben Entscheidungen akkumulieren die am Ende zu irreversiblen oder falschen Aktionen führen. Der Mensch wird erst sinnvoll eingebunden wenn er eine informierte Entscheidung treffen kann — also nach der Planung, vor der Ausführung. Ein Checkpoint zu früh (z.B. nach jedem Schritt) macht den Agent nutzlos; zu spät (nach der Ausführung) macht die Kontrolle bedeutungslos.
 
 Explizite Checkpoint-Punkte im Agent-Loop.
 
@@ -5728,6 +6092,8 @@ Kurze Nutzer-Queries liefern schlechte Retrieval-Ergebnisse. LLM-basierte Erweit
 #### Lösung
 
 
+**Warum Query-Varianten statt einer einzelnen Suche?** Nutzer formulieren in ihrem Vokabular, Dokumente in Fachterminologie: "Lärmschutz" vs. "Schallimmissionsschutz". Jede Variante trifft andere Chunks. RRF-Fusion hebt Chunks, die in mehreren Rankings hoch erscheinen — ein robusteres Signal als ein einzelner Ähnlichkeitsscore.
+
 Query per LLM zu 3–5 Varianten expandieren, Kosten in Redis cachen und per PostgreSQL budgetieren:
 
 
@@ -5932,6 +6298,8 @@ LLM-Context-Fenster werden überschritten → API-Fehler. Token-Counting per Tik
 
 #### Lösung
 
+
+**Warum explizites Budget statt einfach alles einschließen?** Mehr Kontext ist nicht besser: LLMs verlieren bei überfülltem Fenster Fokus auf die relevantesten Chunks ("Lost-in-the-Middle"-Problem). Ein Budget erzwingt Priorisierung — Top-K relevante Chunks statt erste K gefundene. Gleichzeitig verhindert es unerwartet hohe Kosten bei großen Dokumentkollektionen.
 
 Tiktoken als Singleton, konservative Budgetverteilung mit System-Nachricht-Priorisierung:
 
@@ -6140,6 +6508,7 @@ class SystemPromptService {
 
 #### Problem
 
+Modell-Upgrades brechen capability-abhängigen Code: `if model == "claude-opus-4-6": use_vision()` ist ein hartcodierter Fähigkeits-Check, der bei jedem Modellwechsel manuell angepasst werden muss. Über Dutzende Stellen verteilt entsteht ein fragiles Geflecht aus Modell-Name-Strings im Code.
 
 #### Konsequenzen
 
@@ -6472,6 +6841,8 @@ LLMs liefern häufig strukturell fehlerhafte JSON-Antworten — fehlende Pflicht
 #### Lösung
 
 
+**Warum Auto-Repair statt sofort Exception?** LLMs machen konsistente, behebbare Fehler: fehlende Pflichtfelder, Strings statt Numbers, `None` statt leerer Liste. Ein Validator der diese bekannten Muster kennt, repariert 80 % der Fälle bevor Pydantic sie als harten Fehler behandelt — ohne teuren Retry-Call. Nur die verbleibenden 20 % landen im Feedback-Loop.
+
 Einen Validator vor die Schema-Validierung-Validierung schalten, der häufige LLM-Fehler automatisch repariert und eine Audit-Trail führt:
 
 
@@ -6494,7 +6865,7 @@ graph LR
 
 
 ```python
-# backend/rule-extraction-service/src/services/llm_response_validator.py
+# src/services/llm_response_validator.py
 class LLMResponseValidator:
     def validate_and_repair(self, response: dict) -> tuple[dict, list[str]]:
         repairs = []
@@ -6559,6 +6930,8 @@ Wenn die LLM-Antwort die Schema-Validierung-Validierung nicht besteht, einfach e
 #### Lösung
 
 
+**Warum Feedback-Loop statt blindem Retry?** Ein blindes Retry mit identischem Prompt produziert identische Fehler — das Modell hat keine neue Information. Der Feedback-Loop gibt dem Modell den konkreten Validierungsfehler als Kontext: "Feld `date` muss ISO-8601-Format haben, du hast `15. März 2024` geliefert." Das Modell korrigiert gezielt statt zufällig.
+
 Validierungsfehler strukturiert an den LLM-Retry-Call zurückgeben — der LLM kann sich selbst korrigieren:
 
 
@@ -6599,7 +6972,7 @@ graph LR
 
 
 ```python
-# backend/rule-extraction-service/src/services/rule_structurer_v3.py
+# src/services/rule_structurer.py
 async def structure(self, raw_rule: RawExtractedRule,
                    feedback: dict[str, Any] | None = None) -> StructuredRuleV3Model:
     is_retry = feedback is not None
@@ -6634,7 +7007,7 @@ Bitte korrigiere diese Fehler:
 ```
 
 ```python
-# backend/rule-extraction-service/src/services/confidence_scorer.py
+# src/services/confidence_scorer.py
 class ConfidenceScorer:
     WEIGHTS = {
         "structural_completeness": 0.25,  # Pflichtfelder, Logic-Tiefe, Conditions-Anzahl
@@ -6697,6 +7070,8 @@ LLMs extrahieren aus demselben Dokument-Chunk oft semantisch gleiche Regeln mit 
 #### Lösung
 
 
+**Warum Embedding-basiert statt String-Matching?** Exaktes String-Matching übersieht semantische Duplikate: "Lärmschutzwand entlang B27" und "Schallschutzanlage Bundesstraße 27" sind dasselbe Objekt — 0 % Zeichenübereinstimmung. Embeddings erfassen semantische Äquivalenz. Ein Cosine-Similarity-Score ≥ 0,85 identifiziert zuverlässig Doppelextraktionen, die bei Einzelbetrachtung korrekt aussehen.
+
 Embeddings vergleichen, Kosinus-Ähnlichkeit berechnen, Duplikate identifizieren — die Regel mit höchstem Confidence-Score gewinnt:
 
 
@@ -6722,7 +7097,7 @@ graph LR
 
 
 ```python
-# backend/rule-extraction-service/src/services/semantic_deduplicator.py
+# src/services/semantic_deduplicator.py
 class SemanticDeduplicator:
     def __init__(self,
                  model_name: str = "paraphrase-multilingual-MiniLM-L12-v2",
@@ -6796,6 +7171,8 @@ LLM-APIs können zeitweise ausfallen. Ohne Circuit Breaker werden alle Requests 
 #### Lösung
 
 
+**Warum drei Zustände statt einfach Retry?** Exponential Backoff reicht nicht: Bei einem anhaltenden API-Ausfall retried jeder eingehende Request individuell und schöpft dabei Thread-Pool, Speicher und Verbindungen aus. Der Circuit Breaker erkennt das Muster (N Fehler in Folge) und wechselt in OPEN: alle weiteren Requests schlagen sofort fehl — kein Thread-Block, keine API-Belastung. HALF_OPEN sendet einen kontrollierten Probe-Call wenn das Timeout abläuft; erst bei Erfolg öffnet sich der Circuit wieder.
+
 3-Zustands-Circuit-Breaker speziell für LLM-Aufrufe:
 
 
@@ -6818,7 +7195,7 @@ stateDiagram-v2
 
 
 ```python
-# backend/rule-service/src/services/circuit_breaker.py
+# src/services/circuit_breaker.py
 class CircuitState(Enum):
     CLOSED    = "closed"     # Normal — alle Calls durch
     OPEN      = "open"       # Fail-Fast — keine Calls, sofortiger Fehler
@@ -6925,6 +7302,8 @@ Bestimmte Felder (z.B. `norm_hierarchy`) dürfen im Ausgabemodell **niemals null
 #### Lösung
 
 
+**Warum explizite Stufen statt einfachem Catch-All?** Ein `except Exception: return default` versteckt das Problem und liefert still falsche Daten. Die 5-stufige Kette dokumentiert explizit was in welchem Fehlerfall passiert: direkte Antwort → Vorvalidierungs-Fallback → Pattern-Matching → Minimal-Default. Jede Stufe ist nachvollziehbar, jede hat eine klare Semantik. Das ermöglicht gezielte Verbesserung: Wenn Stufe 3 (Pattern-Matching) zu oft ausgelöst wird, ist das ein Signal das Prompt zu verbessern — statt eines unsichtbaren stillen Fallbacks.
+
 5-stufige Fallback-Kette mit klarer Prioritätsreihenfolge:
 
 
@@ -6951,7 +7330,7 @@ graph TD
 
 
 ```python
-# backend/rule-extraction-service/src/services/rule_structurer_v3.py
+# src/services/rule_structurer.py
 async def structure(self, raw_rule: RawExtractedRule) -> StructuredRuleV3Model:
     try:
         # Stufe 1: LLM-Antwort direkt nutzen
@@ -7024,6 +7403,8 @@ Fallback-Logik in KI-Pipelines (z.B. "wenn LLM-Service down, nehme regelbasierte
 #### Lösung
 
 
+**Warum Fail-Fast statt defensivem Fallback?** Jeder stille Fallback (`except: return {}`) erzeugt unsichtbar falsche Ausgaben, die unerkannt weiterverarbeitet werden. Fail-Fast macht den Fehler sofort sichtbar — an der richtigen Stelle, mit dem richtigen Stack-Trace. Resilenz gehört an die Systemgrenze (Circuit Breaker, Endpoint), nicht tief in die Business-Logik versteckt.
+
 Explizite Architektur-Entscheidung **gegen** Fallbacks — klare Exceptions stattdessen:
 
 
@@ -7076,6 +7457,8 @@ Standard-API-Monitoring reicht für LLM-intensive Systeme nicht — wichtig sind
 #### Lösung
 
 
+**Warum LLM-spezifische Metriken statt Standard-HTTP-Monitoring?** HTTP-Statuscodes zeigen ob ein Request ankam — nicht ob das LLM brauchbare Ergebnisse lieferte. Latenz-Histogramme mit Standard-Buckets (100ms, 500ms) sind nutzlos wenn LLM-Calls typisch 2–30 Sekunden dauern. Und der Circuit-Breaker-State ist vollständig unsichtbar in normalen API-Metriken. LLM-spezifische Buckets, Timeout-Rate und Modell-Labels sind der Unterschied zwischen "wir sehen dass etwas langsam ist" und "wir sehen welches Modell bei welchem Task-Typ auf 429 läuft".
+
 Dedizierte Prometheus-Metriken für alle LLM-Operationen:
 
 
@@ -7102,7 +7485,7 @@ graph LR
 
 
 ```python
-# backend/rule-service/src/services/metrics.py
+# src/services/metrics.py
 from prometheus_client import Counter, Histogram, Gauge
 
 # LLM Request Metrics
@@ -7255,6 +7638,7 @@ class PatternHierarchyClassifier:
 
 #### Problem
 
+Beim iterativen Prompt-Entwickeln wird dasselbe Dokument dutzende Male geparst, gechunkt und embedded — jedes Mal mit identischem Ergebnis. Bei 100 Dokumenten mit je 50 Chunks kostet allein der Embedding-Schritt mehrere Minuten und signifikante API-Kosten pro Entwicklungs-Run.
 
 #### Konsequenzen
 
@@ -7613,7 +7997,7 @@ class BudgetManager:
 
 ## 19. Multi-Tenancy & Mandantentrennung
 
-> 🟡 **Fortgeschritten** — 19.1 (Tenant-Isolierung), 19.2 (Prompt-Trennung) · 🔴 **Expert** — 20.3 (Daten-Isolation)
+> 🟡 **Fortgeschritten** — 19.1 (Tenant-Isolierung), 19.2 (Tenant-spezifisches Prompt-Management)
 
 ### 19.1 Tenant-Isolierung in LLM-Pipelines
 
