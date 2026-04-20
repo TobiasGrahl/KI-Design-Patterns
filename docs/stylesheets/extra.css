@@ -1,716 +1,386 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   KI Design Patterns — MkDocs Material Custom Theme
-   Replikation des dunklen Navy/Lila HTML-Designs
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* ============================================================================
+   KI-Muster-Bibliothek — Custom Styles
+   Ergänzt das Material-Theme um buchtypische Ästhetik für ein Fachwerk.
+   ============================================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+/* ----------------------------------------------------------------------------
+   1. Farbpalette — Indigo als Primärfarbe, warmes Dunkel für Dark Mode
+   ---------------------------------------------------------------------------- */
 
-/* ── Design-Tokens ──────────────────────────────────────────────────────── */
 :root {
-  --ki-bg:       #f8f7f4;
-  --ki-surface:  #ffffff;
-  --ki-sb:       #1a1a2e;
-  --ki-sb-text:  #c8c8d8;
-  --ki-act:      #a78bfa;
-  --ki-act-bg:   rgba(167,139,250,.12);
-  --ki-acc:      #6d28d9;
-  --ki-al:       #ede9fe;
-  --ki-am:       #c4b5fd;
-  --ki-tx:       #1e1e2e;
-  --ki-mt:       #64748b;
-  --ki-bd:       #e2e8f0;
-  --ki-cb:       #f1f5f9;
-  --ki-code-bg:  #1e1e2e;
-  --ki-code-fg:  #cdd6f4;
-  --ki-green-bg: #065f46;
-  --ki-green-fg: #d1fae5;
-  --ki-amber-bg: #78350f;
-  --ki-amber-fg: #fef3c7;
-  --ki-ib:       #faf5ff;
-  --ki-ibd:      #7c3aed;
-  --ki-ibt:      #3b0764;
+  --md-primary-fg-color:           #3949ab;
+  --md-primary-fg-color--light:    #5c6bc0;
+  --md-primary-fg-color--dark:     #283593;
+  --md-accent-fg-color:            #7e57c2;
 
-  /* ─ Fluid Layout: skaliert proportional mit Viewport-Breite ─ */
-  /* Sidebar: min 200px · 20vw · max 320px */
-  --md-sidebar-width:   clamp(320px, 22vw, 460px);
-  /* Content-Breite: min 480px · 72vw · max 1100px */
-  --ki-content-max:     clamp(480px, 72vw, 1100px);
-  /* Content-Padding X: min 1rem · 3.5vw · max 4rem */
-  --ki-content-pad-x:   clamp(1rem, 3.5vw, 4rem);
-  /* Content-Padding Top */
-  --ki-content-pad-top: clamp(1.5rem, 3vh, 3.5rem);
+  /* Eigene Buch-Farben */
+  --book-pattern-border:           #e0e0e0;
+  --book-pattern-bg-subtle:        #fafafa;
+  --book-category-badge:           #f5f5f5;
+  --book-intent-border:            #7e57c2;
+  --book-intent-bg:                #f3e5f5;
+  --book-code-bg:                  #f8f9fb;
+  --book-variant-accent:           #00897b;
+  --book-variant-bg:               #e0f2f1;
+  --book-quote-color:              #5c6bc0;
 }
 
-/* ── Material-Theme-Variablen überschreiben ─────────────────────────────── */
-[data-md-color-scheme="default"] {
-  --md-primary-fg-color:        var(--ki-sb);
-  --md-primary-fg-color--light: var(--ki-act);
-  --md-primary-fg-color--dark:  #0f0f1a;
-  --md-primary-bg-color:        #ffffff;
-  --md-primary-bg-color--light: rgba(255,255,255,.7);
-
-  --md-accent-fg-color:         var(--ki-acc);
-  --md-accent-fg-color--transparent: rgba(109,40,217,.1);
-  --md-accent-bg-color:         #ffffff;
-
-  --md-default-fg-color:        var(--ki-tx);
-  --md-default-bg-color:        var(--ki-bg);
-
-  --md-typeset-color:           var(--ki-tx);
-  --md-typeset-a-color:         var(--ki-acc);
-
-  --md-code-bg-color:           var(--ki-code-bg);
-  --md-code-fg-color:           var(--ki-code-fg);
-  --md-code-hl-color:           rgba(167,139,250,.2);
+[data-md-color-scheme="slate"] {
+  --book-pattern-border:           #424242;
+  --book-pattern-bg-subtle:        #1a1a2e;
+  --book-category-badge:           #2a2a3e;
+  --book-intent-border:            #b39ddb;
+  --book-intent-bg:                #1f1830;
+  --book-code-bg:                  #161624;
+  --book-variant-accent:           #4db6ac;
+  --book-variant-bg:               #162826;
+  --book-quote-color:              #9fa8da;
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   TYPOGRAFIE — Georgia Serif wie im HTML-Design
-   ══════════════════════════════════════════════════════════════════════════ */
-body,
+/* ----------------------------------------------------------------------------
+   2. Typografie — klassisch, gut lesbar, deutsch-freundlich
+   ---------------------------------------------------------------------------- */
+
 .md-typeset {
-  font-family: "Georgia", "Crimson Text", serif;
-  font-size: 1.05rem;
-  line-height: 1.75;
-  color: var(--ki-tx);
-  background-color: var(--ki-bg);
+  font-size: 0.78rem;
+  line-height: 1.7;
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   TOP-HEADER — Navy mit weißem Logo-Text
-   ══════════════════════════════════════════════════════════════════════════ */
-.md-header {
-  background-color: var(--ki-sb);
-  border-bottom: 1px solid rgba(255,255,255,.08);
-  box-shadow: none;
+/* Längere Absätze besser lesbar machen */
+.md-typeset p {
+  text-align: left;              /* Keine Blocksatz-Probleme bei deutschen Umlauten */
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  lang: de;
 }
 
-.md-header__title {
-  font-family: "Georgia", serif;
-  font-size: 1rem;
-  color: #ffffff !important;
-  letter-spacing: .01em;
-}
-
-/* KI-Badge im Titel */
-.md-header__title::before {
-  content: "KI";
-  display: inline-block;
-  background: var(--ki-acc);
-  color: #fff;
-  font-size: 10px;
-  font-family: "JetBrains Mono", monospace;
-  font-weight: 700;
-  letter-spacing: .05em;
-  padding: 2px 7px;
+/* Inline-Code in Proportionalschrift-Prosa */
+.md-typeset code {
+  padding: 0.1em 0.35em;
   border-radius: 3px;
-  margin-right: 8px;
+  font-size: 0.88em;
+  background-color: var(--book-code-bg);
+}
+
+/* ----------------------------------------------------------------------------
+   3. Überschriften — klare Hierarchie, Patterns sticken heraus
+   ---------------------------------------------------------------------------- */
+
+/* H1 — Sektions-Titel */
+.md-typeset h1 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  border-bottom: 3px solid var(--md-primary-fg-color);
+  padding-bottom: 0.3em;
+  margin-top: 0;
+}
+
+/* H2 — Sektion innerhalb Kapitel */
+.md-typeset h2 {
+  font-weight: 700;
+  margin-top: 2.2em;
+  padding-top: 0.3em;
+  border-top: 1px solid var(--book-pattern-border);
+}
+
+/* H3 — Pattern-Namen: Das visuelle Zentrum des Buchs */
+.md-typeset h3 {
+  font-weight: 700;
+  font-size: 1.3em;
+  color: var(--md-primary-fg-color);
+  margin-top: 2.5em;
+  padding: 0.5em 0.8em;
+  background: var(--book-pattern-bg-subtle);
+  border-left: 4px solid var(--md-primary-fg-color);
+  border-radius: 0 6px 6px 0;
+  scroll-margin-top: 4em;      /* Für Anker-Links bei fixer Top-Bar */
+}
+
+/* Numerische Pattern-Präfixe ("1.1", "15.3") hervorheben */
+.md-typeset h3 {
+  font-variant-numeric: tabular-nums;
+}
+
+/* H4 — Pattern-Schritte: Problem, Lösung, Struktur, etc. */
+.md-typeset h4 {
+  font-weight: 700;
+  font-size: 0.95em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--md-primary-fg-color--dark);
+  margin-top: 2em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px dashed var(--book-pattern-border);
+}
+
+[data-md-color-scheme="slate"] .md-typeset h4 {
+  color: var(--md-primary-fg-color--light);
+}
+
+/* "Variante:"-Unterabschnitte visuell absetzen */
+.md-typeset h4[id*="variante"] {
+  color: var(--book-variant-accent);
+  border-bottom-color: var(--book-variant-accent);
+  background: var(--book-variant-bg);
+  padding: 0.5em 0.8em;
+  border-radius: 4px;
+  border-bottom: none;
+}
+
+/* ----------------------------------------------------------------------------
+   4. Blockquotes — „Kategorie:" und „Intent:" dezent stylen
+   ---------------------------------------------------------------------------- */
+
+.md-typeset blockquote {
+  border-left: 3px solid var(--book-intent-border);
+  color: inherit;
+  background: var(--book-intent-bg);
+  padding: 0.6em 1em;
+  margin: 1em 0;
+  border-radius: 0 4px 4px 0;
+  font-style: normal;
+}
+
+.md-typeset blockquote p {
+  margin: 0.3em 0;
+}
+
+/* ----------------------------------------------------------------------------
+   5. Tabellen — dichter und lesbarer
+   ---------------------------------------------------------------------------- */
+
+.md-typeset table:not([class]) {
+  font-size: 0.85em;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.md-typeset table:not([class]) th {
+  background: var(--md-primary-fg-color);
+  color: white;
+  font-weight: 600;
+}
+
+/* Zebra-Streifen */
+.md-typeset table:not([class]) tr:nth-child(even) {
+  background: var(--book-pattern-bg-subtle);
+}
+
+/* ----------------------------------------------------------------------------
+   6. Admonitions — deutsch beschriftet, wichtige Rollen
+   ---------------------------------------------------------------------------- */
+
+/* "❌ Häufiger Fehler" — als Danger gestylt */
+.md-typeset blockquote:has(strong:first-child) {
+  border-left-color: #e53935;
+  background: #ffebee;
+}
+
+[data-md-color-scheme="slate"] .md-typeset blockquote:has(strong:first-child) {
+  background: #3a1e1e;
+}
+
+/* ----------------------------------------------------------------------------
+   7. Code-Blöcke — klares Monospace, sauber strukturiert
+   ---------------------------------------------------------------------------- */
+
+.md-typeset pre > code {
+  font-size: 0.82em;
+  line-height: 1.55;
+  tab-size: 4;
+}
+
+.md-typeset .highlight {
+  border-radius: 6px;
+  margin: 1.2em 0;
+}
+
+/* Copy-Button etwas dezenter */
+.md-clipboard {
+  color: var(--md-default-fg-color--lighter);
+}
+
+/* ----------------------------------------------------------------------------
+   8. Mermaid-Diagramme — zentriert, mit etwas Luft
+   ---------------------------------------------------------------------------- */
+
+.md-typeset .mermaid {
+  text-align: center;
+  margin: 1.5em auto;
+  padding: 1em;
+  background: white;
+  border-radius: 6px;
+}
+
+[data-md-color-scheme="slate"] .md-typeset .mermaid {
+  background: #1e1e2e;
+}
+
+/* Diagramm-Beschriftung direkt darunter */
+.md-typeset .mermaid + p em:first-child {
+  display: block;
+  text-align: center;
+  font-size: 0.88em;
+  color: var(--md-default-fg-color--light);
+  margin-top: -0.5em;
+  padding: 0 1em;
+}
+
+/* ----------------------------------------------------------------------------
+   9. Pattern-Verweise (→ Navigation zwischen Mustern)
+   ---------------------------------------------------------------------------- */
+
+.md-typeset p:has(> a[href^="../"]):first-child,
+.md-typeset p:has(> a[href*="pattern"]) {
+  font-size: 0.9em;
+}
+
+/* Pfeil-Listen nach Pattern-Namen */
+.md-typeset p a[href*="-pattern"] {
+  text-decoration: none;
+  border-bottom: 1px dotted currentColor;
+}
+
+.md-typeset p a[href*="-pattern"]:hover {
+  border-bottom-style: solid;
+}
+
+/* ----------------------------------------------------------------------------
+   10. Sidebar / TOC — etwas dichter
+   ---------------------------------------------------------------------------- */
+
+.md-nav__link {
+  line-height: 1.4;
+}
+
+.md-nav--secondary .md-nav__link {
+  font-size: 0.72rem;
+}
+
+/* ----------------------------------------------------------------------------
+   11. Druck-Styles — für PDF-Export via Browser
+   ---------------------------------------------------------------------------- */
+
+@media print {
+  /* Seitenumbruch vor jedem Pattern */
+  .md-typeset h3 {
+    page-break-before: always;
+    break-before: page;
+  }
+
+  /* Aber nicht vor dem allerersten */
+  .md-typeset h1 + h3,
+  .md-typeset h2 + h3 {
+    page-break-before: auto;
+    break-before: auto;
+  }
+
+  /* Code-Blöcke nicht zerreißen */
+  .md-typeset pre,
+  .md-typeset .mermaid {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Tabellen nicht zerreißen */
+  .md-typeset table:not([class]) {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Header/Footer sichtbar */
+  .md-header,
+  .md-sidebar,
+  .md-footer,
+  .md-tabs {
+    display: none !important;
+  }
+
+  .md-content {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Links in Druckversion als URL anzeigen */
+  .md-typeset a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #666;
+  }
+
+  /* Bessere Typografie fürs Papier */
+  .md-typeset {
+    font-size: 10pt;
+    line-height: 1.5;
+  }
+
+  .md-typeset h1 {
+    font-size: 22pt;
+  }
+
+  .md-typeset h2 {
+    font-size: 16pt;
+  }
+
+  .md-typeset h3 {
+    font-size: 14pt;
+    background: transparent !important;
+    border-left: 3px solid #333;
+  }
+
+  .md-typeset h4 {
+    font-size: 11pt;
+  }
+}
+
+/* ----------------------------------------------------------------------------
+   12. Startseite — Hero-Box für das Landing
+   ---------------------------------------------------------------------------- */
+
+.md-typeset .hero {
+  text-align: center;
+  padding: 3em 1em;
+  margin-bottom: 2em;
+  background: linear-gradient(135deg, var(--md-primary-fg-color) 0%, var(--md-accent-fg-color) 100%);
+  color: white;
+  border-radius: 12px;
+}
+
+.md-typeset .hero h1 {
+  border-bottom: none;
+  color: white;
+  margin: 0;
+  font-size: 2.5em;
+}
+
+.md-typeset .hero p {
+  font-size: 1.1em;
+  opacity: 0.95;
+  max-width: 40em;
+  margin: 1em auto 0 auto;
+}
+
+/* ----------------------------------------------------------------------------
+   13. Utility-Klassen für benutzerdefinierte Elemente
+   ---------------------------------------------------------------------------- */
+
+/* Badge für Niveau-Anzeige */
+.badge {
+  display: inline-block;
+  padding: 0.15em 0.5em;
+  font-size: 0.8em;
+  border-radius: 3px;
+  font-weight: 600;
+  line-height: 1;
   vertical-align: middle;
 }
 
-/* Search-Feld */
-.md-search__input {
-  background-color: rgba(255,255,255,.08);
-  border: 1px solid rgba(255,255,255,.15);
-  border-radius: 6px;
-  color: #ffffff;
-  font-family: "Georgia", serif;
-}
-.md-search__input::placeholder { color: rgba(255,255,255,.35); }
-.md-search__input:focus        { border-color: var(--ki-act); }
-.md-search__icon               { color: rgba(255,255,255,.5); }
+.badge-einstieg    { background: #c8e6c9; color: #2e7d32; }
+.badge-fortgeschr  { background: #fff3cd; color: #856404; }
+.badge-expert      { background: #ffcdd2; color: #c62828; }
+.badge-pflicht     { background: #b2dfdb; color: #00695c; }
 
-/* Search-Ergebnis-Highlights */
-.md-search-result__meta { color: var(--ki-act); font-family: monospace; }
-mark { background: #fef08a; border-radius: 2px; }
-
-/* ══════════════════════════════════════════════════════════════════════════
-   LINKE SIDEBAR — Navy mit Lila Active-State (exakt wie HTML-Design)
-   ══════════════════════════════════════════════════════════════════════════ */
-.md-sidebar--primary {
-  background-color: var(--ki-sb);
-  width: clamp(320px, 22vw, 460px) !important;   /* direkt — überschreibt Material */
-  min-width: 320px !important;
-}
-.md-sidebar--primary .md-sidebar__scrollwrap {
-  background-color: var(--ki-sb);
-  width: clamp(320px, 22vw, 460px) !important;
-}
-
-/* Sidebar Scrollbar */
-.md-sidebar--primary .md-sidebar__scrollwrap::-webkit-scrollbar { width: 4px; }
-.md-sidebar--primary .md-sidebar__scrollwrap::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,.1); border-radius: 2px;
-}
-
-/* Nav-Sektion-Labels ("MUSTERKATALOG") */
-.md-nav--primary > .md-nav__title {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: .1em;
-  color: rgba(255,255,255,.25);
-  background: none;
-  padding: 16px 18px 8px;
-  box-shadow: none;
-}
-
-/* Nav-Einträge allgemein */
-.md-nav--primary .md-nav__item { margin: 0; }
-
-/* H2-Links (Sektions-Titel) */
-.md-nav--primary > .md-nav__list > .md-nav__item > .md-nav__link {
-  font-family: "Georgia", serif;
-  font-size: .82rem;
-  color: #e2e8f0;
-  border-left: 2px solid transparent;
-  padding: 6px 18px;
-  transition: color .15s, border-color .15s, background .15s;
-}
-.md-nav--primary > .md-nav__list > .md-nav__item > .md-nav__link:hover,
-.md-nav--primary > .md-nav__list > .md-nav__item > .md-nav__link--active {
-  color: var(--ki-act);
-  border-left-color: var(--ki-act);
-  background: var(--ki-act-bg);
-}
-
-/* H3-Links (Pattern-Namen) */
-.md-nav--primary .md-nav__list .md-nav__list .md-nav__link {
-  font-family: "JetBrains Mono", monospace;
-  font-size: .72rem;
-  color: var(--ki-sb-text);
-  border-left: 2px solid transparent;
-  padding: 3px 18px 3px 32px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  transition: color .12s, background .12s;
-}
-.md-nav--primary .md-nav__list .md-nav__list .md-nav__link:hover,
-.md-nav--primary .md-nav__list .md-nav__list .md-nav__link--active {
-  color: var(--ki-act);
-  background: var(--ki-act-bg);
-  border-left-color: var(--ki-act);
-}
-
-/* TOC integriert (rechte Sidebar wenn toc.integrate aus) */
-.md-sidebar--secondary { background: var(--ki-bg); }
-.md-sidebar--secondary .md-nav__link {
-  font-family: "JetBrains Mono", monospace;
-  font-size: .72rem;
-  color: var(--ki-mt);
-}
-.md-sidebar--secondary .md-nav__link:hover,
-.md-sidebar--secondary .md-nav__link--active { color: var(--ki-acc); }
-
-/* ══════════════════════════════════════════════════════════════════════════
-   MAIN CONTENT
-   ══════════════════════════════════════════════════════════════════════════ */
-.md-content {
-  background-color: var(--ki-bg);
-}
-/* Sicherstellen dass Content-Bereich nicht hinter Sidebar versteckt wird */
-@media screen and (min-width: 76.25em) {
-  .md-main__inner {
-    margin-left: clamp(320px, 22vw, 460px) !important;
-  }
-}
-.md-content__inner {
-  max-width: var(--ki-content-max);
-  padding: var(--ki-content-pad-top) var(--ki-content-pad-x) 6rem;
-  /* Sicherstellen dass der Content den verfügbaren Platz nutzt */
-  width: 100%;
-  box-sizing: border-box;
-}
-
-/* ── Überschriften ── */
-.md-typeset h1 {
-  font-family: "Georgia", serif;
-  font-size: 2rem;
-  font-weight: 400;
-  color: var(--ki-tx);
-  border-bottom: 2px solid var(--ki-al);
-  padding-bottom: .5rem;
-  margin-bottom: 1rem;
-}
-
-.md-typeset h2 {
-  font-family: "Georgia", serif;
-  font-size: 1.45rem;
-  font-weight: 400;
-  color: var(--ki-tx);
-  border-bottom: 1px solid var(--ki-bd);
-  padding: 1rem 0 .5rem;
-  margin-top: 3.5rem;
-}
-
-.md-typeset h3 {
-  font-family: "Georgia", serif;
-  font-size: 1.2rem;
-  font-weight: 400;
-  font-style: italic;
-  color: #3730a3;
-  margin-top: 2.5rem;
-  margin-bottom: .25rem;
-}
-
-.md-typeset h4 {
-  font-family: "JetBrains Mono", monospace;
-  font-size: .78rem;
-  font-weight: 700;
-  color: var(--ki-mt);
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  border-bottom: 1px solid var(--ki-bd);
-  padding-bottom: .25rem;
-  margin-top: 1.4rem;
-}
-
-.md-typeset h5, .md-typeset h6 {
-  font-family: "JetBrains Mono", monospace;
-  color: var(--ki-mt);
-}
-
-/* ── Links ── */
-.md-typeset a {
-  color: var(--ki-acc);
-  text-decoration: none;
-}
-.md-typeset a:hover { text-decoration: underline; }
-
-/* ── Fließtext ── */
-.md-typeset p     { margin-bottom: .75rem; }
-.md-typeset em    { color: var(--ki-mt); }
-.md-typeset hr    { border-color: var(--ki-bd); margin: 2.5rem 0; }
-.md-typeset ul li { margin-bottom: .25rem; }
-
-/* ══════════════════════════════════════════════════════════════════════════
-   BLOCKQUOTES — Lila Akzent wie im HTML-Design
-   ══════════════════════════════════════════════════════════════════════════ */
-.md-typeset blockquote {
-  border-left: 3px solid var(--ki-am);
-  background: var(--ki-al);
-  padding: .6rem 1rem;
-  margin: .9rem 0;
-  border-radius: 0 6px 6px 0;
-  font-size: .9rem;
-  color: #4c1d95;
-}
-.md-typeset blockquote p { margin: 0; color: #4c1d95; }
-
-/* ══════════════════════════════════════════════════════════════════════════
-   ADMONITIONS als Intent-Boxen + farbige Pattern-Kategorien
-   ══════════════════════════════════════════════════════════════════════════ */
-
-/* Basis — kein gerundeter Rand, quadratische Ästhetik */
-.md-typeset .admonition,
-.md-typeset details {
-  border-radius: 0 8px 8px 0;
-  border-left: 3px solid var(--ki-ibd);
-  border-top: none;
-  border-right: none;
-  border-bottom: none;
-  font-size: .92rem;
-  margin: 1rem 0;
-}
-.md-typeset .admonition-title,
-.md-typeset summary {
-  font-family: "JetBrains Mono", monospace;
-  font-size: .72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  padding: .45rem .75rem;
-}
-
-/* info → Intent-Box (Lila) */
-.md-typeset .admonition.info  { background: var(--ki-ib); border-left-color: var(--ki-ibd); }
-.md-typeset .info > .admonition-title { background: var(--ki-ibd); color: #fff; }
-
-/* note → Allgemein (Navy) */
-.md-typeset .admonition.note  { background: #f0f4f8; border-left-color: var(--ki-sb); }
-.md-typeset .note > .admonition-title { background: var(--ki-sb); color: #fff; }
-
-/* warning → Anti-Pattern (Bernstein) */
-.md-typeset .admonition.warning { background: #fffbeb; border-left-color: #92400e; }
-.md-typeset .warning > .admonition-title { background: #92400e; color: #fef3c7; }
-
-/* danger → Pflicht (Rot) */
-.md-typeset .admonition.danger { background: #fff1f2; border-left-color: #9f1239; }
-.md-typeset .danger > .admonition-title { background: #9f1239; color: #ffe4e6; }
-
-/* tip → Tipp (Grün) */
-.md-typeset .admonition.tip   { background: #f0fdf4; border-left-color: #065f46; }
-.md-typeset .tip > .admonition-title { background: #065f46; color: var(--ki-green-fg); }
-
-/* success → Vorteil */
-.md-typeset .admonition.success { background: #f0fdf4; border-left-color: #166534; }
-.md-typeset .success > .admonition-title { background: #166534; color: var(--ki-green-fg); }
-
-/* ══════════════════════════════════════════════════════════════════════════
-   TABELLEN — Navy-Header, Grün erste Spalte, Bernstein letzte Spalte
-   ══════════════════════════════════════════════════════════════════════════ */
-.md-typeset table:not([class]) {
-  width: 100%;
-  border-collapse: collapse;
-  font-family: "JetBrains Mono", monospace;
-  font-size: .82rem;
-  margin: .9rem 0;
-}
-
-.md-typeset table:not([class]) thead tr th {
-  background-color: var(--ki-sb);
-  color: var(--ki-sb-text);
-  padding: 8px 12px;
-  font-size: .68rem;
-  text-transform: uppercase;
-  letter-spacing: .07em;
-  font-weight: 400;
-  border: none;
-}
-/* Erste Spalte: Grün */
-.md-typeset table:not([class]) thead tr th:first-child {
-  background-color: var(--ki-green-bg);
-  color: var(--ki-green-fg);
-}
-/* Letzte Spalte: Bernstein */
-.md-typeset table:not([class]) thead tr th:last-child {
-  background-color: var(--ki-amber-bg);
-  color: var(--ki-amber-fg);
-}
-
-.md-typeset table:not([class]) tbody tr td {
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--ki-bd);
-  border-left: none;
-  border-right: none;
-  vertical-align: top;
-  line-height: 1.5;
-  color: var(--ki-tx);
-  background: none;
-}
-.md-typeset table:not([class]) tbody tr:hover td {
-  background-color: #f8f6ff;
-}
-/* Gerade Zeilen leicht getönt */
-.md-typeset table:not([class]) tbody tr:nth-child(even) td {
-  background-color: #fafaf8;
-}
-.md-typeset table:not([class]) tbody tr:nth-child(even):hover td {
-  background-color: #f8f6ff;
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   CODE — Dunkler Hintergrund, Lila-Rand wie im HTML-Design
-   ══════════════════════════════════════════════════════════════════════════ */
-
-/* Inline-Code */
-.md-typeset code {
-  font-family: "JetBrains Mono", monospace;
-  font-size: .82em;
-  background: var(--ki-cb);
-  color: #5b21b6;
-  padding: 2px 5px;
-  border-radius: 3px;
-}
-
-/* Code-Blöcke */
-.md-typeset pre {
-  background: var(--ki-code-bg) !important;
-  border-radius: 8px;
-  border-left: 3px solid var(--ki-acc);
-  margin: .9rem 0;
-  line-height: 1.6;
-}
-.md-typeset pre > code {
-  background: none;
-  color: var(--ki-code-fg);
-  font-size: .8rem;
-  padding: 0;
-}
-
-/* Pygments Highlight-Theme anpassen (dark background) */
-.highlight { background: var(--ki-code-bg) !important; border-radius: 8px; }
-.highlight .hll { background: rgba(167,139,250,.15); }
-.highlight .c, .highlight .c1, .highlight .cm { color: #6272a4; font-style: italic; }
-.highlight .k  { color: #ff79c6; }
-.highlight .kn { color: #ff79c6; }
-.highlight .n  { color: var(--ki-code-fg); }
-.highlight .s, .highlight .s1, .highlight .s2 { color: #f1fa8c; }
-.highlight .mi { color: #bd93f9; }
-.highlight .nc { color: #8be9fd; }
-.highlight .nd { color: #50fa7b; }
-.highlight .nf { color: #50fa7b; }
-.highlight .o  { color: #ff79c6; }
-.highlight .p  { color: var(--ki-code-fg); }
-
-/* Copy-Button */
-.md-clipboard { color: rgba(255,255,255,.3); }
-.md-clipboard:hover { color: var(--ki-act); }
-
-/* ══════════════════════════════════════════════════════════════════════════
-   MERMAID-DIAGRAMME
-   Strategie: helles Schema — dunkler Text auf hellem Hintergrund.
-   Mermaid 10 rendert Labels in foreignObject>div>span (kein SVG-text),
-   daher wirkt nur `color`, nicht `fill`. CSS greift NACH dem JS-Render.
-   ══════════════════════════════════════════════════════════════════════════ */
-
-/* Container */
-.mermaid,
-pre.mermaid {
-  background: #fafafa;
-  border: 1px solid var(--ki-bd);
-  border-radius: 8px;
-  padding: 24px 20px;
-  margin: .9rem 0;
-  overflow-x: auto;
-  text-align: center;
-}
-
-/* ── SVG-Wurzel ── */
-.mermaid svg {
-  font-family: "JetBrains Mono", monospace !important;
-  max-width: 100%;
-}
-
-/* ── Knoten-Formen (SVG rect/circle/polygon) ── */
-.mermaid svg .node rect,
-.mermaid svg .node circle,
-.mermaid svg .node ellipse,
-.mermaid svg .node polygon,
-.mermaid svg .node path,
-.mermaid svg g.node rect,
-.mermaid svg g.node circle {
-  fill:         #ede9fe !important;   /* helles Lila */
-  stroke:       #6d28d9 !important;   /* kräftiges Lila */
-  stroke-width: 2px     !important;
-}
-
-/* ── Knoten-Text: SVG <text> Elemente ── */
-.mermaid svg .node text,
-.mermaid svg .node tspan,
-.mermaid svg text {
-  fill:        #1e1e2e !important;   /* fast Schwarz */
-  font-family: "JetBrains Mono", monospace !important;
-  font-size:   12px               !important;
-  font-weight: 500                !important;
-}
-
-/* ── Knoten-Text: foreignObject > div > span (Mermaid 10 HTML-Labels) ── */
-.mermaid svg foreignObject > div,
-.mermaid svg foreignObject > div > *,
-.mermaid .nodeLabel,
-.mermaid .nodeLabel *,
-.mermaid p.nodeLabel,
-.mermaid span.nodeLabel {
-  color:       #1e1e2e       !important;
-  font-family: "JetBrains Mono", monospace !important;
-  font-size:   12px          !important;
-  font-weight: 500           !important;
-  line-height: 1.35          !important;
-  background:  transparent   !important;
-}
-
-/* ── Subgraphen / Cluster ── */
-.mermaid svg .cluster rect,
-.mermaid svg .subgraph rect {
-  fill:         #f0ebff !important;
-  stroke:       #7c3aed !important;
-  stroke-width: 1.5px   !important;
-}
-.mermaid svg .cluster text,
-.mermaid svg .cluster span,
-.mermaid svg .subgraphTitleText {
-  fill:        #4c1d95 !important;
-  color:       #4c1d95 !important;
-  font-weight: 700     !important;
-  font-size:   11px    !important;
-  text-transform: uppercase;
-  letter-spacing: .05em;
-}
-
-/* ── Kanten (Linien & Pfeile) ── */
-.mermaid svg .edgePath path,
-.mermaid svg .flowchart-link,
-.mermaid svg path.path {
-  stroke:       #6d28d9 !important;
-  stroke-width: 1.5px   !important;
-  fill:         none    !important;
-}
-
-/* ── Pfeilspitzen ── */
-.mermaid svg defs marker path,
-.mermaid svg marker path,
-.mermaid svg .arrowhead path {
-  fill:   #6d28d9 !important;
-  stroke: #6d28d9 !important;
-}
-
-/* ── Kantenbeschriftungen ── */
-.mermaid svg .edgeLabel foreignObject,
-.mermaid svg .edgeLabel rect {
-  background: #fff !important;
-  fill:       #fff !important;
-}
-.mermaid svg .edgeLabel span,
-.mermaid svg .edgeLabel p,
-.mermaid .edgeLabel .label {
-  color:       #3730a3 !important;
-  background:  #f5f3ff !important;
-  font-size:   11px    !important;
-  font-family: "JetBrains Mono", monospace !important;
-  border-radius: 3px;
-  padding: 1px 4px;
-}
-
-/* ── Datenbank-Zylinder ([(name)]) ── */
-.mermaid svg .node .label foreignObject div {
-  color: #1e1e2e !important;
-}
-
-/* ── Rauten (Entscheidungen {}) ── */
-.mermaid svg .node.rhombus rect,
-.mermaid svg g.node > polygon {
-  fill:   #ddd6fe !important;
-  stroke: #6d28d9 !important;
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   PROGRESS-LEISTE oben (Material nutzt eigene — hier Farbe überschreiben)
-   ══════════════════════════════════════════════════════════════════════════ */
-.md-progress {
-  background-color: var(--ki-acc) !important;
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   FOOTER
-   ══════════════════════════════════════════════════════════════════════════ */
-.md-footer {
-  background-color: var(--ki-sb);
-  color: var(--ki-sb-text);
-}
-.md-footer-meta { background-color: #0f0f1a; }
-.md-footer__link { color: var(--ki-sb-text); }
-.md-footer__link:hover { color: var(--ki-act); }
-
-/* ══════════════════════════════════════════════════════════════════════════
-   BACK-TO-TOP BUTTON
-   ══════════════════════════════════════════════════════════════════════════ */
-.md-top {
-  background-color: var(--ki-acc);
-  color: #ffffff;
-  border-radius: 50%;
-  box-shadow: 0 2px 8px rgba(109,40,217,.35);
-}
-.md-top:hover { background-color: #5b21b6; }
-
-/* ══════════════════════════════════════════════════════════════════════════
-   RESPONSIVE — Mobile: Sidebar ausblenden
-   ══════════════════════════════════════════════════════════════════════════ */
-
-/* ══════════════════════════════════════════════════════════════════════════
-   TWISTY — Auf-/Zuklappen der Hauptkapitel in der linken Sidebar
-   ══════════════════════════════════════════════════════════════════════════ */
-
-/* Pfeil-Icon neben jedem klappbaren Kapitel */
-.md-nav--primary .md-nav__icon {
-  color: var(--ki-sb-text);
-  font-size: .75rem;
-  transition: transform .2s ease, color .15s;
-  margin-left: auto;
-  flex-shrink: 0;
-}
-
-/* Pfeil dreht sich beim Aufklappen */
-.md-nav--primary .md-nav__toggle:checked ~ .md-nav__link .md-nav__icon,
-.md-nav--primary .md-nav__item--nested > .md-nav__link .md-nav__icon {
-  color: var(--ki-act);
-}
-
-/* Kapitel-Label: Pfeil rechts, Text links — als Flex-Zeile */
-.md-nav--primary > .md-nav__list > .md-nav__item--nested > .md-nav__link {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  user-select: none;
-}
-
-/* Aktives/geöffnetes Kapitel — Pfeil lila */
-.md-nav--primary .md-nav__item--active > .md-nav__link .md-nav__icon,
-.md-nav--primary .md-nav__toggle:checked ~ .md-nav__link .md-nav__icon {
-  color: var(--ki-act) !important;
-  transform: rotate(90deg);
-}
-
-/* Hover auf Kapitel-Label — Pfeil aufhellen */
-.md-nav--primary > .md-nav__list > .md-nav__item--nested > .md-nav__link:hover .md-nav__icon {
-  color: #ffffff;
-}
-
-/* Unterpunkte: sanfte Ein-/Ausblend-Animation */
-.md-nav--primary .md-nav__item--nested .md-nav {
-  overflow: hidden;
-  transition: max-height .25s ease;
-}
-
-/* Eingeklappter Zustand: kein Padding, keine Lücke */
-.md-nav--primary .md-nav__item--nested:not(.md-nav__item--active) > .md-nav {
-  display: none;
-}
-
-/* Trennlinie zwischen Hauptkapiteln */
-.md-nav--primary > .md-nav__list > .md-nav__item--nested {
-  border-bottom: 1px solid rgba(255,255,255,.06);
-}
-.md-nav--primary > .md-nav__list > .md-nav__item--nested:first-child {
-  border-top: 1px solid rgba(255,255,255,.06);
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   RESPONSIVE BREAKPOINTS
-   ══════════════════════════════════════════════════════════════════════════ */
-
-/* Tablet / kleines Laptop (< 1220px) */
-@media screen and (max-width: 76.1875em) {
-  :root {
-    --md-sidebar-width:   clamp(280px, 24vw, 420px);
-    --ki-content-max:     90vw;
-    --ki-content-pad-x:   clamp(1rem, 2.5vw, 2.5rem);
-  }
-  .md-nav--primary {
-    background-color: var(--ki-sb);
-  }
-  .md-nav--primary .md-nav__title {
-    background-color: #0f0f1a;
-    color: #fff;
-  }
-}
-
-/* Mobile (< 960px) — Sidebar als Overlay */
-@media screen and (max-width: 60em) {
-  :root {
-    --ki-content-max:     100%;
-    --ki-content-pad-x:   1.25rem;
-    --ki-content-pad-top: 1.25rem;
-  }
-  .md-content__inner {
-    padding: 1.25rem 1.25rem 4rem;
-  }
-}
-
-/* Großer Monitor (> 1600px) — mehr Luft */
-@media screen and (min-width: 100em) {
-  :root {
-    --md-sidebar-width:   clamp(360px, 22vw, 480px);
-    --ki-content-max:     clamp(900px, 68vw, 1300px);
-    --ki-content-pad-x:   clamp(3rem, 4vw, 5rem);
-  }
-}
-
-/* Ultra-Wide (> 2000px) */
-@media screen and (min-width: 125em) {
-  :root {
-    --md-sidebar-width:   clamp(380px, 20vw, 500px);
-    --ki-content-max:     clamp(1000px, 62vw, 1500px);
-  }
-}
+[data-md-color-scheme="slate"] .badge-einstieg   { background: #1b5e20; color: #a5d6a7; }
+[data-md-color-scheme="slate"] .badge-fortgeschr { background: #4e342e; color: #ffb74d; }
+[data-md-color-scheme="slate"] .badge-expert     { background: #b71c1c; color: #ef9a9a; }
+[data-md-color-scheme="slate"] .badge-pflicht    { background: #004d40; color: #80cbc4; }
