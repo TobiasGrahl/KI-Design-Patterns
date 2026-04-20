@@ -233,6 +233,18 @@ Nicht alle Muster sind gleich wichtig. Diese acht sollten **von Anfang an** impl
 
 > **Muster-Bewertungs-Attribute:** 🔄 Lernend (verbessert sich mit Nutzung?) · 🎯 Determinismus (gleiches Input → gleiches Output?) · 🔍 XAI (Erklärbarkeit: Hoch / Mittel / Gering) · 👤 HitL (Human-in-the-Loop: Optional / Empfohlen / Pflicht) · 🔒 DSGVO-Risiko (Niedrig / Mittel / Hoch) · 📊 Datenbedarf (Gering / Mittel / Hoch) — vollständige Beschreibung: [Muster-Bewertungs-Framework](#muster-bewertungs-framework-6-attribute)
 
+---
+
+## Über den Autor
+
+Tobias Grahl erwarb seinen Universitätsabschluss in Angewandter Informatik an der Universität Hamburg — zu einer Zeit, als Künstliche Intelligenz noch ein akademisches Randthema war. Die Auseinandersetzung mit KI-Methoden begann für ihn bereits während des Studiums und hat ihn seitdem nicht losgelassen.
+
+Seit über 30 Jahren konzipiert und leitet er komplexe IT-Projekte im öffentlichen Sektor — von Bundesbehörden über Landesverwaltungen bis hin zu kommunalen Einrichtungen. Seine Schwerpunkte liegen auf serviceorientierten Architekturen, Prozessautomatisierung und der digitalen Transformation von Verwaltungsprozessen. Zu diesen Themen hat er mehrfach publiziert und auf nationalen Fachkonferenzen referiert.
+
+In den letzten Jahren hat er sich intensiv mit generativer KI und dem Aufbau produktionsreifer KI-Backends befasst. Die vorliegende Muster-Bibliothek ist das Ergebnis dieser Arbeit: Systeme, die heute mit LLMs gebaut werden, stellen eigene Anforderungen an Architektur, Resilienz und Qualitätssicherung — Anforderungen, für die etablierte Entwurfsmuster allein nicht ausreichen. Dieses Buch wurde für KI geschrieben und mit KI erstellt.
+
+---
+
 ## 1. Business-Muster
 
 > **Kategorie:** K · Business-Muster
@@ -7572,44 +7584,6 @@ Coding-Agents haben die Pattern-Literatur in ihrem Trainingskorpus — GoF, POSA
 Für den Entwickler bedeutet das: Das Erlernen eines Pattern-Katalogs ist keine theoretische Übung, sondern eine unmittelbar produktive Investition. Jedes sauber benannte Pattern spart in der Zusammenarbeit mit Coding-Agents Minuten bis Stunden pro Task.
 
 ---
-
-## Anhang B: Bibliografie & Weiterführendes
-
-Die Muster in diesem Buch stehen auf den Schultern einer umfangreichen Literatur. Diese Auswahl enthält die wichtigsten Primärquellen und Standardreferenzen.
-
-### Klassische Design-Pattern-Literatur
-
-- **Gamma, E., Helm, R., Johnson, R., Vlissides, J.** (1994). *Design Patterns: Elements of Reusable Object-Oriented Software.* Addison-Wesley. — Das Referenzwerk, das die Pattern-Sprache in die Softwareentwicklung einführte.
-- **Hohpe, G., Woolf, B.** (2003). *Enterprise Integration Patterns.* Addison-Wesley. — Grundlage für Muster wie Saga, Outbox, Message-Routing, die in agentischen Systemen ebenfalls greifen.
-- **Fowler, M.** (2002). *Patterns of Enterprise Application Architecture.* Addison-Wesley.
-
-### LLM- und RAG-Primärquellen
-
-- **Lewis, P. et al.** (2020). *Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.* NeurIPS. — Original-Paper zu RAG.
-- **Yao, S. et al.** (2023). *ReAct: Synergizing Reasoning and Acting in Language Models.* ICLR. — Grundlage für Sektion 13.1.
-- **Gao, L. et al.** (2023). *Precise Zero-Shot Dense Retrieval without Relevance Labels.* ACL. — HyDE-Pattern (→ 2.4, 16.3).
-- **Cormack, G. V., Clarke, C. L. A., Büttcher, S.** (2009). *Reciprocal Rank Fusion Outperforms Condorcet and Individual Rank Learning Methods.* SIGIR. — Grundlage für Sektion 14.1.
-- **Shinn, N. et al.** (2023). *Reflexion: Language Agents with Verbal Reinforcement Learning.* NeurIPS.
-
-### Betrieb und Qualitätssicherung
-
-- **OpenTelemetry-Dokumentation.** opentelemetry.io — Grundlage für Sektion 8.1.
-- **Anthropic: Claude Prompt Engineering Guide.** docs.anthropic.com — Insbesondere zu Prefill, Tool Use und Prompt-Caching.
-- **OpenAI: Structured Outputs Guide.** platform.openai.com/docs — Grundlage für Sektion 12.
-- **Liu, J. et al.** *Instructor: Pythonic Structured Outputs for LLMs.* github.com/instructor-ai/instructor — Bibliothek hinter Sektion 12.2.
-
-### Branchenreports und Diskussionsgrundlagen
-
-- **Thoughtworks Technology Radar.** thoughtworks.com/radar — Halbjährliche Einschätzungen zu KI-Engineering-Praktiken; Prägung des Begriffs *cognitive debt*.
-- **Anthropic: Building Effective Agents.** anthropic.com/engineering — Grundlegende Unterscheidung zwischen Workflow und Agent (→ Sektion 13 Entscheidungsregel).
-
-### Weiterführende Perspektiven
-
-- **Karpathy, A.** *Software 2.0 / 3.0 Essays.* — Einordnung der Rolle von LLMs in der Softwarearchitektur.
-- **Fowler, M.** *Expanding AI Capability Patterns.* martinfowler.com — Aktuelle Pattern-Diskussion für LLM-intensive Systeme.
-
----
-
 ## Hinweise zur Diagramm-Darstellung
 
 Die Mermaid-Diagramme in diesem Dokument erfordern einen Renderer mit Mermaid-Unterstützung (z. B. GitHub, GitLab, Obsidian, VS Code mit Erweiterung). Alle Diagramme sind mit einer kurzen Textbeschreibung direkt darunter versehen — diese dienen als Fallback, wenn das Diagramm nicht gerendert wird.
