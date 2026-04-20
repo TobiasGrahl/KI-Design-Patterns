@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="KI-Design-Patterns-Cover.png"
+       alt="KI-Muster-Bibliothek" width="320"/>
+</div>
 # KI-Muster-Bibliothek
 
 ### Design Patterns für die KI-Softwareentwicklung
@@ -256,37 +260,16 @@ Business-Muster beschreiben KI-Fähigkeiten auf Anwendungsebene: *Was kann KI f�
 Jedes Muster enthält die **6 Bewertungs-Attribute** (→ [Muster-Bewertungs-Framework](#muster-bewertungs-framework-6-attribute)) sowie Verweise auf relevante technische Implementierungsmuster.
 ### Alle 14 Business-Muster im Überblick
 
-```mermaid
-graph LR
-    ROOT(("KI-<br/>Fähigkeiten")):::root
+| **Wissen + Retrieval** | **Steuerung + Routing** | **Datengewinnung** | **Textproduktion** |
+|---|---|---|---|
+| 1.1 Semantische Suche | 1.2 Klassifikation & Routing | 1.3 Informationsextraktion | 1.4 Generierung & Drafting |
+| 1.5 Zusammenfassung | 1.13 Ranking + Empfehlung | 1.9 Multimodale Analyse | 1.11 Übersetzung + Vereinfachung |
+| | | 1.10 Dokumentvergleich | |
 
-    ROOT --> C1["Wissen +<br/>Retrieval"]:::cat
-    ROOT --> C2["Steuerung +<br/>Routing"]:::cat
-    ROOT --> C3["Daten-<br/>gewinnung"]:::cat
-    ROOT --> C4["Text-<br/>produktion"]:::cat
-    ROOT --> C5["Qualitäts-<br/>sicherung"]:::cat
-    ROOT --> C6["Analyse +<br/>Planung"]:::cat
-    ROOT --> C7["Automation"]:::cat
-
-    C1 --> P1["Semantische<br/>Suche"]:::pat
-    C1 --> P2["Zusammen-<br/>fassung"]:::pat
-    C2 --> P3["Klassifikation<br/>Routing"]:::pat
-    C2 --> P4["Ranking +<br/>Empfehlung"]:::pat
-    C3 --> P5["Informations-<br/>extraktion"]:::pat
-    C3 --> P6["Multimodale<br/>Analyse"]:::pat
-    C3 --> P7["Dokument-<br/>vergleich"]:::pat
-    C4 --> P8["Generierung<br/>Drafting"]:::pat
-    C4 --> P9["Übersetzung<br/>Vereinfachung"]:::pat
-    C5 --> P10["Validierung<br/>Plausibilität"]:::pat
-    C5 --> P11["Anomalie-<br/>Erkennung"]:::pat
-    C6 --> P12["Prognose"]:::pat
-    C7 --> P13["Agent"]:::pat
-    C7 --> P14["Prozess-<br/>automatisierung"]:::pat
-
-    classDef root fill:#6366f1,stroke:#4f46e5,color:#fff,font-weight:bold
-    classDef cat fill:#dbeafe,stroke:#3b82f6,color:#1e3a8a,font-weight:600
-    classDef pat fill:#f8fafc,stroke:#cbd5e1,color:#475569
-```
+| **Qualitätssicherung** | **Analyse + Planung** | **Automation** |
+|---|---|---|
+| 1.12 Validierung & Plausibilität | 1.8 Prognose | 1.6 Autonomer Agent |
+| 1.7 Anomalieerkennung | | 1.14 Prozessautomatisierung |
 
 *Diagramm: Alle 14 Business-Muster gruppiert in 7 Kategorien — Wissen & Retrieval (Semantische Suche, Zusammenfassung), Steuerung & Routing (Klassifikation, Ranking), Datengewinnung (Extraktion, Multimodal, Vergleich), Textproduktion (Generierung, Übersetzung), Qualitätssicherung (Validierung, Anomalie), Analyse & Planung (Prognose) sowie Automation (Agent, Prozessautomatisierung).*
 
