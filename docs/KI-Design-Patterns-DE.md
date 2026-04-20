@@ -1,10 +1,34 @@
-# KI-Muster-Bibliothek — Best Practices für KI-intensive Backend-Systeme
+# KI-Muster-Bibliothek
 
-Ein praktischer Leitfaden für **Software-Ingenieure und Software-Architekten**, die produktionsreife KI-Backends bauen. Kein Überblick, keine Theorie — konkrete Muster mit vollständigem Code, klaren Trade-offs und Entscheidungsregeln für den Alltag.
+### Design Patterns für die KI-Softwareentwicklung
 
-Jedes technische Muster folgt dem Schema: **Problem → Lösung → vollständiger Python-Code → Wann einsetzen / Wann nicht**. Business-Muster (Sektion 1) folgen dem Schema: **Use-Case → Governance-Profil → Implementierungs-Verweis**.
+Ein praktischer Leitfaden für **Software-Ingenieure, Software-Architekten sowie technische Projektleiter und Product Owner**, die produktionsreife KI-Systeme bauen und verantworten. Kein Überblick, keine Theorie — konkrete Muster mit vollständigem Code, klaren Trade-offs und Entscheidungsregeln für den Alltag.
 
-© amkat.de 2026
+Jedes technische Muster folgt demselben Grundschema: **Problem → Lösung → Struktur → Implementierungshinweise → Konsequenzen → Verwandte Muster**. Nicht jedes Muster benötigt jeden Abschnitt in voller Länge — kleinere, eigenständige Muster konzentrieren sich auf Problem, Implementierung und Konsequenzen; größere Muster mit Architekturwirkung führen zusätzlich „Lösung" (die Rationale hinter dem Entwurf) und „Struktur" (Diagramm der Bausteine) aus. Business-Muster (Sektion 1) folgen einem eigenen, kompakteren Schema: **Use-Case → Struktur → Konsequenzen → Verwandte Muster → Implementierungs-Verweis**, weil ihre Aufgabe die Entscheidungsunterstützung ist, nicht die konkrete Implementierung.
+
+© Tobias Grahl, amkat.de — 2026. Alle Rechte vorbehalten.
+
+## Warum dieses Buch
+
+Als Gamma, Helm, Johnson und Vlissides 1994 ihren Musterkatalog veröffentlichten, gaben sie Entwicklern ein gemeinsames Vokabular: „Observer", „Strategy", „Factory" – Begriffe, die halbe Stunden Whiteboard-Erklärung ersparten und Best Practices über Projektgrenzen hinweg übertragbar machten. Dreißig Jahre später stehen wir vor einer neuen Klasse von Systemen, für die dieses Vokabular erst entsteht.
+
+KI-Systeme sind keine klassischen Softwaresysteme mit ein paar LLM-Calls. Sie haben andere Fehlermodi, andere Kostenstrukturen, andere Sicherheitsrisiken – und in Projekten werden dieselben Probleme neu gelöst, meist unter Zeitdruck und ohne gemeinsames Vokabular.
+
+Dieses Buch sammelt die Muster, die sich in Produktion bewährt haben: RAG-Pipelines, die nicht halluzinieren. Agenten, die nicht in Endlosschleifen laufen. Structured Outputs, die nicht an Schema-Validierung scheitern. Guardrails, Evals, Caching, Observability – beschrieben modell- und framework-unabhängig, damit die Muster Versionen überdauern.
+
+Ein weiterer Grund macht Patterns gerade jetzt unverzichtbar: **agentenbasierte Entwicklung**. Wer einem KI-Agenten sagt „baue einen Service, der Bestellungen verarbeitet", bekommt vagen Code. Wer sagt „implementiere das nach dem Saga-Pattern mit Outbox für Event-Publikation", bekommt belastbaren Code. Patterns sind damit nicht mehr nur Entwurfswerkzeug, sondern Steuerungssprache gegenüber der KI – und der wirksamste Hebel gegen das, was zunehmend als **KI-Schulden** beschrieben wird: die stille Anhäufung von Code, den am Ende niemand im Team mehr versteht.
+
+Wer Patterns kennt, kann der KI sagen, was er will. Wer sie nicht kennt, bekommt, was die KI für angemessen hält.
+
+### Exkurs: Was sind KI-Schulden?
+
+Klassische *technische Schulden* beschreiben suboptimalen Code, der bewusst akzeptiert wird, um eine Frist zu halten — mit der Verpflichtung, ihn später zu bereinigen. **KI-Schulden** sind ein Dachbegriff für verwandte, aber strukturell andere Lasten, die durch den Einsatz generativer KI im Entwicklungsprozess entstehen. Drei Ausprägungen lassen sich unterscheiden:
+
+- **Verständnis-Schulden (*understanding debt*):** Code existiert und funktioniert — aber niemand im Team hat ihn je gelesen oder begriffen. Beim ersten Fehler oder der ersten Änderung fehlt das mentale Modell, um sicher einzugreifen.
+- **Kognitive Schulden (*cognitive debt*):** Die Geschwindigkeit der Codegenerierung übersteigt die Geschwindigkeit, mit der ein Team neue Systeme durchdringen kann. Die Kluft zwischen dem, was existiert, und dem, was verstanden ist, wächst stetig.
+- **Technische Schulden 2.0:** KI-generierter Code enthält unsichtbare Kompromisse — ineffiziente Algorithmen, veraltete Bibliotheken, subtile Anti-Pattern — die der menschliche Entwickler nicht bewusst eingegangen ist und daher auch nicht als zu tilgende Schuld dokumentiert hat.
+
+Design-Patterns sind gegen alle drei Ausprägungen das wirksamste Gegenmittel. Sie geben dem Menschen ein Rahmenwerk, in dem KI-generierter Code bewertbar bleibt; sie geben dem Coding-Agenten präzise Anweisungen, die zu verständlichem Code führen; und sie machen die Kompromisse explizit, die sonst unsichtbar bleiben.
 
 ---
 
@@ -12,13 +36,14 @@ Jedes technische Muster folgt dem Schema: **Problem → Lösung → vollständig
 
 | Version | Datum | Änderungen |
 |---|---|---|
+| 1.5 | 2026-04 | Konsolidierung von 82 auf 67 Muster: Streichung nicht-LLM-spezifischer Muster (Infrastruktur, Code-Organisation, Forecast, Validation & Plausibility, Ranking & Recommendation); Verschmelzungen als Varianten (Per-Model Throttling, CI-Integration, Embedding-/Chunk-Cache, Capability-aware Routing, Document-Context-Boost, Kosten-basiertes Routing, Cache Invalidation, Schema-Design-Richtlinien, Multi-dimensionales Confidence Scoring, Prompt-Context-Engineering); LLM Metrics in Observability verschoben (neu 8.2); Master-Referenztabelle und Navigations-Hilfen durchgängig neu generiert |
+| 1.4 | 2026-04 | KI-Schulden-Abschnitt definitorisch ausgebaut; Anhang „Patterns als Steuerungssprache für Coding-Agents"; Code-Konventionen und Tech-Stack-Voraussetzungen; Bibliografie; Nummerierungs-Konsolidierung (4.1b Output Guardrails, 11.6 Prefill, 13.5 Prompt-Caching als eigene Muster; doppeltes Tool-Use-Muster entfernt); Business-Muster-Tabellen strukturell korrigiert; Acute-Bugs in 11.1 und 11.2 behoben; Mermaid-Labels auf `<br/>` umgestellt |
 | 1.3 | 2026-04 | Produkt-unabhängige Konzept-Code-Schicht für 7.1, 6.1, 7.2, 3.2, 9.1 (Konzept + Produkt-Mapping-Tabelle); Migrations-Leitfaden ergänzt; Lösung-Abschnitte mit Warum-Erklärungen erweitert; Ghost-Header bereinigt; veraltete 20.3-Referenz entfernt |
-| 1.2 | 2026-04 | Sektionsnummern bereinigt (18=Kosten, 19=Multi-Tenancy); vollständige Master-Referenztabelle (82 Muster); Anti-Patterns-Sektion (18 Einträge in 7 Kategorien); Schnelldiagnose-Tabelle erweitert (5 neue Zeilen); fehlende ## Sektions-Header ergänzt; Business-Muster-Intro präzisiert |
-| 1.1 | 2026-04 | Zielgruppen-Sektion, Tech-Stack, Quick-Start, Systemarchitektur-Diagramm, Schwierigkeitsgrade, Anti-Pattern-Callouts, rollenbasierte Navigation; Sektionen 18 (Kosten-Management), 19 (Multi-Tenancy) ergänzt; frühere Sektion 18 (Allgemeine Backend-Muster) entfernt; PII-Redaktion (4.2) ergänzt |
+| 1.2 | 2026-04 | Sektionsnummern bereinigt (18=Kosten, 19=Multi-Tenancy); vollständige Master-Referenztabelle (82 Muster — Erweiterung gegenüber v1.0 hauptsächlich durch Sektion 14 „Erweiterte RAG-Muster", Sektion 15 „LLM-Robustheit" und feinere Aufteilung der Sicherheits- und Evals-Muster); Anti-Patterns-Sektion (18 Einträge in 7 Kategorien); Schnelldiagnose-Tabelle erweitert (5 neue Zeilen); fehlende ## Sektions-Header ergänzt; Business-Muster-Intro präzisiert |
+| 1.1 | 2026-04 | Zielgruppen-Sektion, Tech-Stack, Quick-Start, Systemarchitektur-Diagramm, Schwierigkeitsgrade, Anti-Pattern-Callouts, rollenbasierte Navigation; Sektionen 18 (Kosten-Management), 19 (Multi-Tenancy) ergänzt; frühere Sektion 16 (Allgemeine Backend-Muster) entfernt; PII-Redaktion (4.2) ergänzt |
 | 1.0 | 2026-01 | Erstveröffentlichung — 17 Sektionen, 14 Business-Muster, 39+ technische Muster |
 
 ---
-
 
 ## Für wen ist dieses Dokument?
 
@@ -26,7 +51,81 @@ Jedes technische Muster folgt dem Schema: **Problem → Lösung → vollständig
 
 **Software-Architekten**, die KI-Systeme entwerfen: Welche Fähigkeit für welchen Use-Case? Wie werden Resilienz, Observability und Testbarkeit sichergestellt? Welche Muster bilden das Fundament, welche kommen später?
 
+**Technische Projektleiter und Product Owner im KI-Umfeld** profitieren insbesondere von Sektion 1 (Business-Muster) — sie gibt ein gemeinsames Vokabular für die Abstimmung mit Entwicklungsteams, ohne dass tiefgehende Implementierungskenntnisse nötig sind.
+
 > **Nicht das richtige Dokument** für: erste Schritte mit LLMs, Einführung in Python, allgemeines Machine Learning.
+
+---
+
+## Wie dieses Buch zu lesen ist
+
+Das Buch hat drei Einstiegsebenen, die aufeinander aufbauen. Neu-Leser folgen idealerweise dieser Reihenfolge:
+
+1. **Einleitung → Quick-Start:** Acht Fundament-Muster, die jedes KI-Projekt ab Tag 1 braucht. Wer diese kennt, hat bereits 80 % der häufigsten Produktionsprobleme adressiert.
+2. **Business-Muster (Sektion 1):** Welche KI-Fähigkeit löst welchen Use-Case? Diese Sicht steht bewusst vor den technischen Sektionen, weil die Fähigkeit die Implementierung vorgibt — nicht umgekehrt.
+3. **Technische Sektionen (2–19):** Tiefe Implementierungen. Zum systematischen Durcharbeiten oder als Referenz.
+
+Die beiden Navigationshilfen **„Einstiegsleitfaden nach Rolle"** und **„Schnelldiagnose — Welches Muster löst mein Problem?"** unten sind **Referenz-Werkzeuge**, keine Einstiegspunkte: Sie helfen beim Rückgriff auf spezifische Muster, wenn ein konkretes Problem ansteht. Die **Master-Referenztabelle** am Ende des Buches listet alle 82 Muster mit Aufwand, Impact und Niveau-Bewertung — ideal für die Projektplanung.
+
+---
+
+## Muster-Kategorien
+
+Jedes Muster trägt einen Kategorie-Buchstaben (z. B. *B · Prompt Engineering*). Die vollständige Taxonomie:
+
+| Code | Kategorie | Kurzbeschreibung |
+|---|---|---|
+| A | RAG & Retrieval | Semantische Suche, Hybrid-Retrieval, Reranking, Index-Tuning |
+| B | Prompt Engineering | Prompt-Konstruktion, Beispiele, Format-Constraints, Prefill |
+| C | LLM-Output-Verarbeitung | Structured Generation, Tool Use, Streaming, Validierung |
+| D | Datenverarbeitung | Chunking, Metadaten, strukturelle Textzerlegung |
+| E | Workflow- & Resilienz-Infrastruktur | Durable Workflows, Gateway, Circuit Breaker, Fallbacks |
+| F | Agent-Patterns | ReAct, Tool Registry, HitL-Checkpoints, Agent-Memory |
+| G | Pipeline- & Workflow-Orchestrierung | Map-Reduce, mehrstufige KI-Pipelines |
+| H | Performance & Caching | Exact/Semantic/Embedding-Cache, Prompt-Caching, Concurrency |
+| I | Observability & Evals | Tracing, Metriken, Golden Datasets, LLM-as-Judge |
+| J | Sicherheit | Prompt Injection Defense, Output Guardrails, PII-Redaktion |
+| K | Business-Muster | Anwendungs-Ebene: welche KI-Fähigkeit für welchen Use-Case |
+
+---
+
+## Technische Voraussetzungen & Code-Konventionen
+
+Die Code-Beispiele sind illustrativ, keine ausführbaren Komplett-Implementierungen. Sie zeigen die Kern-Idee eines Musters so knapp wie möglich.
+
+**Programmiersprache & Version:**
+- Python ≥ 3.10 (Union-Syntax `str | None`, generische Built-ins `list[str]`, `dict[str, X]`)
+- Async-First: alle LLM-Calls sind `async`; eingebettet in FastAPI oder vergleichbare Frameworks
+
+**Typische Bibliotheken:**
+- `pydantic` ≥ 2.0 für Schema-Validierung
+- `httpx` oder `aiohttp` für Async-HTTP
+- `anthropic`, `openai` für LLM-Provider-SDKs
+- `instructor` für Schema-First-Generation (→ 12.2)
+- `structlog` oder Standard-`logging` für strukturierte Logs
+- `opentelemetry-*` für Tracing (→ 8.1)
+
+**Wiederkehrende Dummy-Funktionen:** In den Code-Beispielen tauchen folgende Funktionen als idiomatische Abkürzungen auf, die in Ihrem Projekt konkret zu implementieren sind oder aus anderen Mustern dieses Buches stammen:
+
+| Funktion | Bedeutung / Quelle |
+|---|---|
+| `llm.chat(...)` / `llm.complete(...)` | Abstrakter LLM-Aufruf über einen zentralen Gateway (→ 7.2) |
+| `llm_extract(...)` / `llm.extract(...)` | LLM-gestützte strukturierte Extraktion (→ 2.1, 12.2) |
+| `llm.summarize(...)` | LLM-gestützte Zusammenfassung/Kompression (→ 1.5, 13.6) |
+| `sliding_window(...)` | Concurrency-kontrollierte Parallelausführung (→ 5.1) |
+| `validate_against_schema(...)` | JSON-Schema-Validierung einer Dict-Struktur (→ 12.2, 13.2) |
+| `parse_llm_json(...)` | Robustes JSON-Parsing mit Markdown-Toleranz (→ 9.2) |
+| `split_into_chunks(...)` / `chunked(...)` | Token-bewusste Dokument-Zerlegung (→ 2.1, 6.x) |
+| `gather_evidence(...)` / `consolidate_evidence(...)` | Map- bzw. Reduce-Phase einer Evidence-Extraktion (→ 2.1, 2.2) |
+| `embedding_client.embed(...)` | Embedding-API-Abstraktion (Provider-agnostisch) |
+| `vector_db.search(...)` / `qdrant.search(...)` | Vektorsuche (Qdrant, Pinecone, Weaviate u. a.) |
+| `redis` | Async-Redis-Client (`redis.asyncio`) für Caches, Counter, Budgets (→ 11.x, 16.x) |
+| `Counter(...)` / `Histogram(...)` / `Gauge(...)` | Prometheus-Metriken (`prometheus_client`) (→ 8.2) |
+| `get_tenant_id()` | Tenant-Kontext aus Request-Scope (→ 17.1) |
+| `logger` | Structlog oder Standard-`logging` für strukturierte Logs |
+| `@app.post(...)` / `router` | FastAPI-Routing für API-Endpunkte |
+
+Provider-Spezifika (Claude, GPT, Gemini) werden explizit genannt, wo sie das Muster prägen; ansonsten ist der Code provider-agnostisch formuliert.
 
 ---
 
@@ -36,14 +135,14 @@ Jedes technische Muster folgt dem Schema: **Problem → Lösung → vollständig
 
 | Ich bin … und suche … | Empfohlener Einstieg |
 |---|---|
-| **Architect** · Systemdesign & Fähigkeiten | → [Sektion 1 (Business-Muster)](#1-business-muster) + [Systemarchitektur-Überblick](#systemarchitektur-überblick) |
-| **Architect** · Resilienz & Betrieb | → [Sektion 7 (Workflow-Engine)](#7-workflow-engine--resilienz) + [Sektion 9 (Observability)](#9-observability) + [Sektion 17 (LLM-Robustheit)](#17-llm-robustheit--qualitätssicherung) |
-| **Engineer** · RAG implementieren | → [Sektion 6 (RAG)](#6-retrieval-augmented-generation-rag) + [Sektion 2 (LLM-Muster)](#2-ki--llm-muster) + [Sektion 16 (Erweiterte RAG)](#16-erweiterte-rag-muster) inkl. [16.8 Reranking](#168-cross-encoder-reranking-pattern) + [16.9 HNSW](#169-hnsw--ann-index-tuning-pattern) |
-| **Engineer** · LLM-Output strukturieren | → [Sektion 14 (Structured Generation)](#14-structured-generation) + [Sektion 17.1 (Response Validator)](#17-llm-robustheit--qualitätssicherung) |
-| **Engineer** · Agent bauen | → [Sektion 15 (Agent-Patterns)](#15-agent-patterns) · zuerst [Entscheidungsregel](#agent-vs-deterministischer-prozess--entscheidungsregel) lesen |
-| **Engineer** · LLM-Stack absichern | → [Sektion 4 (Sicherheit)](#4-sicherheit--prompt-schutz) + [Sektion 17.5 (Circuit Breaker)](#17-llm-robustheit--qualitätssicherung) |
-| **Engineer** · Performance / Kosten | → [Sektion 13 (Caching)](#13-caching) + [Sektion 5 (Concurrency)](#5-concurrency--rate-limiting) + [Sektion 18 (Kosten-Management)](#18-llm-kosten-management) |
-| **Engineer** · Prompts testen | → [Sektion 12 (Evals)](#12-evals--llm-testing) + [Sektion 11 (Prompt Engineering)](#11-prompt-engineering) |
+| **Architect** · Systemdesign & Fähigkeiten | → [Sektion 1 (Business-Muster)](#1-business-muster) |
+| **Architect** · Resilienz & Betrieb | → [Sektion 7 (Workflow-Engine)](#7-workflow-engine--resilienz) + [Sektion 8 (Observability)](#8-observability) + [Sektion 15 (LLM-Robustheit)](#15-summarization-pattern) |
+| **Engineer** · RAG implementieren | → [Sektion 6 (RAG)](#6-retrieval-augmented-generation-rag) + [Sektion 2 (LLM-Muster)](#2-ki--llm-muster) + [Sektion 14 (Erweiterte RAG)](#14-generation-drafting-pattern) inkl. [14.8 Reranking](#147-cross-encoder-reranking-pattern) + [14.9 HNSW](#148-hnsw-ann-index-tuning-pattern) |
+| **Engineer** · LLM-Output strukturieren | → [Sektion 12 (Structured Generation)](#12-classification-routing-pattern) + [Sektion 15.1 (Response Validator)](#15-summarization-pattern) |
+| **Engineer** · Agent bauen | → [Sektion 13 (Agent-Patterns)](#13-information-extraction-pattern) · zuerst [Entscheidungsregel](#agent-vs-deterministischer-prozess--entscheidungsregel) lesen |
+| **Engineer** · LLM-Stack absichern | → [Sektion 4 (Sicherheit)](#4-sicherheit--prompt-schutz) + [Sektion 15.5 (Circuit Breaker)](#15-summarization-pattern) |
+| **Engineer** · Performance / Kosten | → [Sektion 11 (Caching)](#11-semantic-search-pattern) + [Sektion 5 (Concurrency)](#5-concurrency--rate-limiting) + [Sektion 16 (Kosten-Management)](#16-autonomous-agent-pattern) |
+| **Engineer** · Prompts testen | → [Sektion 10 (Evals)](#10-evals--llm-testing) + [Sektion 9 (Prompt Engineering)](#9-prompt-engineering) |
 
 > 💡 **Tipp:** Die Bewertungs-Symbole in jedem Muster-Header (🔄 🎯 🔍 👤 🔒 📊) sind im [Muster-Bewertungs-Framework](#muster-bewertungs-framework-6-attribute) erklärt.
 
@@ -58,13 +157,13 @@ Nicht alle Muster sind gleich wichtig. Diese acht sollten **von Anfang an** impl
 | Priorität | Muster | Warum jetzt? | Aufwand |
 |---|---|---|---|
 | 🔴 **1** | [LLM-Gateway (7.2)](#7-workflow-engine--resilienz) | Provider-Lock-in ist ab Tag 1 ein Risiko. Ein zentraler Gateway kostet 1 Tag und spart Wochen beim Anbieterwechsel. | Niedrig |
-| 🔴 **2** | [Structured Generation / Instructor (14.2)](#14-structured-generation) | Freies JSON-Parsing bricht in Produktion. Schema-Validierung von Anfang an — nicht als Nachbesserung. | Niedrig |
+| 🔴 **2** | [Structured Generation / Instructor (12.2)](#12-classification-routing-pattern) | Freies JSON-Parsing bricht in Produktion. Schema-Validierung von Anfang an — nicht als Nachbesserung. | Niedrig |
 | 🔴 **3** | [Prompt Injection Defense + PII-Redaktion (4.1/4.2)](#4-sicherheit--prompt-schutz) | Prompt Injection und PII-Weitergabe sind die häufigsten Sicherheitslücken. Beide gleichzeitig angehen. | Mittel |
-| 🟡 **4** | [Exaktes Caching (13.1)](#13-caching) | LLM-Kosten explodieren bei Entwicklung und Tests ohne Cache. Hash-basiertes Caching spart sofort 40–70 %. | Niedrig |
-| 🟡 **5** | [Observability-Stack (9.1)](#9-observability) | LLM-Debugging ohne strukturierte Logs und Traces ist Raten. OTel von Anfang an kostet wenig, spart enorm. | Mittel |
+| 🟡 **4** | [Exaktes Caching (11.1)](#11-semantic-search-pattern) | LLM-Kosten explodieren bei Entwicklung und Tests ohne Cache. Hash-basiertes Caching spart sofort 40–70 %. | Niedrig |
+| 🟡 **5** | [Observability-Stack (8.1)](#8-observability) | LLM-Debugging ohne strukturierte Logs und Traces ist Raten. OTel von Anfang an kostet wenig, spart enorm. | Mittel |
 | 🟡 **6** | [Sliding Window Executor (5.1)](#5-concurrency--rate-limiting) | `asyncio.gather()` auf 1000 Chunks trifft sofort Rate Limits. Concurrency-Kontrolle gehört in die Basis. | Niedrig |
 | 🟢 **7** | [Evidence + Source Pattern (2.2)](#2-ki--llm-muster) | Jede LLM-Extraktion ohne Quellzitat ist nicht verifizierbar und nicht auditierbar. | Niedrig |
-| 🟢 **8** | [Golden Dataset + Regression Tests (12.2)](#12-evals--llm-testing) | Ohne Eval-Baseline kann man Prompt-Änderungen nicht sicher deployen. 10–20 Cases reichen für den Start. | Mittel |
+| 🟢 **8** | [Golden Dataset + Regression Tests (10.2)](#10-evals--llm-testing) | Ohne Eval-Baseline kann man Prompt-Änderungen nicht sicher deployen. 10–20 Cases reichen für den Start. | Mittel |
 
 > **Reihenfolge:** 1–3 vor dem ersten Produktions-Deployment · 4–6 spätestens nach Sprint 1 · 7–8 parallel zum Feature-Aufbau
 
@@ -75,33 +174,31 @@ Nicht alle Muster sind gleich wichtig. Diese acht sollten **von Anfang an** impl
 
 | Symptom / Problem | Empfohlene Muster | Sektion |
 |---|---|---|
-| Nutzer suchen mit natürlicher Sprache, Keyword-Suche liefert schlechte Treffer | Semantic Search, Hybrid-RAG mit RRF | 1.1, 16.1 |
+| Nutzer suchen mit natürlicher Sprache, Keyword-Suche liefert schlechte Treffer | Semantic Search, Hybrid-RAG mit RRF | 1.1, 14.1 |
 | Dokument überschreitet das LLM-Kontextfenster | Map-Reduce Extraction | 2.1 |
-| LLM-Output ist kein valides JSON / bricht Schema-Validierung | Structured Generation (Instructor), LLM Response Validator | 14.2, 17.1 |
+| LLM-Output ist kein valides JSON / bricht Schema-Validierung | Structured Generation (Instructor), LLM Response Validator | 12.2, 15.1 |
 | LLM halluziniert — Extraktion nicht nachvollziehbar | Evidence + Source Pattern | 2.2 |
 | Prompt-Injection durch externen Content möglich | Prompt Injection Defense | 4.1 |
 | Rate Limits durch parallele LLM-Calls | Sliding Window Executor | 5.1 |
-| LLM-Kosten explodieren bei Entwicklung / Tests | Exaktes Hash-Caching | 13.1 |
-| Ähnliche Queries kosten jedes Mal volle LLM-Kosten | Semantisches Caching | 13.2 |
+| LLM-Kosten explodieren bei Entwicklung / Tests | Exaktes Hash-Caching | 11.1 |
+| Ähnliche Queries kosten jedes Mal volle LLM-Kosten | Semantisches Caching | 11.2 |
 | LLM-Provider-Wechsel wäre aufwendig | LLM-Gateway | 7.2 |
-| LLM-API fällt aus, Service sollte weiter laufen | Circuit Breaker, Fallback-Hierarchie | 17.5, 17.6 |
+| LLM-API fällt aus, Service sollte weiter laufen | Circuit Breaker, Fallback-Hierarchie | 15.4, 15.5 |
 | Pipeline dauert > 5 Minuten, Absturz verliert Fortschritt | Durable Workflow | 7.1 |
-| Kein Überblick über LLM-Latenz, Fehlerrate, Kosten | Observability Stack (OTel + Prometheus) | 9.1 |
-| Prompt-Änderung bricht bestehende Extraktion unbemerkt | Golden Dataset + Regression Tests | 12.2 |
-| Eingabe-Daten vor LLM-Verarbeitung prüfen | Validation & Plausibility Pattern | 1.12 |
-| Aufgabe hat > 5 variable Verzweigungen, Weg nicht vorab definierbar | Autonomous Agent (ReAct Loop) | 1.6, 15.1 |
-| Mehrere Dokumente nach Dringlichkeit sortieren | Ranking & Recommendation Pattern | 1.13 |
+| Kein Überblick über LLM-Latenz, Fehlerrate, Kosten | Observability Stack (OTel) + LLM-Metriken | 8.1, 8.2 |
+| Prompt-Änderung bricht bestehende Extraktion unbemerkt | Golden Dataset + Regression Tests | 10.2 |
+| Aufgabe hat > 5 variable Verzweigungen, Weg nicht vorab definierbar | Autonomous Agent (ReAct Loop) | 1.6, 13.1 |
 | Recall vs. Precision trade-off bei Extraktion unklar | Recall-First Screening | 2.3 |
 | Klassifikation liefert inkonsistente Kategorien | Closed Taxonomy Pattern | 2.5 |
-| Query findet relevante Chunks nicht zuverlässig | HyDE, LLM Query Expansion | 2.4, 16.3 |
-| Top-5-Retrieval-Qualität ist gut aber nicht gut genug für LLM-Antwortqualität | Cross-Encoder Reranking (Two-Stage Retrieval) | 16.8 |
-| Vektorsuche ist langsam oder Recall < 95% trotz korrekter Embeddings | HNSW / ANN Index Tuning | 16.9 |
-| LLM-Output-Qualität ist nicht messbar / vergleichbar | LLM-as-Judge, Multi-Dimensional Confidence Scorer | 12.1, 17.3 |
+| Query findet relevante Chunks nicht zuverlässig | HyDE, LLM Query Expansion | 2.4, 14.3 |
+| Top-5-Retrieval-Qualität ist gut aber nicht gut genug für LLM-Antwortqualität | Cross-Encoder Reranking (Two-Stage Retrieval) | 14.7 |
+| Vektorsuche ist langsam oder Recall < 95% trotz korrekter Embeddings | HNSW / ANN Index Tuning | 14.8 |
+| LLM-Output-Qualität ist nicht messbar / vergleichbar | LLM-as-Judge, Multi-dim. Confidence-Scoring (15.1 Variante) | 10.1, 15.1 |
 | Personenbezogene Daten (PII) werden ungefiltert an externen LLM-Provider gesendet | PII-Redaktion vor LLM-Call | 4.2 |
-| LLM-Kosten sind unsichtbar, kein Alert bei Budget-Überschreitung | LLM-Cost-Tracking (Prometheus) | 18.1 |
-| Ein Nutzer verbraucht unverhältnismäßig viel LLM-Budget | Per-User Budget Limits | 18.3 |
-| Daten eines Tenants gelangen in den Kontext eines anderen | Tenant-Isolierung in LLM-Pipelines | 19.1 |
-| Verschiedene Kunden brauchen unterschiedliches LLM-Verhalten ohne Code-Deployment | Tenant-spezifisches Prompt-Management | 19.2 |
+| LLM-Kosten sind unsichtbar, kein Alert bei Budget-Überschreitung | LLM-Cost-Tracking | 16.1 |
+| Ein Nutzer verbraucht unverhältnismäßig viel LLM-Budget | Per-User Budget Limits | 16.2 |
+| Daten eines Tenants gelangen in den Kontext eines anderen | Tenant-Isolierung in LLM-Pipelines | 17.1 |
+| Verschiedene Kunden brauchen unterschiedliches LLM-Verhalten ohne Code-Deployment | Tenant-spezifisches Prompt-Management | 17.2 |
 
 
 ---
@@ -117,22 +214,20 @@ Nicht alle Muster sind gleich wichtig. Diese acht sollten **von Anfang an** impl
 **Implementierungsschicht — Technische Muster:**
 2. [KI & LLM-Muster](#2-ki--llm-muster)
 3. [Datenverarbeitungs-Muster](#3-datenverarbeitungs-muster)
-4. [Sicherheit & Prompt-Schutz](#4-sicherheit--prompt-schutz) — inkl. 4.2 PII-Redaktion
+4. [Sicherheit & Prompt-Schutz](#4-sicherheit--prompt-schutz) — inkl. 4.1b Output Guardrails, 4.2 PII-Redaktion
 5. [Concurrency & Rate Limiting](#5-concurrency--rate-limiting)
 6. [Retrieval-Augmented Generation (RAG)](#6-retrieval-augmented-generation-rag)
 7. [Workflow-Engine & Resilienz](#7-workflow-engine--resilienz)
-8. [Infrastruktur & Deployment](#8-infrastruktur--deployment)
-9. [Observability](#9-observability)
-10. [Code-Organisation](#10-code-organisation)
-11. [Prompt Engineering](#11-prompt-engineering)
-12. [Evals & LLM-Testing](#12-evals--llm-testing)
-13. [Caching](#13-caching)
-14. [Structured Generation](#14-structured-generation)
-15. [Agent-Patterns](#15-agent-patterns)
-16. [Erweiterte RAG-Muster](#16-erweiterte-rag-muster) — inkl. 16.8 Cross-Encoder Reranking · 16.9 HNSW Index Tuning
-17. [LLM-Robustheit & Qualitätssicherung](#17-llm-robustheit--qualitätssicherung)
-18. [LLM-Kosten-Management](#18-llm-kosten-management)
-19. [Multi-Tenancy & Mandantentrennung](#19-multi-tenancy--mandantentrennung)
+8. [Observability](#8-observability)
+9. [Prompt Engineering](#9-prompt-engineering)
+10. [Evals & LLM-Testing](#10-evals--llm-testing)
+11. [Caching](#11-semantic-search-pattern)
+12. [Structured Generation](#12-classification-routing-pattern)
+13. [Agent-Patterns](#13-information-extraction-pattern)
+14. [Erweiterte RAG-Muster](#14-generation-drafting-pattern) — inkl. 14.7 Cross-Encoder Reranking · 14.8 HNSW Index Tuning
+15. [LLM-Robustheit & Qualitätssicherung](#15-summarization-pattern)
+16. [LLM-Kosten-Management](#16-autonomous-agent-pattern)
+17. [Multi-Tenancy & Mandantentrennung](#17-anomaly-detection-pattern)
 
 ---
 
@@ -142,7 +237,7 @@ Nicht alle Muster sind gleich wichtig. Diese acht sollten **von Anfang an** impl
 
 > **Kategorie:** K · Business-Muster
 
-Business-Muster beschreiben KI-Fähigkeiten auf Anwendungsebene: *Was kann KI für diesen Use-Case leisten?* Sie sind orthogonal zu den technischen Implementierungsmustern (Sektionen 2–19) und dienen als Entscheidungsschicht — welche KI-Fähigkeit für welchen Anwendungsfall, mit welchen Governance-Anforderungen.
+Business-Muster beschreiben KI-Fähigkeiten auf Anwendungsebene: *Was kann KI für diesen Use-Case leisten?* Sie sind orthogonal zu den technischen Implementierungsmustern (Sektionen 2–17) und dienen als Entscheidungsschicht — welche KI-Fähigkeit für welchen Anwendungsfall, mit welchen Governance-Anforderungen.
 
 > **Hinweis:** Business-Muster enthalten Governance-Profile und Entscheidungsregeln statt Implementierungscode — für die konkrete Umsetzung verweist jedes Muster auf die technischen Sektionen (2–19).
 
@@ -151,30 +246,30 @@ Jedes Muster enthält die **6 Bewertungs-Attribute** (→ [Muster-Bewertungs-Fra
 
 ```mermaid
 graph LR
-    ROOT(("KI-\nFähigkeiten")):::root
+    ROOT(("KI-<br/>Fähigkeiten")):::root
 
-    ROOT --> C1["Wissen +\nRetrieval"]:::cat
-    ROOT --> C2["Steuerung +\nRouting"]:::cat
-    ROOT --> C3["Daten-\ngewinnung"]:::cat
-    ROOT --> C4["Text-\nproduktion"]:::cat
-    ROOT --> C5["Qualitäts-\nsicherung"]:::cat
-    ROOT --> C6["Analyse +\nPlanung"]:::cat
+    ROOT --> C1["Wissen +<br/>Retrieval"]:::cat
+    ROOT --> C2["Steuerung +<br/>Routing"]:::cat
+    ROOT --> C3["Daten-<br/>gewinnung"]:::cat
+    ROOT --> C4["Text-<br/>produktion"]:::cat
+    ROOT --> C5["Qualitäts-<br/>sicherung"]:::cat
+    ROOT --> C6["Analyse +<br/>Planung"]:::cat
     ROOT --> C7["Automation"]:::cat
 
-    C1 --> P1["Semantische\nSuche"]:::pat
-    C1 --> P2["Zusammen-\nfassung"]:::pat
-    C2 --> P3["Klassifikation\nRouting"]:::pat
-    C2 --> P4["Ranking +\nEmpfehlung"]:::pat
-    C3 --> P5["Informations-\nextraktion"]:::pat
-    C3 --> P6["Multimodale\nAnalyse"]:::pat
-    C3 --> P7["Dokument-\nvergleich"]:::pat
-    C4 --> P8["Generierung\nDrafting"]:::pat
-    C4 --> P9["Übersetzung\nVereinfachung"]:::pat
-    C5 --> P10["Validierung\nPlausibilität"]:::pat
-    C5 --> P11["Anomalie-\nErkennung"]:::pat
+    C1 --> P1["Semantische<br/>Suche"]:::pat
+    C1 --> P2["Zusammen-<br/>fassung"]:::pat
+    C2 --> P3["Klassifikation<br/>Routing"]:::pat
+    C2 --> P4["Ranking +<br/>Empfehlung"]:::pat
+    C3 --> P5["Informations-<br/>extraktion"]:::pat
+    C3 --> P6["Multimodale<br/>Analyse"]:::pat
+    C3 --> P7["Dokument-<br/>vergleich"]:::pat
+    C4 --> P8["Generierung<br/>Drafting"]:::pat
+    C4 --> P9["Übersetzung<br/>Vereinfachung"]:::pat
+    C5 --> P10["Validierung<br/>Plausibilität"]:::pat
+    C5 --> P11["Anomalie-<br/>Erkennung"]:::pat
     C6 --> P12["Prognose"]:::pat
     C7 --> P13["Agent"]:::pat
-    C7 --> P14["Prozess-\nautomatisierung"]:::pat
+    C7 --> P14["Prozess-<br/>automatisierung"]:::pat
 
     classDef root fill:#6366f1,stroke:#4f46e5,color:#fff,font-weight:bold
     classDef cat fill:#dbeafe,stroke:#3b82f6,color:#1e3a8a,font-weight:600
@@ -205,10 +300,10 @@ Bedeutungsbasiertes Retrieval in Dokumenten, Wissensdatenbanken oder Gesetzestex
 
 ```mermaid
 graph LR
-    Q[Nutzer-Query] --> EMB[Embedding\nModel]
+    Q[Nutzer-Query] --> EMB[Embedding<br/>Model]
     EMB --> VEC[(Vektor-DB)]
-    VEC --> RANK[Ranking\nTop-K]
-    RANK --> CTX[Kontext-\naufbereitung]
+    VEC --> RANK[Ranking<br/>Top-K]
+    RANK --> CTX[Kontext-<br/>aufbereitung]
     CTX --> ANS[Antwort]
 ```
 
@@ -218,16 +313,16 @@ graph LR
 #### Konsequenzen
 
 
-| ✅ Wann geeignet | ⛔ Wann NICHT einsetzen | ⚠️ Trade-offs |
-|---|---|---|
-| Wenn Nutzer mit natürlicher Sprache suchen und Stichwort-Suche zu viele Fehlzugriffe produziert. | Semantische Suche benötigt Embeddings (Latenz + Kosten) | |
-| Kein Training nötig — LLM-Embeddings reichen. | Kein Training nötig, aber schlechte Chunk-Qualität senkt Recall massiv | |
+| ✅ Wann geeignet | ⚠️ Trade-offs & Risiken |
+|---|---|
+| Wenn Nutzer mit natürlicher Sprache suchen und Stichwort-Suche zu viele Fehlzugriffe produziert | Embeddings kosten zusätzliche Latenz und Infrastruktur (Vektor-DB) |
+| Kein Training nötig — LLM-Embeddings reichen | Schlechte Chunk-Qualität senkt Recall massiv |
 
 
 #### Verwandte Muster
 
 
-→ [Hybrid-RAG with RRF Pattern](#161-hybrid-rag-mit-reciprocal-rank-fusion) · [Adaptive Query Boosting Pattern](#162-adaptives-query-boosting) · [LLM Query Expansion Pattern](#163-llm-query-expansion-mit-budget-tracking)
+→ [Hybrid-RAG with RRF Pattern](#141-hybrid-rag-with-rrf-pattern) · [Adaptive Query Boosting Pattern](#142-adaptive-query-boosting-pattern) · [LLM Query Expansion Pattern](#143-llm-query-expansion-pattern)
 
 **Technische Implementierung:** → Sektion 6 (RAG), 16.1 (Hybrid-RAG), 16.2 (Query-Boosting), 16.3 (Query-Expansion)
 
@@ -254,11 +349,11 @@ Eingehende Objekte (Dokumente, Anfragen, Anträge) automatisch in Kategorien ein
 
 ```mermaid
 graph LR
-    IN[Eingehende\nAnfrage] --> CLS[Klassifikator\nLLM/Finetuned]
+    IN[Eingehende<br/>Anfrage] --> CLS[Klassifikator<br/>LLM/Finetuned]
     CLS --> A[Abteilung A]
     CLS --> B[Abteilung B]
     CLS --> C[Abteilung C]
-    CLS --> ESC[Eskalation\nUnklar]
+    CLS --> ESC[Eskalation<br/>Unklar]
     ESC --> HUM[👤 Mensch]
 ```
 
@@ -268,16 +363,16 @@ graph LR
 #### Konsequenzen
 
 
-| ✅ Wann geeignet | ⛔ Wann NICHT einsetzen | ⚠️ Trade-offs |
-|---|---|---|
-| Wenn Volumen zu groß für manuelle Vorprüfung und Kategorien stabil definiert sind. | Verbessert sich mit Feedback-Daten, startet aber ohne Trainingsdaten | |
-| Verbessert sich mit Feedback-Daten. | Fehlerhafte Routing-Entscheidungen erzeugen Folgeprobleme im Prozess | |
+| ✅ Wann geeignet | ⚠️ Trade-offs & Risiken |
+|---|---|
+| Wenn Volumen zu groß für manuelle Vorprüfung und Kategorien stabil definiert sind | Startet ohne Trainingsdaten — Qualität zu Beginn limitiert, verbessert sich erst mit Feedback |
+| Verbessert sich mit Feedback-Daten | Fehlerhafte Routing-Entscheidungen erzeugen Folgeprobleme im Prozess |
 
 
 #### Verwandte Muster
 
 
-→ [Closed Taxonomy Pattern](#25-geschlossene-taxonomie-fr-klassifikation) · [Document-Context Classification Pattern](#179-dokument-kontext-bewusste-klassifikation) · [Model Priority Chain Pattern](#164-model-priority-chain)
+→ [Closed Taxonomy Pattern](#25-closed-taxonomy-pattern) · [Document-Context Classification Pattern](#25-closed-taxonomy-pattern) · [Model Priority Chain Pattern](#144-model-priority-chain-pattern)
 
 **Technische Implementierung:** → Sektion 2.5 (Geschlossene Taxonomie), 17.9 (Kontext-Klassifikation), 16.4 (Model Priority-Chain)
 
@@ -304,11 +399,11 @@ Strukturierte Daten aus Formularen, PDFs, Freitext oder Scans gewinnen — autom
 
 ```mermaid
 graph LR
-    DOC[Dokument\nPDF / Scan] --> PRE[Vorverarbeitung\nOCR / Parsing]
-    PRE --> LLM[LLM\nStrukturierung]
-    LLM --> VAL[Validierung\nPydantic]
+    DOC[Dokument<br/>PDF / Scan] --> PRE[Vorverarbeitung<br/>OCR / Parsing]
+    PRE --> LLM[LLM<br/>Strukturierung]
+    LLM --> VAL[Validierung<br/>Pydantic]
     VAL -->|OK| DB[(Datenbank)]
-    VAL -->|Fehler| REP[Auto-Repair\nRetry]
+    VAL -->|Fehler| REP[Auto-Repair<br/>Retry]
     REP --> LLM
 ```
 
@@ -318,18 +413,18 @@ graph LR
 #### Konsequenzen
 
 
-| ✅ Wann geeignet | ⛔ Wann NICHT einsetzen | ⚠️ Trade-offs |
-|---|---|---|
-| Wenn Dokumente in großem Volumen anfallen und manuelle Dateneingabe Engpass ist. | DSGVO-Prüfung zwingend bei personenbezogenen Daten | |
-| DSGVO-Prüfung erforderlich, da typischerweise personenbezogene Daten. | LLM kann halluzinieren — Pydantic-Validierung und HitL sind Pflicht | |
+| ✅ Wann geeignet | ⚠️ Trade-offs & Risiken |
+|---|---|
+| Wenn Dokumente in großem Volumen anfallen und manuelle Dateneingabe Engpass ist | DSGVO-Prüfung zwingend bei personenbezogenen Daten — PII-Redaktion (→ 4.2) oft erforderlich |
+| Strukturierte Ausgabe per Schema-Validierung (→ 12.2) technisch gut beherrschbar | LLM kann halluzinieren — Pydantic-Validierung und Human-in-the-Loop sind Pflicht |
 
 
 #### Verwandte Muster
 
 
-→ [Schema-First Generation Pattern](#142-instructor--schema-validierung-first-structured-generation) · [LLM Response Validator Pattern](#171-llm-response-validator-mit-auto-repair) · [Map-Reduce Extraction Pattern](#21-map-reduce-metadaten-extraktion)
+→ [Schema-First Generation Pattern](#122-schema-first-generation-pattern) · [LLM Response Validator Pattern](#151-llm-response-validator-pattern) · [Map-Reduce Extraction Pattern](#21-map-reduce-extraction-pattern)
 
-**Technische Implementierung:** → Sektion 14 (Structured Generation), 17.1 (LLM Response Validator), 2.1 (Map-Reduce)
+**Technische Implementierung:** → Sektion 12 (Structured Generation), 17.1 (LLM Response Validator), 2.1 (Map-Reduce)
 
 
 ---
@@ -354,9 +449,9 @@ Texte, Bescheide, Berichte oder E-Mails auf Basis von strukturiertem Kontext vor
 
 ```mermaid
 graph LR
-    CTX[Fallakte /\nStrukturierter Kontext] --> LLM[LLM\nDrafting]
+    CTX[Fallakte /<br/>Strukturierter Kontext] --> LLM[LLM<br/>Drafting]
     LLM --> DRAFT[Entwurf]
-    DRAFT --> HUM[👤 Sachbearbeiter\nprüft & korrigiert]
+    DRAFT --> HUM[👤 Sachbearbeiter<br/>prüft & korrigiert]
     HUM -->|Freigabe| OUT[Finales Dokument]
     HUM -->|Ablehnung| LLM
 ```
@@ -367,18 +462,18 @@ graph LR
 #### Konsequenzen
 
 
-| ✅ Wann geeignet | ⛔ Wann NICHT einsetzen | ⚠️ Trade-offs |
-|---|---|---|
-| Wenn Textproduktion Engpass ist und ein Mensch den Entwurf ohnehin prüfen muss. | HitL ist immer Pflicht — LLM-generierte Texte dürfen nie ungeprüft weiterverwendet werden | |
-| HitL ist Pflicht — das LLM kann halluzinieren oder juristisch falsche Formulierungen wählen. | Höheres Halluzinationsrisiko bei juristischen Formulierungen | |
+| ✅ Wann geeignet | ⚠️ Trade-offs & Risiken |
+|---|---|
+| Wenn Textproduktion Engpass ist und ein Mensch den Entwurf ohnehin prüfen muss | HitL ist immer Pflicht — LLM-generierte Texte dürfen nie ungeprüft weiterverwendet werden |
+| Guter Einstieg in KI-Einsatz mit geringem Risiko (bei konsequenter Prüfung) | Höheres Halluzinationsrisiko bei juristischen oder fachlich präzisen Formulierungen |
 
 
 #### Verwandte Muster
 
 
-→ [Domain Context Pattern](#113-domnen-kontext-im-system-prompt) · [Schema Design Pattern](#143-schema-design-fr-structured-generation) · [Human-in-the-Loop Checkpoint Pattern](#153-human-in-the-loop-checkpoints)
+→ [Domain Context Pattern](#93-prompt-context-engineering-pattern) · [Schema Design Pattern](#123-streaming-structured-generation-pattern) · [Human-in-the-Loop Checkpoint Pattern](#133-human-in-the-loop-checkpoint-pattern)
 
-**Technische Implementierung:** → Sektion 11 (Prompt Engineering), 14.3 (Schema-Design)
+**Technische Implementierung:** → Sektion 9 (Prompt Engineering), 14.3 (Schema-Design)
 
 
 ---
@@ -403,11 +498,11 @@ Lange Dokumente, Protokolle, Akten oder Berichte komprimiert aufbereiten — die
 
 ```mermaid
 graph LR
-    LONG[Langes\nDokument] --> CHUNK[Chunking]
-    CHUNK --> SUM1[Zusammenfassung\nje Chunk]
-    SUM1 --> AGG[Aggregation\nMap-Reduce]
-    AGG --> FINAL[Finale\nZusammenfassung]
-    FINAL --> HUM[👤 Plausibilitäts-\nprüfung]
+    LONG[Langes<br/>Dokument] --> CHUNK[Chunking]
+    CHUNK --> SUM1[Zusammenfassung<br/>je Chunk]
+    SUM1 --> AGG[Aggregation<br/>Map-Reduce]
+    AGG --> FINAL[Finale<br/>Zusammenfassung]
+    FINAL --> HUM[👤 Plausibilitäts-<br/>prüfung]
 ```
 
 *Diagramm: Zusammenfassungs-Pipeline — langes Dokument wird in Chunks aufgeteilt; jeder Chunk wird einzeln zusammengefasst; die Chunk-Zusammenfassungen werden per Map-Reduce aggregiert zur finalen Zusammenfassung; empfohlene Plausibilitätsprüfung durch Mensch.*
@@ -416,16 +511,16 @@ graph LR
 #### Konsequenzen
 
 
-| ✅ Wann geeignet | ⛔ Wann NICHT einsetzen | ⚠️ Trade-offs |
-|---|---|---|
-| Wenn Mitarbeiter große Dokumentmengen sichten müssen. | Hierarchisches Map-Reduce nötig bei sehr langen Dokumenten | |
-| Kostengünstig, da kein Training nötig. | Qualität hängt stark von Chunk-Granularität ab | |
+| ✅ Wann geeignet | ⚠️ Trade-offs & Risiken |
+|---|---|
+| Wenn Mitarbeiter große Dokumentmengen sichten müssen | Hierarchisches Map-Reduce nötig bei sehr langen Dokumenten (→ 2.1) |
+| Kostengünstig, da kein Training nötig | Qualität hängt stark von Chunk-Granularität ab — Plausibilitätsprüfung durch Mensch empfohlen |
 
 
 #### Verwandte Muster
 
 
-→ [Map-Reduce Extraction Pattern](#21-map-reduce-metadaten-extraktion) · [Domain Context Pattern](#113-domnen-kontext-im-system-prompt) · [Token Budget Management Pattern](#165-token-budget-management-mit-tiktoken-singleton)
+→ [Map-Reduce Extraction Pattern](#21-map-reduce-extraction-pattern) · [Domain Context Pattern](#93-prompt-context-engineering-pattern) · [Token Budget Management Pattern](#145-token-budget-management-pattern)
 
 **Technische Implementierung:** → Sektion 2.1 (Map-Reduce), 11.3 (Domänen-Kontext), 16.5 (Token-Budget)
 
@@ -452,8 +547,8 @@ Autonome Orchestrierung bei variablem, unbekanntem Lösungsweg — der Agent ent
 
 ```mermaid
 graph LR
-    TASK[Aufgabe] --> PLAN[Planung\nThought]
-    PLAN --> TOOL{Tool-\nAuswahl}
+    TASK[Aufgabe] --> PLAN[Planung<br/>Thought]
+    PLAN --> TOOL{Tool-<br/>Auswahl}
     TOOL --> SEARCH[Suche]
     TOOL --> EXTRACT[Extraktion]
     TOOL --> CALC[Berechnung]
@@ -461,7 +556,7 @@ graph LR
     SEARCH & EXTRACT & CALC --> OBS[Observation]
     OBS --> PLAN
     PLAN -->|Fertig| OUT[Ergebnis]
-    OUT --> HUM[👤 HitL\nCheckpoint]
+    OUT --> HUM[👤 HitL<br/>Checkpoint]
 ```
 
 *Diagramm: ReAct-Loop eines Agenten — Aufgabe → Planung → Tool-Auswahl (Suche / Extraktion / Berechnung / Eskalation) → Observation → zurück zur Planung. Wenn fertig: Ergebnis → HitL-Checkpoint.*
@@ -470,18 +565,18 @@ graph LR
 #### Konsequenzen
 
 
-| ✅ Wann geeignet | ⛔ Wann NICHT einsetzen | ⚠️ Trade-offs |
-|---|---|---|
-| Wenn der Lösungsweg vorab nicht vollständig definierbar ist und ≥ 5 Verzweigungen existieren (→ Entscheidungsregel Sektion 15). | Höchstes Governance-Risiko: Agents agieren autonom | |
-| HitL ist bei kritischen Outputs Pflicht. | Schwer zu debuggen, zu testen und zu auditieren — HitL-Checkpoints sind unabdingbar | |
+| ✅ Wann geeignet | ⚠️ Trade-offs & Risiken |
+|---|---|
+| Wenn der Lösungsweg vorab nicht vollständig definierbar ist und ≥ 5 Verzweigungen existieren (→ Entscheidungsregel Sektion 13) | Höchstes Governance-Risiko: Agents agieren autonom — HitL-Checkpoints sind unabdingbar |
+| Flexibel bei unbekannten Fallkonstellationen | Schwer zu debuggen, zu testen und zu auditieren; höhere LLM-Kosten pro Fall |
 
 
 #### Verwandte Muster
 
 
-→ [ReAct Loop Pattern](#151-react--reason--act) · [Human-in-the-Loop Checkpoint Pattern](#153-human-in-the-loop-checkpoints) · [Agent Memory Pattern](#154-agent-memory) · [Durable Workflow Pattern](#71-durable-workflows-fr-lange-ki-pipelines)
+→ [ReAct Loop Pattern](#131-react-loop-pattern) · [Human-in-the-Loop Checkpoint Pattern](#133-human-in-the-loop-checkpoint-pattern) · [Agent Memory Pattern](#134-agent-memory-pattern) · [Durable Workflow Pattern](#71-durable-workflow-pattern)
 
-**Technische Implementierung:** → Sektion 15 (Agent-Patterns), 15.1 (ReAct), 15.3 (HitL Checkpoints), 15.4 (Agent-Memory)
+**Technische Implementierung:** → Sektion 13 (Agent-Patterns), 15.1 (ReAct), 15.3 (HitL Checkpoints), 15.4 (Agent-Memory)
 
 
 ---
@@ -506,12 +601,12 @@ Abweichungen, Inkonsistenzen und verdächtige Muster in Daten automatisch aufdec
 
 ```mermaid
 graph LR
-    DATA[Eingehende\nDaten] --> MODEL[Anomalie-\nModell]
-    MODEL --> SCORE[Anomalie-\nScore]
+    DATA[Eingehende<br/>Daten] --> MODEL[Anomalie-<br/>Modell]
+    MODEL --> SCORE[Anomalie-<br/>Score]
     SCORE -->|Score < Schwelle| OK[✅ Normal]
-    SCORE -->|Score ≥ Schwelle| ALERT[⚠️ Anomalie\nerkannt]
+    SCORE -->|Score ≥ Schwelle| ALERT[⚠️ Anomalie<br/>erkannt]
     ALERT --> HUM[👤 Prüfung]
-    HUM -->|Bestätigt| LOG[Feedback\nins Modell]
+    HUM -->|Bestätigt| LOG[Feedback<br/>ins Modell]
     HUM -->|Falsch-Positiv| LOG
 ```
 
@@ -521,69 +616,24 @@ graph LR
 #### Konsequenzen
 
 
-| ✅ Wann geeignet | ⛔ Wann NICHT einsetzen | ⚠️ Trade-offs |
-|---|---|---|
-| Wenn Volumen zu groß für manuelle Prüfung und Anomalien seltene aber kritische Ereignisse sind. | Hoher Datenbedarf: viele gelabelte Beispiele normaler Fälle nötig | |
-| Hoher Datenbedarf — benötigt viele gelabelte Beispiele normaler Fälle. | Falsch-Positive können zu Alarm-Fatigue führen | |
+| ✅ Wann geeignet | ⚠️ Trade-offs & Risiken |
+|---|---|
+| Wenn Volumen zu groß für manuelle Prüfung und Anomalien seltene aber kritische Ereignisse sind | Hoher Datenbedarf — viele gelabelte Beispiele normaler Fälle nötig |
+| Ermöglicht Erkennung von Mustern, die Regeln nicht abbilden können | Falsch-Positive können zu Alarm-Fatigue führen; Schwellwerte sorgfältig kalibrieren |
 
 
 #### Verwandte Muster
 
 
-→ [Multi-Dimensional Confidence Scorer Pattern](#173-multi-dimensional-confidence-scorer) · [LLM-as-Judge Pattern](#121-llm-as-judge)
+→ [Multi-dimensionales Confidence Scoring (15.1 Variante)](#151-llm-response-validator-pattern) · [LLM-as-Judge Pattern](#101-llm-as-judge-pattern)
+
+**Technische Implementierung:** → Sektion 2.3 (Recall-First Screening), 15.1 (LLM Response Validator + Multi-dim. Confidence Scoring), 10.1 (LLM-as-Judge)
 
 
 ---
 
-### 1.8 Forecast Pattern
 
-> **Kategorie:** K · Business-Muster | 🔄 Ja · 🎯 Hybrid · 🔍 XAI Mittel · 👤 HitL Empfohlen · 🔒 Mittel · 📊 Hoch
-
-> **Intent:** Schätzt zukünftige Werte und Entwicklungen auf Basis historischer Zeitreihendaten für Planung und Ressourcenallokation.
-
-
-#### Problem | Kontext
-
-
-Zukünftige Werte und Entwicklungen auf Basis historischer Daten schätzen — für Planung, Ressourcenallokation und Priorisierung.
-
-**Typisches Beispiel:** Fallaufkommen für Personalplanung, Antragsvolumen vorhersagen, Bearbeitungsdauer schätzen.
-
-
-#### Struktur
-
-
-```mermaid
-graph LR
-    HIST[Historische\nDaten] --> FEAT[Feature\nEngineering]
-    FEAT --> MODEL[Prognose-\nModell]
-    MODEL --> FC[Forecast\n+ Konfidenz]
-    FC --> VIS[Dashboard\nVisualisierung]
-    VIS --> PLAN[Planungs-\nentscheidung]
-    NEW[Neue Daten] --> MODEL
-```
-
-*Diagramm: Prognose-Pipeline — historische Daten → Feature Engineering → Prognose-Modell (wird laufend mit neuen Daten gespeist) → Forecast mit Konfidenz → Dashboard-Visualisierung → Planungsentscheidung.*
-
-
-#### Konsequenzen
-
-
-| ✅ Wann geeignet | ⛔ Wann NICHT einsetzen | ⚠️ Trade-offs |
-|---|---|---|
-| Wenn historische Zeitreihendaten vorliegen (mindestens 1–2 Jahre) und Planungshorizont bekannt ist. | Mindestens 1–2 Jahre historische Daten benötigt | |
-| Hoher Datenbedarf ist typischer Engpass. | Prognosen sind keine Garantien — externe Schocks nicht modellierbar | |
-
-
-#### Verwandte Muster
-
-
-→ [Full Observability Stack Pattern](#91-vollstndiger-observability-stack) · [LLM Metrics Pattern](#178-prometheus-llm-metriken)
-
-
----
-
-### 1.9 Process Automation Pattern
+### 1.8 Process Automation Pattern
 
 > **Kategorie:** K · Business-Muster | 🔄 Nein · 🎯 Determin. · 🔍 XAI Hoch · 👤 HitL Optional · 🔒 Niedrig · 📊 Gering
 
@@ -603,12 +653,12 @@ Regelbasierte Schritte und Datenbewegungen vollautomatisch ausführen — kein L
 
 ```mermaid
 graph LR
-    TRIG[Trigger\nEreignis] --> RULE1{Regel 1\nerfüllt?}
-    RULE1 -->|Ja| STEP1[Schritt 1\nAktion]
-    RULE1 -->|Nein| RULE2{Regel 2\nerfüllt?}
-    STEP1 --> STEP2[Schritt 2\nAktion]
+    TRIG[Trigger<br/>Ereignis] --> RULE1{Regel 1<br/>erfüllt?}
+    RULE1 -->|Ja| STEP1[Schritt 1<br/>Aktion]
+    RULE1 -->|Nein| RULE2{Regel 2<br/>erfüllt?}
+    STEP1 --> STEP2[Schritt 2<br/>Aktion]
     RULE2 -->|Ja| STEP2
-    RULE2 -->|Nein| ESC[Manuelle\nBearbeitung]
+    RULE2 -->|Nein| ESC[Manuelle<br/>Bearbeitung]
     STEP2 --> OUT[✅ Ergebnis]
 ```
 
@@ -618,23 +668,23 @@ graph LR
 #### Konsequenzen
 
 
-| ✅ Wann geeignet | ⛔ Wann NICHT einsetzen | ⚠️ Trade-offs |
-|---|---|---|
-| Wenn Lösungsweg vorab vollständig definierbar und < 5 Verzweigungen (→ Entscheidungsregel Sektion 15). | Versagt bei unbekannten Fällen außerhalb des definierten Regelbaums | |
-| Kostengünstig, hochgradig auditierbar — bevorzugte Wahl für regulierte Umgebungen. | Nicht für Aufgaben mit > 5 variablen Verzweigungen geeignet | |
+| ✅ Wann geeignet | ⚠️ Trade-offs & Risiken |
+|---|---|
+| Wenn Lösungsweg vorab vollständig definierbar und < 5 Verzweigungen (→ Entscheidungsregel Sektion 13) | Versagt bei unbekannten Fällen außerhalb des definierten Regelbaums |
+| Kostengünstig, hochgradig auditierbar — bevorzugte Wahl für regulierte Umgebungen | Nicht für Aufgaben mit > 5 variablen Verzweigungen geeignet |
 
 
 #### Verwandte Muster
 
 
-→ [Durable Workflow Pattern](#71-durable-workflows-fr-lange-ki-pipelines) · [Process Automation Pattern](#19-prozessautomatisierung)
+→ [Durable Workflow Pattern](#71-durable-workflow-pattern) · [Process Automation Pattern](#19-multimodal-analysis-pattern)
 
 **Technische Implementierung:** → Sektion 7.1 (Durable Workflows / Workflow-Engine)
 
 
 ---
 
-### 1.10 Multimodal Analysis Pattern
+### 1.9 Multimodal Analysis Pattern
 
 > **Kategorie:** K · Business-Muster | 🔄 Feedback · 🎯 Hybrid · 🔍 XAI Gering · 👤 HitL Empfohlen · 🔒 Hoch · 📊 Hoch
 
@@ -654,12 +704,12 @@ Bilder, Fotos, Pläne, Scans und gemischte Dokumente analysieren und Information
 
 ```mermaid
 graph LR
-    IMG[Bild / Scan\nPDF mit Grafiken] --> VISION[Vision-\nModell]
+    IMG[Bild / Scan<br/>PDF mit Grafiken] --> VISION[Vision-<br/>Modell]
     TEXT[Text-Anteil] --> LLM[Text-LLM]
-    VISION --> MERGE[Fusion\nbeider Modalitäten]
+    VISION --> MERGE[Fusion<br/>beider Modalitäten]
     LLM --> MERGE
-    MERGE --> STRUCT[Strukturiertes\nErgebnis]
-    STRUCT --> HUM[👤 Plausibilitäts-\nprüfung]
+    MERGE --> STRUCT[Strukturiertes<br/>Ergebnis]
+    STRUCT --> HUM[👤 Plausibilitäts-<br/>prüfung]
 ```
 
 *Diagramm: Multimodale Analyse — Bild/Scan und Text-Anteil werden parallel verarbeitet (Vision-Modell bzw. Text-LLM), beide Ergebnisse in einem Fusion-Schritt zusammengeführt → strukturiertes Ergebnis → menschliche Plausibilitätsprüfung.*
@@ -668,21 +718,23 @@ graph LR
 #### Konsequenzen
 
 
-| ✅ Wann geeignet | ⛔ Wann NICHT einsetzen | ⚠️ Trade-offs |
-|---|---|---|
-| Wenn Dokumente nicht rein textbasiert sind und OCR alleine nicht ausreicht. | Vision-Modelle sind auf unbekannten Formaten fehleranfällig | |
-| Hoher DSGVO-Risiko da Fotos oft Personenbezug haben. | Hohes DSGVO-Risiko da Fotos oft Personenbezug haben | |
+| ✅ Wann geeignet | ⚠️ Trade-offs & Risiken |
+|---|---|
+| Wenn Dokumente nicht rein textbasiert sind und OCR alleine nicht ausreicht | Vision-Modelle sind auf unbekannten Formaten fehleranfällig |
+| Extraktion aus Formularen, Skizzen, Diagrammen möglich | Hohes DSGVO-Risiko, da Fotos oft Personenbezug haben — PII-Redaktion (→ 4.2) prüfen |
 
 
 #### Verwandte Muster
 
 
-→ [Information Extraction Pattern](#13-informationsextraktion) · [Output Guardrails Pattern](#42-output-guardrails)
+→ [Information Extraction Pattern](#13-information-extraction-pattern) · [Output Guardrails Pattern](#41b-output-guardrails-pattern)
+
+**Technische Implementierung:** → Sektion 2.1 (Map-Reduce Extraction), 2.2 (Evidence + Source), 12.1 (Tool Use / Function Calling für Vision-Modelle)
 
 
 ---
 
-### 1.11 Document Comparison Pattern
+### 1.10 Document Comparison Pattern
 
 > **Kategorie:** K · Business-Muster | 🔄 Nein · 🎯 Determin. · 🔍 XAI Hoch · 👤 HitL Optional · 🔒 Niedrig · 📊 Gering
 
@@ -702,9 +754,9 @@ Unterschiede zwischen Versionen, Verträgen, Gesetzestexten oder Bescheiden prä
 
 ```mermaid
 graph LR
-    V1[Version 1] --> LLM[LLM\nVergleich]
+    V1[Version 1] --> LLM[LLM<br/>Vergleich]
     V2[Version 2] --> LLM
-    LLM --> DIFF[Änderungsliste\nStrukturiert]
+    LLM --> DIFF[Änderungsliste<br/>Strukturiert]
     DIFF --> ADD[➕ Neu]
     DIFF --> DEL[➖ Entfernt]
     DIFF --> MOD[✏️ Geändert]
@@ -716,119 +768,25 @@ graph LR
 #### Konsequenzen
 
 
-| ✅ Wann geeignet | ⛔ Wann NICHT einsetzen | ⚠️ Trade-offs |
-|---|---|---|
-| Wenn Dokumente manuell verglichen werden und der Fokus auf semantischen Unterschieden (nicht Tippfehlern) liegt. | Nur semantische Unterschiede, kein Tippfehler-Diff | |
-| Geringes Risiko — kein Personenbezug nötig. | Keine Aussage über rechtliche Relevanz der Änderungen | |
+| ✅ Wann geeignet | ⚠️ Trade-offs & Risiken |
+|---|---|
+| Wenn Dokumente manuell verglichen werden und der Fokus auf semantischen Unterschieden (nicht Tippfehlern) liegt | Nur semantische Unterschiede — für zeichengenaues Diff klassische Tools nutzen |
+| Geringes Risiko — kein Personenbezug nötig | Keine Aussage über rechtliche Relevanz der Änderungen — juristische Einordnung bleibt beim Menschen |
 
 
 #### Verwandte Muster
 
 
-→ [Evidence + Source Pattern](#22-evidence--source-citation-pattern) · [Validation & Plausibility Pattern](#112-validierung--plausibilitt)
+→ [Evidence + Source Pattern](#22-evidence-source-pattern) · [Hybrid RAG Pattern](#141-hybrid-rag-with-rrf-pattern)
+
+**Technische Implementierung:** → Sektion 14.1 (Hybrid-RAG), 14.7 (Cross-Encoder Reranking), 15.3 (Semantic Deduplication)
 
 
 ---
 
-### 1.12 Validation & Plausibility Pattern
-
-> **Kategorie:** K · Business-Muster | 🔄 Nein · 🎯 Determin. · 🔍 XAI Hoch · 👤 HitL Optional · 🔒 Niedrig · 📊 Gering
-
-> **Intent:** Prüft eingehende Daten auf Vollständigkeit, Konsistenz und Plausibilität als Qualitätstor vor der Verarbeitung.
 
 
-#### Problem | Kontext
-
-
-Vollständigkeit, Konsistenz und Widersprüche in Eingaben und Formularen prüfen — *vor* der Verarbeitung, nicht LLM-Output-Validierung.
-
-**Typisches Beispiel:** Antrag vor Sachbearbeitung auf fehlende Pflichtfelder, widersprüchliche Angaben oder unplausible Werte prüfen.
-
-
-#### Struktur
-
-
-```mermaid
-graph LR
-    IN[Nutzer-Input\nFormular / Antrag] --> CHK1{Vollständig?}
-    CHK1 -->|Nein| ERR1[❌ Fehlende\nFelder]
-    CHK1 -->|Ja| CHK2{Konsistent?}
-    CHK2 -->|Nein| ERR2[❌ Widersprüche\nerkannt]
-    CHK2 -->|Ja| CHK3{Plausibel?}
-    CHK3 -->|Nein| ERR3[❌ Unplausible\nWerte]
-    CHK3 -->|Ja| OK[✅ Weiter zur\nVerarbeitung]
-    ERR1 & ERR2 & ERR3 --> FB[Feedback\nan Nutzer]
-```
-
-*Diagramm: Drei-stufiges Validierungs-Gate — Nutzer-Input wird sequenziell auf Vollständigkeit, Konsistenz und Plausibilität geprüft. Alle Fehlertypen münden in Feedback an den Nutzer; erst bei Bestehen aller drei Stufen geht der Input weiter zur Verarbeitung.*
-
-
-#### Konsequenzen
-
-
-| ✅ Wann geeignet | ⛔ Wann NICHT einsetzen | ⚠️ Trade-offs |
-|---|---|---|
-| Als Qualitätstor am Eingang jeder Verarbeitungspipeline. | Prüft nur Input-Daten, nicht LLM-Output-Qualität (→ 17.1) | |
-| Geringes Risiko und ohne Training einsetzbar — ideal als erster Schritt vor aufwändigen KI-Prozessen. | Regelwerk muss gepflegt werden wenn sich Formulare ändern | |
-
-
-#### Verwandte Muster
-
-
-→ [LLM Response Validator Pattern](#171-llm-response-validator-mit-auto-repair) · [Validation Feedback Loop Pattern](#172-validation-error-feedback-loop)
-
-
----
-
-### 1.13 Ranking & Recommendation Pattern
-
-> **Kategorie:** K · Business-Muster | 🔄 Ja · 🎯 Hybrid · 🔍 XAI Mittel · 👤 HitL Empfohlen · 🔒 Mittel · 📊 Mittel
-
-> **Intent:** Priorisiert Fälle und Optionen datengetrieben nach Dringlichkeit oder Komplexität statt nach Eingangsreihenfolge.
-
-
-#### Problem | Kontext
-
-
-Fälle, Anträge oder Optionen priorisieren und die nächste beste Handlung (Next Best Action) vorschlagen — datengetrieben statt nach Eingangsreihenfolge.
-
-**Typisches Beispiel:** Dringende Anträge automatisch nach oben priorisieren, nächsten Bearbeitungsschritt empfehlen, ähnliche Fälle als Referenz vorschlagen.
-
-
-#### Struktur
-
-
-```mermaid
-graph LR
-    ITEMS[Offene Fälle\nAnträge] --> FEAT[Feature-\nExtraktion]
-    FEAT --> SCORE[Scoring-\nModell]
-    SCORE --> RANK[Ranking\nPriorität]
-    RANK --> TOP[Top-N\nEmpfehlungen]
-    TOP --> HUM[👤 Sachbearbeiter\nentscheidet final]
-    HUM --> FB[Feedback\n→ Modell verbessern]
-```
-
-*Diagramm: Ranking & Empfehlung — offene Fälle/Anträge → Feature-Extraktion → Scoring-Modell → Prioritäts-Ranking → Top-N Empfehlungen → Sachbearbeiter entscheidet final → Feedback verbessert das Modell.*
-
-
-#### Konsequenzen
-
-
-| ✅ Wann geeignet | ⛔ Wann NICHT einsetzen | ⚠️ Trade-offs |
-|---|---|---|
-| Wenn Kapazitäten knapp sind und Priorisierung nach Dringlichkeit oder Komplexität entscheidend ist. | Verbessert sich erst mit historischen Erledigungsdaten | |
-| Verbessert sich mit historischen Erledigungsdaten. | Mensch entscheidet immer final — kein vollautomatisches Routing | |
-
-
-#### Verwandte Muster
-
-
-→ [Semantic Search Pattern](#11-semantische-suche) · [Multi-Dimensional Confidence Scorer Pattern](#173-multi-dimensional-confidence-scorer)
-
-
----
-
-### 1.14 Translation & Simplification Pattern
+### 1.11 Translation & Simplification Pattern
 
 > **Kategorie:** K · Business-Muster | 🔄 Nein · 🎯 Nicht-det. · 🔍 XAI Mittel · 👤 HitL Empfohlen · 🔒 Niedrig · 📊 Gering
 
@@ -848,9 +806,9 @@ Fachsprache in einfache Sprache überführen oder mehrsprachige Kommunikation er
 
 ```mermaid
 graph LR
-    SRC[Fachtext\nBescheid / Dokument] --> LLM[LLM\nÜbersetzung /\nVereinfachung]
-    LLM --> TGT[Zieltext\nEinfache Sprache /\nZielsprache]
-    TGT --> HUM[👤 Prüfung bei\nrechtl. Relevanz]
+    SRC[Fachtext<br/>Bescheid / Dokument] --> LLM[LLM<br/>Übersetzung /<br/>Vereinfachung]
+    LLM --> TGT[Zieltext<br/>Einfache Sprache /<br/>Zielsprache]
+    TGT --> HUM[👤 Prüfung bei<br/>rechtl. Relevanz]
     HUM --> OUT[✅ Veröffentlicht]
 ```
 
@@ -860,16 +818,18 @@ graph LR
 #### Konsequenzen
 
 
-| ✅ Wann geeignet | ⛔ Wann NICHT einsetzen | ⚠️ Trade-offs |
-|---|---|---|
-| Wenn Zielgruppe heterogen ist oder Barrierefreiheit/Mehrsprachigkeit gefordert. | LLM kann bei rechtlich verbindlichen Texten subtile Bedeutungsänderungen einführen | |
-| Geringes Risiko, kein Training nötig. | HitL empfohlen für kritische Inhalte | |
+| ✅ Wann geeignet | ⚠️ Trade-offs & Risiken |
+|---|---|
+| Wenn Zielgruppe heterogen ist oder Barrierefreiheit/Mehrsprachigkeit gefordert | LLM kann bei rechtlich verbindlichen Texten subtile Bedeutungsänderungen einführen |
+| Geringes Risiko, kein Training nötig | HitL empfohlen für kritische Inhalte (Rechtsbehelfsbelehrungen, Bescheide) |
 
 
 #### Verwandte Muster
 
 
-→ [Domain Context Pattern](#113-domnen-kontext-im-system-prompt) · [Structured Output Constraints Pattern](#112-strukturierte-output-anforderungen)
+→ [Prompt-Context-Engineering Pattern](#93-prompt-context-engineering-pattern) · [Structured Output Constraints Pattern](#92-structured-output-constraints-pattern)
+
+**Technische Implementierung:** → Sektion 9.3 (Prompt-Context-Engineering), 10.2 (Golden Dataset für Qualitätssicherung), 13.3 (HitL-Checkpoint bei kritischen Übersetzungen)
 
 
 ---
@@ -969,12 +929,12 @@ flowchart TD
     DOC --> CN["Chunk N"]
 
     subgraph MAP ["🗺️ Map-Phase — parallel"]
-        C1 --> E1["Evidence 1\n{value, source} | null"]
-        C2 --> E2["Evidence 2\n{value, source} | null"]
-        CN --> EN["Evidence N\n{value, source} | null"]
+        C1 --> E1["Evidence 1<br/>{value, source} | null"]
+        C2 --> E2["Evidence 2<br/>{value, source} | null"]
+        CN --> EN["Evidence N<br/>{value, source} | null"]
     end
 
-    E1 --> R["🔄 Reduce-LLM\nEin einziger Call"]
+    E1 --> R["🔄 Reduce-LLM<br/>Ein einziger Call"]
     E2 --> R
     EN --> R
     R --> OUT["✅ Konsolidiertes Ergebnis"]
@@ -1019,7 +979,7 @@ async def extract_metadata(document: Document) -> Metadata:
 #### Verwandte Muster
 
 
-→ [Evidence + Source Pattern](#22-evidence--source-citation-pattern) · [Sliding Window Executor Pattern](#51-sliding-window-executor) · [Durable Workflow Pattern](#71-durable-workflows-fr-lange-ki-pipelines)
+→ [Evidence + Source Pattern](#22-evidence-source-pattern) · [Sliding Window Executor Pattern](#51-sliding-window-executor-pattern) · [Durable Workflow Pattern](#71-durable-workflow-pattern)
 
 > ❌ **Häufiger Fehler:** Die Reduce-Phase mit zu vielen Map-Ergebnissen überlasten. Faustregel: max. 50 Chunks pro Reduce-Call. Bei größeren Dokumenten Reduce in Stufen ausführen (hierarchisches Map-Reduce).
 
@@ -1049,8 +1009,8 @@ Jedes extrahierte Feld trägt neben dem Wert immer den exakten Quelltext mit.
 
 ```mermaid
 graph LR
-    LLM[LLM Extraktion] --> V[Wert\nz.B. '2024']
-    LLM --> Q[Quellzitat\nExakter Text]
+    LLM[LLM Extraktion] --> V[Wert<br/>z.B. '2024']
+    LLM --> Q[Quellzitat<br/>Exakter Text]
     V --> R[Result]
     Q --> R
     R --> VAL{Validierbar?}
@@ -1104,7 +1064,7 @@ class ExtractedMetadata(BaseModel):
 #### Verwandte Muster
 
 
-→ [Map-Reduce Extraction Pattern](#21-map-reduce-metadaten-extraktion) · [LLM Response Validator Pattern](#171-llm-response-validator-mit-auto-repair) · [Golden Dataset & Regression Pattern](#122-golden-dataset--regression-testing)
+→ [Map-Reduce Extraction Pattern](#21-map-reduce-extraction-pattern) · [LLM Response Validator Pattern](#151-llm-response-validator-pattern) · [Golden Dataset & Regression Pattern](#102-golden-dataset-regression-pattern)
 
 
 ---
@@ -1135,8 +1095,8 @@ Die erste Screening-Stufe wird explizit auf maximalen Recall optimiert.
 
 ```mermaid
 graph LR
-    D[Dokument] --> S1[Stufe 1\nRecall-First\nScore 0-100]
-    S1 -->|Score groesser 20| S2[Stufe 2\nDetaillierte\nPruefung]
+    D[Dokument] --> S1[Stufe 1<br/>Recall-First<br/>Score 0-100]
+    S1 -->|Score groesser 20| S2[Stufe 2<br/>Detaillierte<br/>Pruefung]
     S1 -->|Score kleiner 20| X[Ausgeschlossen]
     S2 -->|Score groesser 70| OK[Relevant]
     S2 -->|Score kleiner 70| X
@@ -1183,7 +1143,7 @@ filtered = [
 #### Verwandte Muster
 
 
-→ [Multi-Stage Pipeline Pattern](#26-multi-stage-ki-pipeline) · [LLM-as-Judge Pattern](#121-llm-as-judge)
+→ [Multi-Stage Pipeline Pattern](#26-multi-stage-pipeline-pattern) · [LLM-as-Judge Pattern](#101-llm-as-judge-pattern)
 
 
 ---
@@ -1213,7 +1173,7 @@ Für jeden Chunk werden 2–3 hypothetische Fragen generiert, die ein Nutzer ste
 ```mermaid
 flowchart LR
     subgraph IDX ["📥 Indexierung — einmalig"]
-        CHUNK["📝 Text-Chunk"] --> QGEN["LLM\nFragen generieren"]
+        CHUNK["📝 Text-Chunk"] --> QGEN["LLM<br/>Fragen generieren"]
         QGEN --> Q1["❓ Sachfrage"]
         QGEN --> Q2["❓ Verfahrensfrage"]
         QGEN --> Q3["❓ Rechtsfrage"]
@@ -1225,7 +1185,7 @@ flowchart LR
         USER["👤 User Query"] --> EMB2["Embedding"]
         EMB2 --> SRCH["Ähnlichkeitssuche"]
         VDB --> SRCH
-        SRCH --> RES["📄 Treffer\n(Vokabular-Lücke überbrückt)"]
+        SRCH --> RES["📄 Treffer<br/>(Vokabular-Lücke überbrückt)"]
     end
 
     style IDX fill:#e8f4f8,stroke:#2196F3
@@ -1285,7 +1245,7 @@ async def index_chunk(chunk: Chunk, questions: list[str]) -> None:
 #### Verwandte Muster
 
 
-→ [Hybrid-RAG with RRF Pattern](#161-hybrid-rag-mit-reciprocal-rank-fusion) · [Rich Chunk Metadata Pattern](#31-reiche-chunk-metadaten) · [LLM Query Expansion Pattern](#163-llm-query-expansion-mit-budget-tracking)
+→ [Hybrid-RAG with RRF Pattern](#141-hybrid-rag-with-rrf-pattern) · [Rich Chunk Metadata Pattern](#31-rich-chunk-metadata-pattern) · [LLM Query Expansion Pattern](#143-llm-query-expansion-pattern)
 
 > ❌ **Häufiger Fehler:** Nur den Chunk-Text embedden und auf semantische Suche hoffen. Fachliche Dokumente verwenden andere Begriffe als Nutzer-Queries. HyDE-Fragen überbrücken diese Lücke direkt — besonders bei juristischen, technischen oder medizinischen Inhalten ist der Recall-Gewinn erheblich.
 
@@ -1307,7 +1267,7 @@ Freie LLM-Kategorisierung führt zu inkonsistenten, schwer filterbaren Labels.
 #### Lösung
 
 
-**Warum geschlossene statt offener Klassifikation?** Offene Klassifikation ("Welches Thema?") produziert Freitext-Varianten: "Naturschutz", "Umweltschutz", "ökologische Fragen" — drei Labels für dasselbe Konzept, kein Index kann darauf filtern. Eine geschlossene Taxonomie mit enumerierten IDs macht das Ergebnis direkt filterbar, aggregierbar und testbar. Pflichtbestandteil: die Klasse `OTHER` für alle Fälle außerhalb der Taxonomie.
+**Warum geschlossene statt offener Klassifikation?** Offene Klassifikation („Welches Thema?") produziert Freitext-Varianten: „Naturschutz", „Umweltschutz", „ökologische Fragen" — drei Labels für dasselbe Konzept, kein Index kann darauf filtern. Eine geschlossene Taxonomie mit enumerierten IDs macht das Ergebnis direkt filterbar, aggregierbar und testbar. Pflichtbestandteil: die Klasse `OTHER` für alle Fälle außerhalb der Taxonomie.
 
 Vordefinierte Taxonomie mit ID, Name und Beschreibung als geschlossene Auswahl.
 
@@ -1318,11 +1278,11 @@ Vordefinierte Taxonomie mit ID, Name und Beschreibung als geschlossene Auswahl.
 ```mermaid
 graph TD
     LLM[LLM Output] --> C{Klasse?}
-    C -->|bekannt| T[Taxonomie\nKlasse]
+    C -->|bekannt| T[Taxonomie<br/>Klasse]
     C -->|unbekannt| OTHER[OTHER]
-    T --> DB[(Vector-DB\nmit Filter)]
+    T --> DB[(Vector-DB<br/>mit Filter)]
     OTHER --> DB
-    DB --> Q[Query\nfilter=klasse]
+    DB --> Q[Query<br/>filter=klasse]
 ```
 
 *Diagramm: Geschlossene Taxonomie — LLM-Output wird auf bekannte Klassen geprüft; unbekannte landen in OTHER. Alle Ergebnisse (mit Klasse) gehen in die Vector-DB und sind anschließend über Metadaten-Filter gezielt abfragbar.*
@@ -1378,10 +1338,29 @@ def build_taxonomy_prompt_section(topics: list[Topic]) -> str:
 | Taxonomie erweiterbar ohne Code-Änderungen |  |
 
 
+#### Variante: Document-Context-Boost
+
+Klassifikations-Confidence verbessert sich spürbar, wenn der Gesamtdokument-Kontext einfließt. Ein Chunk aus einem Planfeststellungsbeschluss sollte bei mehrdeutigen Begriffen anders gewichtet werden als der gleiche Chunk aus einem Standardvertrag.
+
+```python
+def classify_with_context(chunk: str, doc_context: dict) -> str:
+    prompt = build_classification_prompt(
+        chunk=chunk,
+        allowed_labels=TAXONOMY,
+        # Optional boost: Dokumenttyp + Rechtsgrundlage als Kontext
+        document_type=doc_context.get("type"),
+        legal_basis=doc_context.get("legal_basis"),
+    )
+    return llm.classify(prompt)
+```
+
+Der Dokumentkontext ist ein optionaler *Boost* — die Basis-Klassifikation funktioniert auch ohne ihn. Aber: Wo vorhanden, reduziert er Fehlzuordnungen bei mehrdeutigen Fachbegriffen erheblich.
+
+
 #### Verwandte Muster
 
 
-→ [Classification & Routing Pattern](#12-klassifikation--routing) · [Document-Context Classification Pattern](#179-dokument-kontext-bewusste-klassifikation)
+→ [Classification & Routing Pattern](#12-classification-routing-pattern) · [Document-Context Classification Pattern](#25-closed-taxonomy-pattern)
 
 
 ---
@@ -1410,23 +1389,23 @@ Pipeline mit spezialisierten Stufen, jede für ihren Zweck optimiert.
 
 ```mermaid
 flowchart TD
-    IN["📥 Eingabe\nAlle Chunks"] --> S1
+    IN["📥 Eingabe<br/>Alle Chunks"] --> S1
 
-    S1["🔍 Stufe 1: Risk Screening\nModell: haiku — günstig\nZiel: Recall 95%+"]
-    S1 -->|"Score ≥ 40\n~30% der Chunks"| S2
+    S1["🔍 Stufe 1: Risk Screening<br/>Modell: haiku — günstig<br/>Ziel: Recall 95%+"]
+    S1 -->|"Score ≥ 40<br/>~30% der Chunks"| S2
     S1 -->|"Score < 40"| D1["🗑️ Verworfen"]
 
-    S2["📚 Stufe 2: Context Retrieval\nVektorsuche + Metadaten-Filter"]
+    S2["📚 Stufe 2: Context Retrieval<br/>Vektorsuche + Metadaten-Filter"]
     S2 --> S3
 
-    S3["✅ Stufe 3: Verification\nModell: sonnet — gründlich\nZiel: Precision 90%+"]
+    S3["✅ Stufe 3: Verification<br/>Modell: sonnet — gründlich<br/>Ziel: Precision 90%+"]
     S3 -->|"Bestätigt"| S4
     S3 -->|"Widerlegt"| D2["🗑️ Falsch-Positiv"]
 
-    S4["🔗 Stufe 4: Clustering\nSemantische Gruppierung"]
+    S4["🔗 Stufe 4: Clustering<br/>Semantische Gruppierung"]
     S4 --> S5
 
-    S5["📊 Stufe 5: Summarization\nFinale Verdichtung"]
+    S5["📊 Stufe 5: Summarization<br/>Finale Verdichtung"]
     S5 --> OUT["✅ Report"]
 
     style S1 fill:#e8f5e9,stroke:#4CAF50
@@ -1477,7 +1456,7 @@ async def run_pipeline(claim: Claim, chunks: list[Chunk]) -> PipelineResult:
 #### Verwandte Muster
 
 
-→ [Recall-First Screening Pattern](#23-recall-first-risk-screening) · [Sliding Window Executor Pattern](#51-sliding-window-executor) · [Per-Model Throttling Pattern](#53-per-model-throttling)
+→ [Recall-First Screening Pattern](#23-recall-first-screening-pattern) · [Sliding Window Executor Pattern](#51-sliding-window-executor-pattern) · [Per-Model Throttling Pattern](#52-thread-safe-rate-limiter-pattern)
 
 
 ---
@@ -1502,7 +1481,7 @@ Standard-RAG speichert nur Text + Embedding. Relevanz-Ranking und Filterung sind
 #### Lösung
 
 
-**Warum Metadaten statt reiner Vektorähnlichkeit?** Vektorähnlichkeit allein kann nicht filtern: "Zeig nur Artenschutz-Chunks aus Dokument X" ist mit reiner Semantik nicht lösbar — "Artenschutz" in Dokument X hat denselben Embedding-Vektor wie in Dokument Y. Strukturierte Metadaten (Dokumenttyp, Thema, Datum, Dokument-ID) ermöglichen kombinierte Filter-Suchen: Ähnlichkeit UND Metadaten-Constraint. Das reduziert Retrieval-Rauschen drastisch ohne den Recall zu verschlechtern.
+**Warum Metadaten statt reiner Vektorähnlichkeit?** Vektorähnlichkeit allein kann nicht filtern: „Zeig nur Artenschutz-Chunks aus Dokument X" ist mit reiner Semantik nicht lösbar — „Artenschutz" in Dokument X hat denselben Embedding-Vektor wie in Dokument Y. Strukturierte Metadaten (Dokumenttyp, Thema, Datum, Dokument-ID) ermöglichen kombinierte Filter-Suchen: Ähnlichkeit UND Metadaten-Constraint. Das reduziert Retrieval-Rauschen drastisch ohne den Recall zu verschlechtern.
 
 Jeder Chunk trägt reichhaltige strukturierte Metadaten.
 
@@ -1513,11 +1492,11 @@ Jeder Chunk trägt reichhaltige strukturierte Metadaten.
 ```mermaid
 graph LR
     DOC[Dokument] --> C[Chunk]
-    C --> EMB[Embedding\nVector]
-    C --> META[Metadaten\nAbschnitt, Typ\nSeite, Dokument-ID]
+    C --> EMB[Embedding<br/>Vector]
+    C --> META[Metadaten<br/>Abschnitt, Typ<br/>Seite, Dokument-ID]
     EMB --> VDB[(Vector-DB)]
     META --> VDB
-    VDB --> Q[Query + Filter\ntyp=rechtlich]
+    VDB --> Q[Query + Filter<br/>typ=rechtlich]
 ```
 
 *Diagramm: Reiche Chunk-Metadaten — ein Dokument-Chunk erzeugt zwei parallele Ausgaben: ein Vektor-Embedding und strukturierte Metadaten (Abschnitt, Typ, Seite, Dokument-ID). Beide werden gemeinsam in der Vector-DB gespeichert und ermöglichen kombinierte Ähnlichkeits- und Filter-Suchen.*
@@ -1585,13 +1564,13 @@ for hit in results:
 |---|---|
 | Hybridsuche: Vektorähnlichkeit + Metadaten-Filter kombinierbar | Metadaten-Extraktion beim Indexieren kostet zusätzliche LLM-Calls |
 | Navigation durch verwandte Chunks (prev/next) für besseren Kontext | Schema-Änderungen erfordern Re-Indexierung |
-| Facettensuche (z.B. "nur Artenschutz-Chunks aus Dokument X") |  |
+| Facettensuche (z.B. „nur Artenschutz-Chunks aus Dokument X") |  |
 
 
 #### Verwandte Muster
 
 
-→ [Hypothetical Questions (HyDE) Pattern](#24-hypothetical-questions-hyde-ansatz) · [Hybrid-RAG with RRF Pattern](#161-hybrid-rag-mit-reciprocal-rank-fusion) · [Domain-Specific Chunk Types Pattern](#62-domnen-spezifische-chunk-typen)
+→ [Hypothetical Questions (HyDE) Pattern](#24-hypothetical-questions-hyde-pattern) · [Hybrid-RAG with RRF Pattern](#141-hybrid-rag-with-rrf-pattern) · [Domain-Specific Chunk Types Pattern](#62-domain-specific-chunk-types-pattern)
 
 
 ---
@@ -1718,14 +1697,14 @@ class S3ObjectStore:
 #### Verwandte Muster
 
 
-→ [Durable Workflow Pattern](#71-durable-workflows-fr-lange-ki-pipelines) · [Failure-Isolated Indexing Pattern](#61-failure-isolated-indexierung)
+→ [Durable Workflow Pattern](#71-durable-workflow-pattern) · [Failure-Isolated Indexing Pattern](#61-failure-isolated-indexing-pattern)
 
 
 ---
 
 ### 3.3 Structural Text Deconstruction Pattern
 
-> **Kategorie:** I · Betrieb & Infrastruktur
+> **Kategorie:** A · RAG & Retrieval | D · Datenverarbeitung
 
 > **Intent:** Zerlegt fachliche Texte (Gesetze, Verträge, Spezifikationen) in ihre logischen Bestandteile für präzises Retrieval auf Teilebene.
 
@@ -1733,13 +1712,13 @@ class S3ObjectStore:
 #### Problem
 
 
-Fachtexte (Gesetze, Spezifikationen, Verträge) haben komplexe interne Struktur, die für Standard-RAG zu grobkörnig ist.
+Fachtexte (Gesetze, Spezifikationen, Verträge) haben komplexe interne Struktur, die für Standard-RAG zu grobkörnig ist. Wer einen Gesetzestext in 500-Token-Chunks zerlegt, verliert die Grenzen zwischen Paragrafen, Absätzen und Sätzen — und damit die Fähigkeit, gezielt „nur die Rechtsfolge in §15 Abs. 2" zu retrieven.
 
 
 #### Lösung
 
 
-Semantische Zerlegung in logische Bestandteile per LLM.
+**Warum semantisch statt syntaktisch zerlegen?** Eine reine Regex-Zerlegung an Überschriften funktioniert nur für Dokumente mit konsistentem Layout. Reale Gesetzestexte haben Formatbrüche: fehlende Nummerierung in Absätzen, inline zitierte Verweise, unnummerierte Protokollnotizen. Ein LLM-gestützter Zerlegungsschritt erkennt die logische Hierarchie auch dann, wenn die visuelle Formatierung unregelmäßig ist — und erzeugt strukturierte Chunks mit Breadcrumb-Pfad, die sowohl den Inhalt als auch seine Position im Dokument für die Retrieval-Phase verfügbar machen.
 
 
 #### Struktur
@@ -1747,15 +1726,63 @@ Semantische Zerlegung in logische Bestandteile per LLM.
 
 ```mermaid
 graph TD
-    T[Rohtext] --> A[Abschnitte\nerkennen]
-    A --> H[Hierarchie\naufbauen]
+    T[Rohtext] --> A[Abschnitte<br/>erkennen]
+    A --> H[Hierarchie<br/>aufbauen]
     H --> C1[Kapitel]
     H --> C2[Unterkapitel]
-    C1 --> CH[Chunks mit\nBreadcrumb]
+    C1 --> CH[Chunks mit<br/>Breadcrumb]
     C2 --> CH
 ```
 
 *Diagramm: Strukturelle Textdekonstruktion — Rohtext → Abschnittserkennung → Hierarchieaufbau → Kapitel und Unterkapitel → Chunks mit Breadcrumb-Pfad für präzises Retrieval auf Teilebene.*
+
+
+#### Implementierungshinweise
+
+
+```python
+from pydantic import BaseModel
+
+class StructuralNode(BaseModel):
+    level: int                    # 1 = Paragraf, 2 = Absatz, 3 = Satz
+    identifier: str               # z.B. "§15 Abs. 2 S. 1"
+    text: str
+    breadcrumb: list[str]         # ["Teil 2", "Kapitel 3", "§15", "Abs. 2"]
+    references: list[str] = []    # Explizite Querverweise im Text
+
+
+async def deconstruct(raw_text: str) -> list[StructuralNode]:
+    """Zerlegt einen Fachtext in hierarchische Knoten per LLM."""
+    # LLM gibt strukturierte Hierarchie zurück (→ Schema-First Generation, 12.2)
+    structured = await llm.extract(
+        text=raw_text,
+        schema=list[StructuralNode],
+        system_prompt=(
+            "Zerlege den Text in seine logischen Bestandteile. "
+            "Jeder Knoten enthält: Ebene, Bezeichner (z.B. §15 Abs. 2), Text, "
+            "Breadcrumb (Pfad von Dokument-Root), und erkannte Querverweise."
+        ),
+    )
+    return structured
+
+
+def to_chunks(nodes: list[StructuralNode]) -> list[Chunk]:
+    """Wandelt Strukturknoten in Retrieval-Chunks mit Metadaten um."""
+    return [
+        Chunk(
+            text=node.text,
+            metadata={
+                "identifier": node.identifier,
+                "breadcrumb": " > ".join(node.breadcrumb),
+                "level": node.level,
+                "references": node.references,
+            },
+        )
+        for node in nodes
+    ]
+```
+
+**Einsatzempfehlung:** Nur für Korpora mit stark strukturiertem Inhalt (Gesetze, Normen, Verträge, Spezifikationen). Für Freitexte (Berichte, E-Mails) ist das klassische Chunk-Splitting (→ 6.2) effizienter.
 
 
 #### Konsequenzen
@@ -1763,15 +1790,15 @@ graph TD
 
 | ✅ Vorteile | ⚠️ Trade-offs |
 |---|---|
-| Präzise Suche auf Teilebene (nur Ausnahmen suchen, nur Rechtsfolgen) | Strukturierte Zersetzung kostet LLM-Calls beim Indexieren |
+| Präzise Suche auf Teilebene (nur Ausnahmen suchen, nur Rechtsfolgen) | Strukturierte Zerlegung kostet zusätzliche LLM-Calls beim Indexieren |
 | Explizite Querverweise als Graph-Daten nutzbar | Nur sinnvoll für stark strukturierte Fachtexte |
-| Bessere LLM-Antworten bei rechtlichen Fragen |  |
+| Bessere LLM-Antworten bei rechtlichen Fragen durch Kontext-Breadcrumbs | Aktualisierung des Korpus erfordert erneute Zerlegung |
 
 
 #### Verwandte Muster
 
 
-→ [Rich Chunk Metadata Pattern](#31-reiche-chunk-metadaten) · [Closed Taxonomy Pattern](#25-geschlossene-taxonomie-fr-klassifikation)
+→ [Rich Chunk Metadata Pattern](#31-rich-chunk-metadata-pattern) · [Closed Taxonomy Pattern](#25-closed-taxonomy-pattern) · [Schema-First Generation Pattern](#122-schema-first-generation-pattern)
 
 
 ---
@@ -1790,7 +1817,7 @@ graph TD
 #### Problem
 
 
-Externes Nutzer-/Dokumenten-Content kann Anweisungen enthalten, die das LLM verwirren ("Ignoriere alle vorherigen Anweisungen...").
+Externes Nutzer-/Dokumenten-Content kann Anweisungen enthalten, die das LLM verwirren („Ignoriere alle vorherigen Anweisungen...").
 
 
 #### Lösung
@@ -1806,13 +1833,13 @@ Mehrschichtiges Verteidigungssystem.
 
 ```mermaid
 flowchart TD
-    EXT["⚠️ Externer Content\nNutzer-Input / Dokument-Text"]
+    EXT["⚠️ Externer Content<br/>Nutzer-Input / Dokument-Text"]
 
-    EXT --> L1["🔍 Schicht 1: Sanitisierung\nBekannte Injection-Pattern entfernen\nUnsichtbare Unicode-Zeichen entfernen"]
-    L1  --> L2["🏷️ Schicht 2: Tagging\nContent in ¤external_data¤-Tags kapseln"]
-    L2  --> L3["🛡️ Schicht 3: System-Prompt-Wrapper\nSicherheits-Preamble vorne UND hinten"]
-    L3  --> L4["📦 Schicht 4: Jinja2 SandboxedEnvironment\nKeine Code-Ausführung in Templates möglich"]
-    L4  --> LLM["🤖 LLM\nPrompt Injection isoliert"]
+    EXT --> L1["🔍 Schicht 1: Sanitisierung<br/>Bekannte Injection-Pattern entfernen<br/>Unsichtbare Unicode-Zeichen entfernen"]
+    L1  --> L2["🏷️ Schicht 2: Tagging<br/>Content in ¤external_data¤-Tags kapseln"]
+    L2  --> L3["🛡️ Schicht 3: System-Prompt-Wrapper<br/>Sicherheits-Preamble vorne UND hinten"]
+    L3  --> L4["📦 Schicht 4: Jinja2 SandboxedEnvironment<br/>Keine Code-Ausführung in Templates möglich"]
+    L4  --> LLM["🤖 LLM<br/>Prompt Injection isoliert"]
 
     style EXT fill:#ffebee,stroke:#f44336
     style L1  fill:#fff8e1,stroke:#FFC107
@@ -1909,50 +1936,90 @@ response = await llm.chat(system=system, user=user)
 #### Verwandte Muster
 
 
-→ [Output Guardrails Pattern](#42-output-guardrails) · [Structured Output Constraints Pattern](#112-strukturierte-output-anforderungen)
+→ [Output Guardrails Pattern](#41b-output-guardrails-pattern) · [Structured Output Constraints Pattern](#92-structured-output-constraints-pattern)
+
+> ⚡ **Anti-Muster:** Kategorie 2 — *Nur eine Sicherheitsschicht implementieren* (→ [Anti-Patterns](#kategorie-2-sicherheit--datenschutz))
 
 
 ---
-### Guardrails / Output Filtering
+### 4.1b Output Guardrails Pattern
 
 > **Kategorie:** J · Sicherheit | C · LLM-Output-Verarbeitung
 
-**Problem:** LLM-Outputs können PII, toxische Inhalte, Compliance-Verletzungen oder Format-Fehler enthalten — selbst bei korrekt formulierten Prompts.
+> **Intent:** Schützt nachgelagerte Systeme und Nutzer vor problematischen LLM-Outputs durch eine vorgeschaltete Validierungskette aus PII-Check, Toxizitätsfilter, Compliance-Prüfung und Schema-Validierung.
 
-**Lösung:** Nachgeschaltete Validierungsschicht, die LLM-Outputs systematisch prüft und filtert, bevor sie den Nutzer oder nachgelagerte Systeme erreichen. Trennung von Input-Schutz (Prompt Injection Defense) und Output-Kontrolle.
+
+#### Problem
+
+
+LLM-Outputs können PII, toxische Inhalte, Compliance-Verletzungen oder Format-Fehler enthalten — selbst bei korrekt formulierten Prompts. Input-Schutz (4.1 Prompt Injection Defense) alleine reicht nicht: Das Modell kann auch ohne böswilligen Input problematische Ausgaben erzeugen.
+
+
+#### Lösung
+
+
+Nachgeschaltete Validierungsschicht, die LLM-Outputs systematisch prüft und filtert, bevor sie den Nutzer oder nachgelagerte Systeme erreichen. Trennung von Input-Schutz (Prompt Injection Defense) und Output-Kontrolle.
 
 **Prüfdimensionen:**
 - **PII-Erkennung:** Personenbezogene Daten vor der Ausgabe maskieren oder ablehnen
 - **Toxizitätsfilter:** Inhaltliche Grenzen (Hate Speech, gefährliche Inhalte)
-- **Compliance-Check:** Branchenspezifische Regeln (z.B. keine Anlageberatung ohne Disclaimer)
+- **Compliance-Check:** Branchenspezifische Regeln (z. B. keine Anlageberatung ohne Disclaimer)
 - **Format-Validierung:** Schema-Konformität vor der Weitergabe
+
+
+#### Struktur
+
 
 ```mermaid
 graph LR
     LLM[LLM-Output] --> G1[PII-Check]
-    G1 --> G2[Toxizitäts-\nFilter]
-    G2 --> G3[Compliance-\nCheck]
-    G3 --> G4[Schema-\nValidierung]
-    G4 -->|OK| OUT[Ausgabe\nan Nutzer]
-    G1 -->|Treffer| BLK[Blockiert /\nAnonymisiert]
+    G1 --> G2[Toxizitäts-<br/>Filter]
+    G2 --> G3[Compliance-<br/>Check]
+    G3 --> G4[Schema-<br/>Validierung]
+    G4 -->|OK| OUT[Ausgabe<br/>an Nutzer]
+    G1 -->|Treffer| BLK[Blockiert /<br/>Anonymisiert]
     G2 -->|Treffer| BLK
     G3 -->|Treffer| BLK
 ```
 
 *Diagramm: Output-Guardrails — LLM-Output durchläuft sequenziell vier Prüfschichten: PII-Erkennung, Toxizitätsfilter, Compliance-Check, Schema-Validierung. Jede Schicht kann blockieren oder anonymisieren; erst bei Bestehen aller vier gelangt der Output zum Nutzer.*
 
+
+#### Implementierungshinweise
+
+
 ```python
+class GuardrailChain:
+    def __init__(self, guards: list):
+        self.guards = guards  # PII, Toxicity, Compliance, Schema
+
     async def check(self, output: str, context: dict) -> GuardrailResult:
-        for guard in self.guards:  # PII, Toxicity, Compliance, Schema
+        for guard in self.guards:
             result = await guard.evaluate(output, context)
             if result.blocked:
                 return GuardrailResult(blocked=True, reason=result.reason)
         return GuardrailResult(blocked=False, content=output)
 ```
 
-**Abgrenzung zu 4.2 Guardrails:** Prompt Injection schützt den *Input* (was ins LLM geht); Guardrails prüfen den *Output* (was aus dem LLM kommt). Beide Schichten sind unabhängig und ergänzen sich.
+**Abgrenzung zu 4.1 Prompt Injection Defense:** Prompt Injection Defense schützt den *Input* (was ins LLM geht); Output Guardrails prüfen den *Output* (was aus dem LLM kommt). Beide Schichten sind unabhängig und ergänzen sich.
 
-> ❌ **Häufiger Fehler:** Nur eine Schicht implementieren. Systeme die externen Content verarbeiten (Dokumente, Nutzer-Uploads) brauchen zwingend beide — Injection-Defense für den Input und Guardrails für den Output.
+> ❌ **Häufiger Fehler:** Nur eine Schicht implementieren. Systeme, die externen Content verarbeiten (Dokumente, Nutzer-Uploads), brauchen zwingend beide — Injection-Defense für den Input und Guardrails für den Output.
+
+
+#### Konsequenzen
+
+
+| ✅ Vorteile | ⚠️ Trade-offs |
+|---|---|
+| Fängt problematische Outputs unabhängig von der Input-Qualität ab | Jede Guard-Schicht kostet Latenz und ggf. zusätzliche LLM-Calls |
+| Modular erweiterbar (neue Guards einfach anhängen) | Falsche Treffer (False Positives) können legitime Antworten blockieren — Guard-Schwellen empirisch kalibrieren |
+
+
+#### Verwandte Muster
+
+
+→ [Prompt Injection Defense Pattern](#41-prompt-injection-defense-pattern) · [PII-Redaktion vor dem LLM-Call](#42-pii-redaktion-vor-dem-llm-call) · [LLM Response Validator Pattern](#151-llm-response-validator-pattern)
+
 
 ---
 
@@ -2094,7 +2161,7 @@ def simple_redact(text: str) -> str:
 #### Verwandte Muster
 
 
-→ [Prompt Injection Defense Pattern](#41-prompt-injection-defense-pattern) · [Output Guardrails Pattern](#guardrails--output-filtering) · [Field-Level Encryption Pattern](#184-aes-256-gcm-fr-sensible-felder)
+→ [Prompt Injection Defense Pattern](#41-prompt-injection-defense-pattern) · [Output Guardrails Pattern](#41b-output-guardrails-pattern) · [Field-Level Encryption Pattern](#42-pii-redaktion-vor-dem-llm-call)
 
 > ❌ **Häufiger Fehler:** DSGVO als rein organisatorisches Thema behandeln und keine technischen Maßnahmen implementieren. PII-Redaktion ist eine konkrete, implementierbare technische Maßnahme — kein vollständiger DSGVO-Compliance-Ersatz, aber ein unverzichtbarer Baustein für Systeme die mit personenbezogenen Dokumenten arbeiten.
 
@@ -2131,15 +2198,15 @@ Echter Sliding-Window-Executor — hält immer genau N Tasks in-flight.
 
 ```mermaid
 flowchart TD
-    START["items = [T1…T8]\nconcurrency = 4"]
-    START --> FILL["Initialen Pool füllen\npending = {T1, T2, T3, T4}"]
+    START["items = [T1…T8]<br/>concurrency = 4"]
+    START --> FILL["Initialen Pool füllen<br/>pending = {T1, T2, T3, T4}"]
     FILL --> WAIT["asyncio.wait(FIRST_COMPLETED)"]
     WAIT --> DONE["Task abgeschlossen"]
     DONE --> COLLECT["Ergebnis sammeln"]
-    COLLECT --> NEXT{"Nächstes\nItem?"}
-    NEXT -->|"Ja"| SPAWN["Neuen Task starten\n(sofortiges Backfill)"]
+    COLLECT --> NEXT{"Nächstes<br/>Item?"}
+    NEXT -->|"Ja"| SPAWN["Neuen Task starten<br/>(sofortiges Backfill)"]
     SPAWN --> WAIT
-    NEXT -->|"Nein, Liste leer"| CHECK{"pending\nleer?"}
+    NEXT -->|"Nein, Liste leer"| CHECK{"pending<br/>leer?"}
     CHECK -->|"Nein"| WAIT
     CHECK -->|"Ja"| RET["return ok, failed"]
 
@@ -2227,7 +2294,7 @@ async def process_all_chunks(chunks: list[Chunk]) -> None:
 #### Verwandte Muster
 
 
-→ [Per-Model Throttling Pattern](#53-per-model-throttling) · [Thread-Safe Rate Limiter Pattern](#52-thread-safe-async-rate-limiter) · [Multi-Stage Pipeline Pattern](#26-multi-stage-ki-pipeline)
+→ [Per-Model Throttling Pattern](#52-thread-safe-rate-limiter-pattern) · [Thread-Safe Rate Limiter Pattern](#52-thread-safe-rate-limiter-pattern) · [Multi-Stage Pipeline Pattern](#26-multi-stage-pipeline-pattern)
 
 > ❌ **Häufiger Fehler:** `asyncio.gather()` direkt auf einer großen Item-Liste verwenden. Bei 500+ LLM-Calls führt das sofort zu Rate-Limit-Errors und 429-Responses. Der Sliding-Window-Executor ist für LLM-intensive Pipelines die richtige Basis.
 
@@ -2332,120 +2399,35 @@ class RateLimitedLLMClient:
 | asyncio.sleep außerhalb des Locks blockiert Event Loop nicht | Token-Burst am Anfang wird nicht verhindert |
 
 
-#### Verwandte Muster
+#### Variante: Per-Model Throttling
 
-
-→ [Sliding Window Executor Pattern](#51-sliding-window-executor) · [Per-Model Throttling Pattern](#53-per-model-throttling)
-
-
----
-
-### 5.3 Per-Model Throttling Pattern
-
-> **Kategorie:** G · Pipeline- & Workflow-Orchestrierung
-
-> **Intent:** Weist jedem LLM-Modell einen eigenen Rate-Limiter zu, sodass unterschiedliche Kapazitäten unabhängig voneinander verwaltet werden.
-
-
-#### Problem
-
-
-Verschiedene LLM-Modelle/Endpunkte haben unterschiedliche Rate Limits. Globale Drosselung ist ineffizient.
-
-
-#### Lösung
-
-
-**Warum pro Modell statt global?** Verschiedene Modelle haben verschiedene Rate Limits: GPT-4o erlaubt weniger Requests pro Minute als Haiku, Enterprise-Tier mehr als Free-Tier. Ein globaler Limiter auf dem restriktivsten Modell drosselt alle anderen unnötig. Per-Modell-Throttling maximiert den Durchsatz: Haiku läuft auf 50 req/min während GPT-4o bei 10 bleibt — ohne dass sie sich gegenseitig blockieren.
-
-Separate Rate-Limiter-Instanz pro Modell oder Task-Typ.
-
-
-#### Struktur
-
-
-```mermaid
-graph LR
-    R[Request] --> D{Modell?}
-    D -->|GPT-4o| RL1[Rate Limiter\n10 req/min]
-    D -->|Claude| RL2[Rate Limiter\n20 req/min]
-    D -->|Haiku| RL3[Rate Limiter\n50 req/min]
-    RL1 --> API[LLM API]
-    RL2 --> API
-    RL3 --> API
-```
-
-*Diagramm: Per-Model Throttling — eingehende Requests werden nach Modell geroutet; jedes Modell hat seinen eigenen Rate Limiter mit eigener Kapazität (10/20/50 req/min). Alle münden in derselben LLM-API.*
-
-
-#### Implementierungshinweise
-
+Für Setups mit mehreren LLM-Modellen reicht ein globaler Rate-Limiter nicht — GPT-4o, Claude und Haiku haben unterschiedliche Limits, und ein globaler Limiter auf dem restriktivsten Modell drosselt alle anderen unnötig. **Lösung:** separate Rate-Limiter-Instanz pro Modell oder Task-Typ, in einem Registry-Dict verwaltet.
 
 ```python
-from dataclasses import dataclass
-
-@dataclass
-class ModelConfig:
-    model_name: str
-    requests_per_minute: int
-    max_concurrent: int  # Semaphore für Burst-Schutz
-
-MODEL_CONFIGS = {
-    "screening": ModelConfig(
-        model_name="claude-haiku-4-5",
-        requests_per_minute=100,
-        max_concurrent=20,
-    ),
-    "extraction": ModelConfig(
-        model_name="claude-sonnet-4-6",
-        requests_per_minute=30,
-        max_concurrent=5,
-    ),
-    "verification": ModelConfig(
-        model_name="claude-sonnet-4-6",
-        requests_per_minute=30,
-        max_concurrent=3,
-    ),
-}
-
-class ThrottledLLMPool:
-    def __init__(self):
-        self._limiters = {
-            key: AsyncRateLimiter(cfg.requests_per_minute)
-            for key, cfg in MODEL_CONFIGS.items()
-        }
-        self._semaphores = {
-            key: asyncio.Semaphore(cfg.max_concurrent)
-            for key, cfg in MODEL_CONFIGS.items()
+class PerModelThrottler:
+    def __init__(self, limits: dict[str, int]):  # model_name → req/min
+        self.limiters = {
+            model: ThreadSafeRateLimiter(rate_per_min=rate)
+            for model, rate in limits.items()
         }
 
-    async def call(self, task_type: str, messages: list[dict]) -> str:
-        cfg = MODEL_CONFIGS[task_type]
-        await self._limiters[task_type].acquire()
-        async with self._semaphores[task_type]:
-            return await llm_client.chat(model=cfg.model_name, messages=messages)
-
-llm_pool = ThrottledLLMPool()
-result = await llm_pool.call("screening", messages)
+    async def acquire(self, model: str):
+        if model not in self.limiters:
+            raise ValueError(f"Unbekanntes Modell: {model}")
+        await self.limiters[model].acquire()
 ```
 
-
-#### Konsequenzen
-
-
-| ✅ Vorteile | ⚠️ Trade-offs |
-|---|---|
-| Verschiedene Kapazitäten pro Modell konfigurierbar | Separate Limiter-Instanzen erhöhen Verwaltungsaufwand |
-| Burst-Schutz durch Semaphore zusätzlich zum Rate-Limiting | Config-Änderungen erfordern Service-Neustart |
+So laufen Haiku-Tasks auf 50 req/min parallel zu GPT-4o-Tasks auf 10 req/min, ohne dass sie sich gegenseitig blockieren.
 
 
 #### Verwandte Muster
 
 
-→ [Thread-Safe Rate Limiter Pattern](#52-thread-safe-async-rate-limiter) · [LLM Gateway Pattern](#72-llm-gateway-muster) · [Circuit Breaker Pattern](#175-circuit-breaker-fr-llm-calls)
+→ [Sliding Window Executor Pattern](#51-sliding-window-executor-pattern) · [Per-Model Throttling Pattern](#52-thread-safe-rate-limiter-pattern)
 
 
 ---
+
 
 ## 6. Retrieval-Augmented Generation (RAG)
 
@@ -2480,10 +2462,10 @@ graph LR
     DOCS[Dokumente] --> Q[Queue]
     Q --> W1[Worker 1]
     Q --> W2[Worker 2]
-    W1 -->|Fehler| DLQ[Dead Letter\nQueue]
+    W1 -->|Fehler| DLQ[Dead Letter<br/>Queue]
     W1 -->|OK| IDX[(Index)]
     W2 -->|OK| IDX
-    DLQ --> RETRY[Retry\nnach 1h]
+    DLQ --> RETRY[Retry<br/>nach 1h]
 ```
 
 *Diagramm: Failure-isolierte Indexierung — Dokumente werden über einen isolierten Task-Mechanismus (Queue, Child-Workflow, Background-Task) an Workers verteilt. Fehler landen in einer Dead Letter Queue und werden nach 1 Stunde erneut versucht; erfolgreiche Indexierungen gehen in den Index. Fehler im Indexierungspfad blockieren den Hauptprozess nicht.*
@@ -2542,7 +2524,7 @@ async def index_document(doc_id: str, text: str) -> None:
 #### Verwandte Muster
 
 
-→ [Durable Workflow Pattern](#71-durable-workflows-fr-lange-ki-pipelines) · [Rich Chunk Metadata Pattern](#31-reiche-chunk-metadaten)
+→ [Durable Workflow Pattern](#71-durable-workflow-pattern) · [Rich Chunk Metadata Pattern](#31-rich-chunk-metadata-pattern)
 
 
 ---
@@ -2576,7 +2558,7 @@ graph TD
     CLS -->|Tabelle| TBL[table_chunk]
     CLS -->|Aufzaehlung| LST[list_chunk]
     CLS -->|Ueberschrift| HDR[header_chunk]
-    TXT --> VDB[(Vector-DB\nmit type-Filter)]
+    TXT --> VDB[(Vector-DB<br/>mit type-Filter)]
     TBL --> VDB
     LST --> VDB
     HDR --> VDB
@@ -2624,7 +2606,7 @@ async def process_chunk(raw_chunk: RawChunk) -> Chunk:
 #### Verwandte Muster
 
 
-→ [Rich Chunk Metadata Pattern](#31-reiche-chunk-metadaten) · [Map-Reduce Extraction Pattern](#21-map-reduce-metadaten-extraktion)
+→ [Rich Chunk Metadata Pattern](#31-rich-chunk-metadata-pattern) · [Map-Reduce Extraction Pattern](#21-map-reduce-extraction-pattern)
 
 
 ---
@@ -2764,7 +2746,7 @@ class DocumentAnalysisWorkflow:
 #### Verwandte Muster
 
 
-→ [Pass-by-Reference Pattern](#32-pass-by-reference-fr-groe-payloads) · [Failure-Isolated Indexing Pattern](#61-failure-isolated-indexierung) · [Circuit Breaker Pattern](#175-circuit-breaker-fr-llm-calls)
+→ [Pass-by-Reference Pattern](#32-pass-by-reference-pattern) · [Failure-Isolated Indexing Pattern](#61-failure-isolated-indexing-pattern) · [Circuit Breaker Pattern](#154-circuit-breaker-pattern)
 
 > ❌ **Häufiger Fehler:** Lange KI-Pipelines (> 30 Sekunden) direkt in HTTP-Request-Handlern oder einfachen `asyncio`-Tasks ausführen. Bei Server-Restart, Netzwerkfehler oder Timeout geht der gesamte Fortschritt verloren. Workflow-Engines wie Temporal speichern jeden Schritt persistent — ein Crash-Recovery kostet nichts außer der Implementierungszeit.
 
@@ -2795,9 +2777,9 @@ Zentraler API-Gateway vor allen LLM-Aufrufen. Der Gateway-Dienst spricht eine ei
 ```mermaid
 graph LR
     APP[Anwendung] --> GW[LLM-Gateway]
-    GW -->|Route| P1[Anbieter A\nCloud]
-    GW -->|Route| P2[Anbieter B\nCloud]
-    GW -->|Route| P3[Lokales\nModell]
+    GW -->|Route| P1[Anbieter A<br/>Cloud]
+    GW -->|Route| P2[Anbieter B<br/>Cloud]
+    GW -->|Route| P3[Lokales<br/>Modell]
     GW -->|Metrics| OBS[Observability]
 ```
 
@@ -2866,210 +2848,46 @@ async def extract_metadata(text: str) -> dict:
 | Rate-Limiting und Retry zentral an einer Stelle | Gateway kann Single Point of Failure werden — HA-Setup empfohlen |
 
 
+#### Variante: Capability-aware Routing
+
+Der Gateway ist der natürliche Ort, Modell-Fähigkeiten (Vision, Function Calling, Context-Limit, Streaming) zu deklarieren und routing-relevant zu machen. Statt jedes aufrufende Service selbst prüfen zu lassen, ob ein Modell ein Feature kann, hält der Gateway eine Capability-Tabelle vor:
+
+```python
+# In der Gateway-DB oder Config
+MODEL_CAPABILITIES = {
+    "claude-opus-4-7":   {"vision": True,  "tools": True,  "context": 200_000, "streaming": True},
+    "claude-haiku-4-5":  {"vision": False, "tools": True,  "context": 200_000, "streaming": True},
+    "gpt-4o":            {"vision": True,  "tools": True,  "context": 128_000, "streaming": True},
+}
+
+def route(request: LLMRequest) -> str:
+    requires = request.required_capabilities()  # z.B. {"vision", "tools"}
+    candidates = [
+        model for model, caps in MODEL_CAPABILITIES.items()
+        if all(caps.get(c) for c in requires)
+    ]
+    if not candidates:
+        raise ValueError(f"Kein Modell erfüllt {requires}")
+    return select_by_policy(candidates, request.policy)  # Kosten, Latenz, Priorität
+```
+
+So kann ein Service einfach `request.needs_vision=True` setzen und muss keine Modell-Liste pflegen — der Gateway filtert automatisch und wählt ein kompatibles Modell.
+
+
 #### Verwandte Muster
 
 
-→ [Model Priority Chain Pattern](#164-model-priority-chain) · [Circuit Breaker Pattern](#175-circuit-breaker-fr-llm-calls) · [Per-Model Throttling Pattern](#53-per-model-throttling)
+→ [Model Priority Chain Pattern](#144-model-priority-chain-pattern) · [Circuit Breaker Pattern](#154-circuit-breaker-pattern) · [Per-Model Throttling Pattern](#52-thread-safe-rate-limiter-pattern)
 
 > ❌ **Häufiger Fehler:** LLM-Provider-SDKs direkt in Business-Logik importieren (`from anthropic import Anthropic` überall verstreut). Bei einem Provider-Wechsel oder API-Key-Rotation müssen dann Dutzende Stellen angefasst werden. Ein zentraler Gateway-Endpunkt — auch wenn er zunächst nur ein simpler Proxy ist — hält die Tür offen.
 
 ---
 
-## 8. Infrastruktur & Deployment
-
-> 🟢 **Einstieg** — 8.1 (Two-Layer Compose), 8.2 (Secrets Management)
-
-### 8.1 Two-Layer Compose Pattern
-
-> **Kategorie:** I · Betrieb & Infrastruktur
-
-> **Intent:** Trennt langlebige Infrastruktur-Container (DB, Cache, Queue) von kurzlebigen Application-Services in separaten Compose-Dateien.
-
-
-#### Problem
-
-
-Infrastruktur und Applikation haben unterschiedliche Lebenszyklen.
-
-
-#### Struktur
-
-
-```mermaid
-graph TD
-    subgraph infra[infra-compose.yml]
-        PG[(PostgreSQL)]
-        RD[(Redis)]
-        QD[(Qdrant)]
-    end
-    subgraph app[app-compose.yml]
-        API[FastAPI]
-        WRK[Worker]
-    end
-    API --> PG
-    API --> RD
-    WRK --> QD
-```
-
-*Diagramm: Zweischichtiges Docker Compose — infra-compose.yml enthält die langlebige Infrastruktur (PostgreSQL, Redis, Qdrant); app-compose.yml enthält die häufig aktualisierten Services (FastAPI, Worker). Services greifen auf die Infra-Datenbanken zu; bei Service-Deployments bleibt die Infrastruktur-Schicht unberührt.*
-
-
-#### Implementierungshinweise
-
-
-```yaml
-services:
-  postgres:
-    image: postgres:16
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
-    secrets:
-      - postgres_password
-    restart: unless-stopped  # Immer laufen lassen
-
-  qdrant:
-    image: qdrant/qdrant:latest
-    volumes:
-      - qdrant_data:/qdrant/storage  # KRITISCH: Volume nicht vergessen!
-    restart: unless-stopped
-
-  temporal:
-    image: temporalio/auto-setup:latest
-    depends_on: [postgres, elasticsearch]
-    restart: unless-stopped
-
-volumes:
-  postgres_data:
-  qdrant_data:   # Vektoren persistent speichern
-
-secrets:
-  postgres_password:
-    external: true  # Via create_secrets.sh erstellt
-```
-
-```yaml
-services:
-  agent-orchestrator:
-    build: ./02-backend/agent_orchestration_service
-    ports:
-      - "8001:8000"
-    environment:
-      DATABASE_URL: postgresql://...
-      TEMPORAL_HOST: temporal:7233
-    depends_on:
-      - postgres
-      - temporal
-    restart: on-failure  # Bei Fehler neu starten, aber nicht immer
-
-  litellm-proxy:
-    image: ghcr.io/berriai/litellm:main-latest
-    volumes:
-      - ./litellm_config.yaml:/app/config.yaml
-    ports:
-      - "4000:4000"
-```
-
-```bash
-# Einmalig: Infrastruktur starten
-docker compose up -d
-
-# Täglich: Nur Services neu deployen (Infra läuft weiter!)
-docker compose -f docker-compose.services.yaml up -d --build agent-orchestrator
-```
-
-
-#### Konsequenzen
-
-
-| ✅ Vorteile | ⚠️ Trade-offs |
-|---|---|
-| Service-Deployments berühren die Infrastruktur nicht | Zwei Compose-Dateien erfordern Koordination bei Updates |
-| Klare Trennung der Lebenszyklen | Infrastruktur-Schema-Änderungen noch immer manuell |
-
-
-#### Verwandte Muster
-
-
-→ [Full Observability Stack Pattern](#91-vollstndiger-observability-stack) · [LLM Gateway Pattern](#72-llm-gateway-muster)
-
-
----
-
-### 8.2 Secrets Management Pattern
-
-> **Kategorie:** I · Betrieb & Infrastruktur
-
-> **Intent:** Verwaltet Secrets über ein zentrales Script und verhindert, dass Credentials in Git-Repositories landen.
-
-
-#### Problem
-
-Passwörter, API-Keys und Datenbankverbindungen landen über `.env`-Dateien oder Inline-Strings unweigerlich im Git-Repository — oft erst beim ersten `git log` entdeckt. Einmal committed und gepusht sind Secrets kompromittiert, selbst nach einem späteren `git rm`.
-
-#### Struktur
-
-
-```mermaid
-graph LR
-    ENV[.env.example] -->|Vorlage| DEV[.env\nlokal]
-    VAULT[Secret Store\nVault/AWS] -->|CI/CD| PROD[Env Vars\nProduktion]
-    DEV --> APP[App]
-    PROD --> APP
-    APP -.->|niemals| GIT[Git Repo]
-```
-
-*Diagramm: Secret-Management — .env.example dient als Vorlage für lokale .env-Datei; Produktions-Secrets kommen über CI/CD aus einem Secret Store (Vault/AWS). Beide Pfade speisen die App, aber niemals landet ein Secret im Git-Repository.*
-
-
-#### Implementierungshinweise
-
-
-```bash
-#!/bin/bash
-# create_secrets.sh — In .gitignore, wird nie committed
-
-set -euo pipefail
-
-echo "Creating Docker secrets..."
-
-# Starke Passwörter generieren
-POSTGRES_PASSWORD=$(openssl rand -base64 32)
-MINIO_ROOT_PASSWORD=$(openssl rand -base64 32)
-TEMPORAL_DB_PASSWORD=$(openssl rand -base64 32)
-
-# Als Docker Secrets anlegen (lokal, kein Swarm nötig)
-echo "$POSTGRES_PASSWORD"      | docker secret create postgres_password - 2>/dev/null || echo "Already exists"
-echo "$MINIO_ROOT_PASSWORD"    | docker secret create minio_root_password - 2>/dev/null || echo "Already exists"
-echo "$TEMPORAL_DB_PASSWORD"   | docker secret create temporal_db_password - 2>/dev/null || echo "Already exists"
-
-echo "Done. Secrets created — never commit this script's output!"
-```
-
-
-#### Konsequenzen
-
-
-| ✅ Vorteile | ⚠️ Trade-offs |
-|---|---|
-| Secrets niemals im Git-Repository | Script muss sicher aufbewahrt werden |
-| Zentrales Management vereinfacht Secret-Rotation | Manuelle Ausführung bei Secret-Rotation nötig |
-
-
-#### Verwandte Muster
-
-
-→ [Field-Level Encryption Pattern](#184-aes-256-gcm-fr-sensible-felder)
-
-
----
-
-## 9. Observability
+## 8. Observability
 
 > 🟡 **Fortgeschritten** — 9.1 (Full Observability Stack) ⚠️
 
-### 9.1 Full Observability Stack Pattern
+### 8.1 Full Observability Stack Pattern
 
 > **Kategorie:** I · Betrieb & Infrastruktur
 
@@ -3087,17 +2905,17 @@ Standard-Monitoring (HTTP-Statuscodes, Response-Time) reicht für LLM-intensive 
 
 ```mermaid
 flowchart TD
-    APP["🖥️ Application\nFastAPI Services"]
+    APP["🖥️ Application<br/>FastAPI Services"]
 
-    APP -->|"structlog\nJSON logs"| OC["📡 OTel Collector"]
-    APP -->|"OpenTelemetry SDK\nSpans & Metrics"| OC
-    APP -->|"Workflow Events"| TUI["⏱️ Workflow-Engine UI\nAudit-Trail"]
+    APP -->|"structlog<br/>JSON logs"| OC["📡 OTel Collector"]
+    APP -->|"OpenTelemetry SDK<br/>Spans & Metrics"| OC
+    APP -->|"Workflow Events"| TUI["⏱️ Workflow-Engine UI<br/>Audit-Trail"]
 
-    OC --> TEMPO["🔍 Tempo\nDistributed Traces\n'Was lief wo wie lang?'"]
-    OC --> LOKI["📋 Loki\nStructured Logs\n'Was wurde geloggt?'"]
-    OC --> PROM["📊 Prometheus\nMetrics\n'Latenz, Requests, Fehlerrate'"]
+    OC --> TEMPO["🔍 Tempo<br/>Distributed Traces<br/>'Was lief wo wie lang?'"]
+    OC --> LOKI["📋 Loki<br/>Structured Logs<br/>'Was wurde geloggt?'"]
+    OC --> PROM["📊 Prometheus<br/>Metrics<br/>'Latenz, Requests, Fehlerrate'"]
 
-    TEMPO --> GRAF["📈 Grafana\nUnified Dashboard"]
+    TEMPO --> GRAF["📈 Grafana<br/>Unified Dashboard"]
     LOKI  --> GRAF
     PROM  --> GRAF
     GRAF  --> ALERT["🚨 Alerting"]
@@ -3200,76 +3018,91 @@ with llm_latency.labels(model="sonnet", task_type="extraction").time():
 #### Verwandte Muster
 
 
-→ [LLM Metrics Pattern](#178-prometheus-llm-metriken) · [Circuit Breaker Pattern](#175-circuit-breaker-fr-llm-calls) · [Full Observability Stack Pattern](#91-vollstndiger-observability-stack)
+→ [LLM Metrics Pattern](#82-llm-metrics-pattern-prometheus) · [Circuit Breaker Pattern](#154-circuit-breaker-pattern) · [Full Observability Stack Pattern](#81-full-observability-stack-pattern)
 
-> ❌ **Häufiger Fehler:** Observability als "nice to have" behandeln und erst nachrüsten wenn etwas in Produktion schiefläuft. LLM-Systeme ohne strukturierte Logs und Traces sind kaum debuggbar — Latenzprobleme, Rate-Limit-Hits und Halluzinationen sind ohne Metrics unsichtbar. OTel von Tag 1 an einbauen kostet einen halben Tag; nachträglich ist es wochenlange Arbeit.
+> ❌ **Häufiger Fehler:** Observability als „nice to have" behandeln und erst nachrüsten wenn etwas in Produktion schiefläuft. LLM-Systeme ohne strukturierte Logs und Traces sind kaum debuggbar — Latenzprobleme, Rate-Limit-Hits und Halluzinationen sind ohne Metrics unsichtbar. OTel von Tag 1 an einbauen kostet einen halben Tag; nachträglich ist es wochenlange Arbeit.
 
 ---
+### 8.2 LLM Metrics Pattern (Prometheus)
 
-## 10. Code-Organisation
+> **Kategorie:** E · Qualität & Evaluation
 
-> 🟢 **Einstieg** — 10.1 (Monorepo Workspace), 10.2 (Living README)
-
-### 10.1 Monorepo Workspace Pattern
-
-> **Kategorie:** I · Betrieb & Infrastruktur
-
-> **Intent:** Organisiert mehrere Services als Monorepo mit geteilten Packages, ohne PyPI-Publishing — Shared Code wird lokal aus dem Workspace bezogen.
+> **Intent:** Instrumentiert alle LLM-Calls mit LLM-spezifischen Prometheus-Metriken (Latenz-Histogramm mit angepassten Buckets, Timeout-Rate, Circuit-Breaker-State).
 
 
 #### Problem
 
 
-Shared Code zwischen Services endet in Copy-Paste oder komplizierten Package-Abhängigkeiten.
+Standard-API-Monitoring reicht für LLM-intensive Systeme nicht — wichtig sind LLM-spezifische KPIs: Latenz pro Modell, Timeout-Rate, Circuit-Breaker-State.
 
 
 #### Lösung
 
 
-`uv workspace` — Shared packages im Monorepo, jeder Service deployt unabhängig.
+**Warum LLM-spezifische Metriken statt Standard-HTTP-Monitoring?** HTTP-Statuscodes zeigen ob ein Request ankam — nicht ob das LLM brauchbare Ergebnisse lieferte. Latenz-Histogramme mit Standard-Buckets (100ms, 500ms) sind nutzlos wenn LLM-Calls typisch 2–30 Sekunden dauern. Und der Circuit-Breaker-State ist vollständig unsichtbar in normalen API-Metriken. LLM-spezifische Buckets, Timeout-Rate und Modell-Labels sind der Unterschied zwischen „wir sehen dass etwas langsam ist" und „wir sehen welches Modell bei welchem Task-Typ auf 429 läuft".
+
+Dedizierte Prometheus-Metriken für alle LLM-Operationen:
 
 
 #### Struktur
 
 
 ```mermaid
-graph TD
-    ROOT[pyproject.toml\nuv workspace] --> S1[service-a/\npyproject.toml]
-    ROOT --> S2[service-b/\npyproject.toml]
-    ROOT --> LIB[shared-lib/\npyproject.toml]
-    S1 --> LIB
-    S2 --> LIB
+graph LR
+    LLM[LLM Call] --> CNT[Counter<br/>Requests Total]
+    LLM --> HIST[Histogram<br/>Duration]
+    LLM --> GAUGE[Gauge<br/>Timeout Rate]
+    CB[Circuit Breaker] --> STATE[Gauge<br/>State 0/1/2]
+    CNT --> PROM[(Prometheus)]
+    HIST --> PROM
+    GAUGE --> PROM
+    STATE --> PROM
+    PROM --> GRAF[Grafana]
 ```
 
-*Diagramm: uv Workspace Monorepo — Root-pyproject.toml definiert den Workspace; Service A und Service B haben eigene pyproject.toml und teilen sich beide eine gemeinsame shared-lib, die lokal aus dem Workspace bezogen wird ohne PyPI-Publishing.*
+*Diagramm: Prometheus LLM-Metriken — jeder LLM-Call speist Counter (Requests Total), Histogram (Duration) und Gauge (Timeout Rate); der Circuit Breaker speist einen State-Gauge (0=closed, 1=open, 2=half_open); alle Metriken fließen in Prometheus und werden in Grafana visualisiert.*
 
 
 #### Implementierungshinweise
 
 
-```toml
-[tool.uv.workspace]
-members = [
-    "04-shared-services/prompt-injection",
-    "04-shared-services/llm-client",
-    "05-modulcluster/modul-inhaltsextraktion",
-    "05-modulcluster/modul-plausibilitaet-pruefung",
-]
-```
+```python
+# src/services/metrics.py
+from prometheus_client import Counter, Histogram, Gauge
 
-```toml
-[project]
-name = "modul-inhaltsextraktion"
-dependencies = [
-    "fastapi>=0.115",
-    "pydantic>=3.0",
-    "prompt-injection",  # ← Shared package, kein PyPI-Publishing nötig
-    "llm-client",
-]
+# LLM Request Metrics
+llm_requests_total = Counter(
+    "llm_requests_total", "Total LLM requests",
+    ["model", "status"]  # status: success | timeout | rate_limit | error
+)
+llm_duration_seconds = Histogram(
+    "llm_duration_seconds", "LLM request duration in seconds",
+    ["model"],
+    buckets=[0.1, 0.5, 1, 5, 10, 30, 60, 120]  # LLM-typische Zeitskala!
+)
+llm_timeout_rate = Gauge(
+    "llm_timeout_rate", "Current LLM timeout rate",
+    ["model"]
+)
 
-[tool.uv.sources]
-prompt-injection = { workspace = true }  # ← Aus dem Workspace
-llm-client       = { workspace = true }
+# Circuit Breaker State
+circuit_breaker_state = Gauge(
+    "circuit_breaker_state", "Circuit breaker state (0=closed, 1=open, 2=half_open)",
+    ["service"]
+)
+
+# Nutzung:
+async def call_llm(model: str, prompt: str):
+    start = time.time()
+    try:
+        result = await llm_api.complete(prompt)
+        llm_requests_total.labels(model=model, status="success").inc()
+        return result
+    except TimeoutError:
+        llm_requests_total.labels(model=model, status="timeout").inc()
+        raise
+    finally:
+        llm_duration_seconds.labels(model=model).observe(time.time() - start)
 ```
 
 
@@ -3278,93 +3111,25 @@ llm-client       = { workspace = true }
 
 | ✅ Vorteile | ⚠️ Trade-offs |
 |---|---|
-| Shared Code ohne PyPI-Publishing | uv-spezifisch — nicht kompatibel mit pip/poetry ohne Anpassung |
-| Konsistente Dependencies über alle Services | Workspace-Pfade müssen relativ und konsistent bleiben |
+| LLM-spezifische Metriken sofort in Grafana sichtbar | Histogramm-Buckets müssen an LLM-Latenzprofil angepasst werden |
+| Circuit-Breaker-State als Gauge überwachbar | Metriken-Granularität (pro Modell) erhöht Prometheus-Cardinality |
 
 
 #### Verwandte Muster
 
 
-→ [Living Service README Pattern](#102-service-readmes-als-lebendige-dokumentation)
+→ [Full Observability Stack Pattern](#81-full-observability-stack-pattern) · [Circuit Breaker Pattern](#154-circuit-breaker-pattern)
 
 
 ---
 
-### 10.2 Living Service README Pattern
-
-> **Kategorie:** I · Betrieb & Infrastruktur
-
-> **Intent:** Macht jeden Service selbsterklärend durch ein standardisiertes README-Template mit Überblick, Schnittstellen, Abhängigkeiten und Startbefehlen.
 
 
-#### Problem
-
-
-In Monorepos mit mehreren Services wissen neue Entwickler oft nicht, wie ein Service gestartet wird, welche ENV-Variablen er braucht und welche Queue-Namen er erwartet. Dieses Wissen liegt verstreut in Köpfen, Slack-Nachrichten oder veraltetem Wiki. Ohne Mindestandard entstehen serviceübergreifend inkonsistente Dokumentationsinseln.
-
-
-#### Konsequenzen
-
-
-| ✅ Vorteile | ⚠️ Trade-offs |
-|---|---|
-| Neuer Entwickler versteht Service in Minuten | READMEs veralten wenn sie nicht aktiv gepflegt werden |
-| Template erzwingt Mindestandard ohne Tools | Kein technisches Enforcement — kulturelle Disziplin nötig |
-
-
-#### Verwandte Muster
-
-
-→ [Monorepo Workspace Pattern](#101-uv-workspace-monorepo)
-
-
----
-### API-Endpunkte
-| Methode | Pfad | Beschreibung |
-|---------|------|--------------|
-| POST | /workflows/start | Startet Analyseworkflow |
-| GET  | /workflows/{id}  | Status abfragen |
-### Workflow-Engine Task Queue
-- **Queue-Name**: `[queue-name]`
-- **Workflows**: `[WorkflowName]`
-- **Activities**: `[activity_1]`, `[activity_2]`
-
-### Abhängigkeiten
-- **Datenbank**: `[db-name]` (Schema: siehe Migrationen)
-- **Object Storage**: Bucket `documents` (read), `results` (write)
-- **LLM-Gateway**: `http://llm-gateway:4000`
-
-### Konfiguration (ENV)
-| Variable | Beschreibung | Beispiel |
-|----------|-------------|---------|
-| `DATABASE_URL` | Datenbank-Verbindung | `postgresql+asyncpg://...` |
-| `WORKFLOW_HOST` | Workflow-Engine | `workflow-engine:7233` |
-| `LLM_GATEWAY_URL` | LLM-Proxy | `http://llm-gateway:4000/v1` |
-
-### Lokal starten
-```bash
-uv sync
-uv run python -m src.worker
-```
-```
-
-```mermaid
-graph LR
-    README[README.md] --> OV[Ueberblick\n2-3 Saetze]
-    README --> API[API-Endpoints\nBeispiele]
-    README --> ENV[ENV-Variablen]
-    README --> RUN[Lokal starten\nKommandos]
-```
-
-*Diagramm: Service-README-Struktur — ein README.md enthält vier Pflichtabschnitte: Überblick (2–3 Sätze), API-Endpoints mit Beispielen, ENV-Variablen und lokale Start-Kommandos.*
-
----
-
-## 11. Prompt Engineering
+## 9. Prompt Engineering
 
 > 🟢 **Einstieg** — 11.1 (Positive + Negative Beispiele), 11.3 (Domänen-Kontext) · 🟡 **Fortgeschritten** — 11.2 (Strukturierte Output-Anforderungen), 11.4 (Edge Cases), Prefill-Muster · 🔴 **Expert** — 11.5 (Mengen-Kontrolle Batching)
 
-### 11.1 Positive + Negative Examples Pattern
+### 9.1 Positive + Negative Examples Pattern
 
 > **Kategorie:** B · Prompt Engineering
 
@@ -3374,7 +3139,62 @@ graph LR
 #### Problem
 
 
-LLMs halten sich ohne Beispiele nicht an gewünschte Output-Formate.
+LLMs halten sich ohne Beispiele nicht an gewünschte Output-Formate. Positive Beispiele alleine reichen oft nicht: Das Modell interpoliert zwischen den gezeigten Fällen, erzeugt aber eigene „plausibel aussehende" Fehlformen, die im Prompt nicht als unerwünscht markiert waren.
+
+
+#### Lösung
+
+
+**Warum Negativ-Beispiele?** Positive Beispiele zeigen dem Modell, was gewünscht ist — sie definieren aber keinen Rand. Negativ-Beispiele markieren den Fehler-Raum: „Nicht so — zu lang, zu generisch, zu abgekürzt." Damit wird die Entscheidungsfläche des Modells zweiseitig eingegrenzt. In der Praxis reduziert ein einziges Negativ-Beispiel die Rate fehlerhafter Outputs oft deutlich stärker als drei zusätzliche Positiv-Beispiele.
+
+
+#### Struktur
+
+
+```mermaid
+graph LR
+    PROMPT[Prompt] --> POS[Positiv-Beispiele<br/>Korrektes Format]
+    PROMPT --> NEG[Negativ-Beispiele<br/>Häufige Fehlformen]
+    POS --> LLM[LLM]
+    NEG --> LLM
+    LLM --> OUT[Ausgabe<br/>im gewünschten Format]
+```
+
+*Diagramm: Positive + Negative Examples — der Prompt enthält beide Beispielklassen. Das LLM sieht gleichzeitig die gewünschte Form und die zu vermeidenden Fehlformen und generiert konsistenter im Ziel-Format.*
+
+
+#### Implementierungshinweise
+
+
+Beispiel für einen Prompt-Auszug (eingebettet in den System- oder User-Prompt):
+
+````text
+Extrahiere Titel und Dokumenttyp aus dem folgenden Text. Antworte ausschließlich
+mit validem JSON im gezeigten Format.
+
+### Korrektes Format:
+{
+  "title": "Planfeststellungsbeschluss Neubau B27 Umgehung Musterstadt",
+  "type": "Planfeststellungsbeschluss"
+}
+
+### Falsches Format (NICHT so):
+{
+  "title": "Der Titel des Dokuments lautet Planfeststellungsbeschluss...",  ← Zu ausführlich
+  "type": "dokument"  ← Zu generisch, falsche Normalisierung
+}
+{
+  "title": "B27",  ← Zu kurz, unvollständig
+  "type": "PFB"    ← Abkürzung statt vollständiger Begriff
+}
+
+Weitere gültige Typen: "Planfeststellungsbeschluss", "Plangenehmigung",
+"Vorläufige Anordnung", "Planänderungsbeschluss", "Sonstiges"
+
+Deine Antwort:
+````
+
+**Faustregel:** Mindestens ein positives UND ein negatives Beispiel — Negativ-Beispiele verhindern die häufigsten Fehler. Bei konstanten Fehlermustern die Negativ-Beispiele nach einigen Wochen überprüfen und ggf. austauschen.
 
 
 #### Konsequenzen
@@ -3389,36 +3209,12 @@ LLMs halten sich ohne Beispiele nicht an gewünschte Output-Formate.
 #### Verwandte Muster
 
 
-→ [Edge Case Constraints Pattern](#114-explizite-randbedingungen-fr-edge-cases) · [Structured Output Constraints Pattern](#112-strukturierte-output-anforderungen)
+→ [Edge Case Constraints Pattern](#94-batch-count-control-pattern) · [Structured Output Constraints Pattern](#92-structured-output-constraints-pattern)
 
 
 ---
-### Korrektes Format:
-{
-  "title": "Planfeststellungsbeschluss Neubau B27 Umgehung Musterstadt",
-  "type": "Planfeststellungsbeschluss"
-}
-### Falsches Format (NICHT so):
-{
-  "title": "Der Titel des Dokuments lautet Planfeststellungsbeschluss...",  ← Zu ausführlich
-  "type": "dokument"  ← Zu generisch, falsche Normalisierung
-}
-{
-  "title": "B27",  ← Zu kurz, unvollständig
-  "type": "PFB"   ← Abkürzung statt vollständiger Begriff
-}
 
-Weitere gültige Typen: "Planfeststellungsbeschluss", "Plangenehmigung",
-"Vorläufige Anordnung", "Planänderungsbeschluss", "Sonstiges"
-
-Deine Antwort:
-```
-
-**Faustregel:** Mindestens ein positives UND ein negatives Beispiel — Negativ-Beispiele verhindern die häufigsten Fehler.
-
----
-
-### 11.2 Structured Output Constraints Pattern
+### 9.2 Structured Output Constraints Pattern
 
 > **Kategorie:** B · Prompt Engineering
 
@@ -3427,7 +3223,29 @@ Deine Antwort:
 
 #### Problem
 
-LLMs ignorieren implizite Formatanforderungen: Trotz der Bitte um reines JSON fügen sie Erklärungstexte, Markdown-Codeblöcke (` ```json `) oder abschließende Kommentare hinzu. Dieses Verhalten ist konsistent — kein Einzelfall-Bug, sondern Standardverhalten ohne explizite Verbote im Prompt.
+LLMs ignorieren implizite Formatanforderungen: Trotz der Bitte um reines JSON fügen sie Erklärungstexte, Markdown-Codeblöcke (z. B. in dreifache Backticks gewrappt) oder abschließende Kommentare hinzu. Dieses Verhalten ist konsistent — kein Einzelfall-Bug, sondern Standardverhalten ohne explizite Verbote im Prompt.
+
+
+#### Lösung
+
+
+Zwei komplementäre Maßnahmen: (1) Im Prompt präzise Format-Constraints formulieren („Gib ausschließlich valides JSON zurück, keine Markdown-Wrapper, keine Erklärungen"); (2) trotzdem ein tolerantes Parsing implementieren, weil sich selbst gut instruierte Modelle gelegentlich nicht daran halten. Prompt-Präzision minimiert die Fehlerrate, robustes Parsing fängt die Reste ab.
+
+
+#### Struktur
+
+
+```mermaid
+graph LR
+    LLM[LLM-Antwort<br/>mit möglichem<br/>Markdown-Wrapper] --> STRIP[Wrapper-Entfernung]
+    STRIP --> EXT[JSON-Block<br/>extrahieren]
+    EXT --> PARSE[json.loads]
+    PARSE -->|OK| OUT[dict]
+    PARSE -->|Fehler| FAIL[ValueError<br/>aufsteigen lassen]
+```
+
+*Diagramm: Robustes LLM-JSON-Parsing — Antwort wird zunächst von Markdown-Wrappern befreit, dann der JSON-Block extrahiert, anschließend mit `json.loads` geparst. Bei Parse-Fehlern wird die Exception weitergereicht (Fail-Fast statt Silent-Default).*
+
 
 #### Implementierungshinweise
 
@@ -3436,12 +3254,24 @@ LLMs ignorieren implizite Formatanforderungen: Trotz der Bitte um reines JSON f�
 import json
 import re
 
+FENCE_RE = re.compile(r"^```(?:json)?\s*|\s*```$", re.MULTILINE)
+
 def parse_llm_json(response: str) -> dict:
     """Parst LLM-JSON-Output — auch wenn das LLM Markdown-Wrapper hinzufügt."""
     text = response.strip()
 
-    # Markdown-Code-Block entfernen (falls LLM sich nicht daran hält)
-    if text.startswith("```
+    # Markdown-Code-Block-Fences entfernen (öffnende und schließende)
+    text = FENCE_RE.sub("", text).strip()
+
+    # Falls noch Fließtext vor oder nach dem JSON steht: ersten { ... } Block greifen
+    match = re.search(r"\{.*\}", text, re.DOTALL)
+    if match:
+        text = match.group(0)
+
+    return json.loads(text)
+```
+
+> ❌ **Häufiger Fehler:** `json.loads(response)` ohne Vorverarbeitung aufrufen. Bricht regelmäßig, sobald das LLM die Antwort in Markdown-Fences wrappt oder eine kurze Einleitung voranstellt.
 
 
 #### Konsequenzen
@@ -3450,74 +3280,102 @@ def parse_llm_json(response: str) -> dict:
 | ✅ Vorteile | ⚠️ Trade-offs |
 |---|---|
 | Robustes Parsing toleriert LLM-Abweichungen | Strikte Format-Anforderungen können LLM-Kreativität einschränken |
-| Klar kommunizierte Formaterwartungen reduzieren Fehlerrate | Robustes Parsing muss trotzdem Abweichungen tolerieren |
+| Klar kommunizierte Formaterwartungen reduzieren Fehlerrate | Regex-basiertes Extrahieren bricht bei verschachtelten JSON-Strukturen mit Fließtext zwischen mehreren Objekten — für komplexe Fälle Instructor (→ 12.2) verwenden |
 
 
 #### Verwandte Muster
 
 
-→ [Schema-First Generation Pattern](#142-instructor--schema-validierung-first-structured-generation) · [LLM Response Validator Pattern](#171-llm-response-validator-mit-auto-repair)
+→ [Schema-First Generation Pattern](#122-schema-first-generation-pattern) · [LLM Response Validator Pattern](#151-llm-response-validator-pattern)
 
 
 ---
 
-### 11.3 Domain Context Pattern
+### 9.3 Prompt-Context-Engineering Pattern
 
 > **Kategorie:** B · Prompt Engineering
 
-> **Intent:** Verbessert LLM-Präzision in Fachdomänen durch explizite Kontextualisierung mit relevanten Gesetzen, Begriffen und Wissensrahmen im System-Prompt.
+> **Intent:** Erzwingt präzise und deterministische LLM-Antworten durch zwei komplementäre Maßnahmen im System-Prompt: expliziten Domänenkontext und enumerierte Edge-Case-Regeln.
 
 
 #### Problem
 
-LLMs ohne Domänenkontext greifen auf allgemeinen Sprachraum zurück: "Artenschutz" wird als allgemeines Umweltthema behandelt statt als Rechtsbegriff. "Prüfpflichtig" wird frei interpretiert statt klassifiziert. Das Ergebnis sind fachlich ungenaue Antworten, die im Downstream-System Fehler erzeugen.
+
+LLMs ohne Prompt-Context-Engineering zeigen zwei typische Schwächen:
+
+- **Fehlender Domänenkontext:** Das Modell greift auf allgemeinen Sprachraum zurück. „Artenschutz" wird als allgemeines Umweltthema behandelt statt als Rechtsbegriff; „prüfpflichtig" wird frei interpretiert statt klassifiziert.
+- **Unbehandelte Grenzfälle:** Ohne explizite Regel entscheidet das Modell jedes Mal neu — ein Dokument ohne Verfasser erhält mal `null`, mal `"Unbekannt"`, mal `"Nicht angegeben"`. Deterministisches Verhalten entsteht nur durch Enumeration der Grenzfälle.
+
+
+#### Lösung
+
+
+Zwei Bausteine im System-Prompt, die sich gegenseitig verstärken:
+
+**Baustein 1: Domänenkontext.** Einmalige Kontextualisierung im System-Prompt mit relevanten Gesetzen, Fachbegriffen, Wissensrahmen. Wirkt auf alle Calls gleichermaßen, kein Overhead pro Request.
+
+**Baustein 2: Edge-Case-Constraints.** Explizit enumerierte Sonderfall-Regeln und Fallback-Verhalten. Macht Entscheidungen bei Grenzfällen deterministisch statt zufällig.
+
+
+#### Struktur
+
+
+```mermaid
+graph LR
+    SYS[System-Prompt] --> DOM[Domänenkontext<br/>Gesetze, Begriffe]
+    SYS --> EDGE[Edge-Case-Regeln<br/>Fallback-Verhalten]
+    DOM --> LLM[LLM]
+    EDGE --> LLM
+    USR[User-Query] --> LLM
+    LLM --> OUT[Präzise,<br/>deterministische<br/>Antwort]
+```
+
+*Diagramm: Prompt-Context-Engineering — der System-Prompt enthält beide Bausteine (Domänenkontext + Edge-Case-Regeln). Beide wirken parallel auf das LLM zusammen mit der User-Query. Das Ergebnis ist fachlich präziser und bei Grenzfällen deterministisch.*
+
+
+#### Implementierungshinweise
+
+
+```text
+# System-Prompt-Aufbau
+
+### Domänenkontext
+Du bist ein Klassifikations-Assistent für deutsche Verwaltungsbescheide im Bereich
+Planfeststellungsverfahren. Beachte folgende Rechtsbegriffe:
+- "Artenschutz" = Schutzregelung nach §44 BNatSchG (Bundesnaturschutzgesetz)
+- "Prüfpflichtig" = formale UVP-Pflicht nach §6 UVPG
+- "Anhörungsverfahren" = §73 VwVfG-Prozess, KEIN informelles Bürgergespräch
+
+### Edge-Case-Regeln
+1. Datum nicht erkennbar → liefere `null`, nicht `"Unbekannt"` oder `""`
+2. Mehrere Verfasser → liefere Array, auch wenn nur einer explizit genannt
+3. Dokumenttyp mehrdeutig → wähle den spezifischsten zutreffenden Typ
+4. Geldbeträge ohne Währung → annehmen EUR, kennzeichnen mit `currency_inferred: true`
+5. Widersprüchliche Angaben → `confidence: "low"` und beide Werte in `conflict`-Feld
+```
+
+**Faustregel:** Domänenkontext sollte so kompakt wie möglich sein (unter ~500 Token), sonst konkurriert er mit dem eigentlichen Content um Kontextfenster. Edge-Case-Regeln werden aus realen Fehlerbeispielen gewonnen — neue Regel hinzufügen, wenn derselbe Edge Case zweimal in der Eval-Suite als Fehler auftaucht.
+
 
 #### Konsequenzen
 
 
 | ✅ Vorteile | ⚠️ Trade-offs |
 |---|---|
-| LLM nutzt Fachbegriffe korrekt ohne Halluzination | Domain-Kontext erhöht System-Prompt-Länge (Token-Kosten) |
-| Einmalig im System-Prompt — wirkt auf alle Calls | Muss bei Wissensänderungen (z. B. neue Gesetze) aktualisiert werden |
+| LLM nutzt Fachbegriffe korrekt ohne Halluzination | Domänenkontext erhöht System-Prompt-Länge (Token-Kosten) |
+| Bekannte Edge Cases deterministisch behandelt | Edge-Case-Liste wird bei jedem neuen Fall länger — regelmäßig prunen |
+| Einmalig im System-Prompt — wirkt auf alle Calls | Muss bei Wissensänderungen (neue Gesetze, neue Edge Cases) aktualisiert werden |
 
 
 #### Verwandte Muster
 
 
-→ [Domain Context Pattern](#113-domnen-kontext-im-system-prompt) · [Document-Context Classification Pattern](#179-dokument-kontext-bewusste-klassifikation)
+→ [Positive + Negative Examples Pattern](#91-positive-negative-examples-pattern) · [Structured Output Constraints Pattern](#92-structured-output-constraints-pattern) · [Versioned Prompt Management Pattern](#146-versioned-prompt-management-pattern)
 
 
 ---
 
-### 11.4 Edge Case Constraints Pattern
-
-> **Kategorie:** B · Prompt Engineering
-
-> **Intent:** Macht Prompts robuster gegenüber Randfällen durch explizit aufgelistete Sonderfall-Regeln und Fallback-Verhalten.
-
-
-#### Problem
-
-Grenzfälle produzieren inkonsistente LLM-Entscheidungen: Ein Dokument ohne expliziten Verfasser erhält mal `null`, mal `"Unbekannt"`, mal `"Nicht angegeben"`. Ohne explizite Regel entscheidet das Modell jedes Mal neu — deterministisches Verhalten ist nur durch Enumeration der Grenzfälle im Prompt erreichbar.
-
-#### Konsequenzen
-
-
-| ✅ Vorteile | ⚠️ Trade-offs |
-|---|---|
-| Bekannte Edge Cases nie mehr unbehandelt | Edge-Case-Liste muss vollständig sein — unbekannte Fälle fallen durch |
-| Explizite Fallback-Regeln dokumentieren Systemverhalten | Zu viele Regeln machen Prompts unlesbar |
-
-
-#### Verwandte Muster
-
-
-→ [Positive + Negative Examples Pattern](#111-positive--negative-beispiele) · [Batch Count Control Pattern](#115-mengen-kontrolle-fr-batched-requests)
-
-
----
-
-### 11.5 Batch Count Control Pattern
+### 9.4 Batch Count Control Pattern
 
 > **Kategorie:** B · Prompt Engineering
 
@@ -3527,7 +3385,29 @@ Grenzfälle produzieren inkonsistente LLM-Entscheidungen: Ein Dokument ohne expl
 #### Problem
 
 
-Beim Batching (N Inputs → N Outputs) gibt das LLM manchmal falsche Anzahlen zurück.
+Beim Batching (N Inputs → N Outputs) gibt das LLM manchmal falsche Anzahlen zurück — mal fehlt ein Ergebnis, mal sind zwei Ergebnisse in einer Zeile kombiniert, mal werden Items übersprungen. Ohne Überprüfung der Anzahl werden fehlende Ergebnisse in Downstream-Systemen als „Input-Item hat keine Antwort" interpretiert — stille Datenverluste.
+
+
+#### Lösung
+
+
+**Warum nicht einfach auf Batching verzichten?** Batching ist oft 5–10× günstiger pro Item als Einzel-Calls, weil System-Prompt-Overhead amortisiert wird. Der Trade-off „Kosten vs. Zuverlässigkeit" lässt sich mit einem Fallback-Mechanismus auflösen: Batch-Call zuerst versuchen, bei Anzahl-Abweichung auf Einzel-Calls zurückfallen. So bleiben die typischen Ersparnisse erhalten, ohne dass Datenverluste durch Batch-Fehler in Kauf genommen werden.
+
+
+#### Struktur
+
+
+```mermaid
+graph TD
+    IN[N Inputs] --> BATCH[Batch-LLM-Call]
+    BATCH --> CHECK{Output<br/>= N?}
+    CHECK -->|Ja| OK[N Outputs]
+    CHECK -->|Nein| SINGLE[Einzel-Calls<br/>pro Input]
+    SINGLE --> OK
+    CHECK -.->|Log| METRIC[batch_size_mismatch<br/>Metric]
+```
+
+*Diagramm: Batch Count Control — N Inputs gehen in einen Batch-Call; stimmt die Output-Anzahl, werden die Ergebnisse direkt verwendet; bei Abweichung fällt der Flow auf Einzel-Calls zurück und die Abweichung wird als Metric geloggt.*
 
 
 #### Implementierungshinweise
@@ -3578,22 +3458,51 @@ async def batched_llm_call(
 #### Verwandte Muster
 
 
-→ [Sliding Window Executor Pattern](#51-sliding-window-executor) · [Edge Case Constraints Pattern](#114-explizite-randbedingungen-fr-edge-cases)
+→ [Sliding Window Executor Pattern](#51-sliding-window-executor-pattern) · [Edge Case Constraints Pattern](#94-batch-count-control-pattern)
 
 
 ---
-### Prefill-Muster (Forced Completion Start)
+
+### 9.5 Prefill Pattern (Forced Completion Start)
 
 > **Kategorie:** B · Prompt Engineering
 
-**Problem:** LLMs beginnen ihre Antwort manchmal mit Fließtext statt direkt mit dem gewünschten Format (z.B. JSON) — das erfordert aufwändiges Post-Processing oder Retry-Schleifen.
+> **Intent:** Erzwingt einen deterministischen Formatbeginn der LLM-Antwort, indem der Assistenten-Turn mit einem vorgegebenen Starttext angefangen wird — ohne zusätzlichen API-Call.
 
-**Lösung:** Den Assistent-Turn mit vorgegebenem Starttext beginnen. Das Modell *vervollständigt* dann nur noch den begonnenen Text und hält damit zwingend das gewünschte Format ein.
+
+#### Problem
+
+
+LLMs beginnen ihre Antwort manchmal mit Fließtext statt direkt mit dem gewünschten Format (z. B. JSON) — das erfordert aufwändiges Post-Processing oder Retry-Schleifen.
+
+
+#### Lösung
+
+
+Den Assistenten-Turn mit vorgegebenem Starttext beginnen. Das Modell *vervollständigt* dann nur noch den begonnenen Text und hält damit zwingend das gewünschte Format ein.
 
 **Typische Anwendungsfälle:**
 - JSON erzwingen: Assistent startet mit `{`
 - Positiv-Antwort fixieren: Startet mit `Ja,` oder `Der Grund ist:`
-- Code-Ausgabe: Startet mit ` ```python `
+- Code-Ausgabe: Startet mit einer öffnenden Code-Fence
+
+
+#### Struktur
+
+
+```mermaid
+graph LR
+    P[Prompt] --> LLM[LLM]
+    PRE["Prefill: {"] --> LLM
+    LLM --> OUT[JSON-Completion]
+    OUT --> VAL[Schema-<br/>Validierung]
+```
+
+*Diagramm: Prefill-Muster — Prompt und Prefill-Token (z. B. `{`) werden gemeinsam ans LLM übergeben; das LLM vervollständigt ab dem Prefill und erzeugt so zwingend valides JSON. Der Output geht direkt in die Schema-Validierung.*
+
+
+#### Implementierungshinweise
+
 
 ```python
 messages = [
@@ -3606,23 +3515,28 @@ response = await llm.chat(messages=messages, stop=["}"])
 result = json.loads("{" + response.content + "}")
 ```
 
-```mermaid
-graph LR
-    P[Prompt] --> LLM[LLM]
-    PRE["Prefill: {"] --> LLM
-    LLM --> OUT[JSON-Completion]
-    OUT --> VAL[Schema-\nValidierung]
-```
+**Vorteile gegenüber Retry-Schleifen:** Kein zusätzlicher API-Call, kein Latenz-Overhead, deterministischer Formatbeginn. Kombiniert sich gut mit `stop_sequences` und Schema-Validierung (→ 12.1).
 
-*Diagramm: Prefill-Muster — Prompt und Prefill-Token (z. B. `{`) werden gemeinsam ans LLM übergeben; das LLM vervollständigt ab dem Prefill und erzeugt so zwingend valides JSON. Der Output geht direkt in die Schema-Validierung.*
+**Einschränkung:** Nicht alle Anbieter unterstützen Prefill im Assistenten-Turn (Anthropic ja; OpenAI nur über Workarounds). Als Fallback: Strikte Formatanweisung im System-Prompt plus JSON-Mode des Anbieters.
 
-**Vorteile gegenüber Retry-Schleifen:** Kein zusätzlicher API-Call, keine Latenz-Overhead, deterministischer Formatbeginn. Kombiniert sich gut mit `stop_sequences` und Schema-Validierung (14.1).
 
-**Einschränkung:** Nicht alle Anbieter unterstützen Prefill im Assistenten-Turn. Als Fallback: Strikte Formatanweisung im System-Prompt + JSON-Mode des Anbieters.
+#### Konsequenzen
+
+
+| ✅ Vorteile | ⚠️ Trade-offs |
+|---|---|
+| Deterministischer Formatbeginn ohne Retry-Schleife | Nicht bei allen LLM-Providern verfügbar |
+| Kein zusätzlicher API-Call, keine Latenz | Bei falsch gewähltem Prefill kann das Modell in eine unpassende Satzstruktur gedrängt werden |
+
+
+#### Verwandte Muster
+
+
+→ [Structured Output Constraints Pattern](#92-structured-output-constraints-pattern) · [Schema-First Generation Pattern](#122-schema-first-generation-pattern)
 
 ---
 
-## 12. Evals & LLM-Testing
+## 10. Evals & LLM-Testing
 
 > 🟢 **Einstieg** — 12.2 (Golden Dataset) · 🟡 **Fortgeschritten** — 12.1 (LLM-as-Judge), 12.3 (Behavioral Testing) · 🔴 **Expert** — 12.4 (Eval-Pipeline als CI-Schritt)
 
@@ -3630,7 +3544,7 @@ LLM-Outputs sind nicht deterministisch — klassische Unit-Tests reichen nicht. 
 
 **Grundprinzip für Engineers:** Behandelt Prompts wie Code. Jede Prompt-Änderung ist ein Deployment. Ohne Regressions-Baseline wisst ihr nicht, ob ihr besser oder schlechter geworden seid. Startet mit einem kleinen Golden Dataset (10–20 Cases), bevor ihr weitere Features baut.
 
-### 12.1 LLM-as-Judge Pattern
+### 10.1 LLM-as-Judge Pattern
 
 > **Kategorie:** E · Qualität & Evaluation
 
@@ -3654,9 +3568,9 @@ Ein separates (oft stärkeres) LLM bewertet die Ausgabe anhand einer Rubrik.
 
 ```mermaid
 graph LR
-    OUT[LLM Output] --> JDG[Judge LLM\nGPT-4o]
-    REF[Referenz\nAntwort] --> JDG
-    JDG --> SC[Score 0-10\n+ Begruendung]
+    OUT[LLM Output] --> JDG[Judge LLM<br/>GPT-4o]
+    REF[Referenz<br/>Antwort] --> JDG
+    JDG --> SC[Score 0-10<br/>+ Begruendung]
     SC -->|kleiner 7| FAIL[Fehlerhaft]
     SC -->|groesser 7| PASS[Akzeptiert]
 ```
@@ -3712,12 +3626,12 @@ async def evaluate_extraction(
 #### Verwandte Muster
 
 
-→ [Golden Dataset & Regression Pattern](#122-golden-dataset--regression-testing) · [Behavioral Testing Pattern](#123-behavioral-testing-eigenschafts-tests) · [Automated Eval Pipeline Pattern](#124-eval-pipeline-automatisiert)
+→ [Golden Dataset & Regression Pattern](#102-golden-dataset-regression-pattern) · [Behavioral Testing Pattern](#103-behavioral-testing-pattern) · [Automated Eval Pipeline Pattern](#102-golden-dataset-regression-pattern)
 
 
 ---
 
-### 12.2 Golden Dataset & Regression Pattern
+### 10.2 Golden Dataset & Regression Pattern
 
 > **Kategorie:** E · Qualität & Evaluation
 
@@ -3741,7 +3655,7 @@ Kleines, handkuratiertes Dataset mit erwarteten Ausgaben — wird bei jeder Änd
 
 ```mermaid
 graph LR
-    GD[(Golden\nDataset)] --> TEST[Eval Run]
+    GD[(Golden<br/>Dataset)] --> TEST[Eval Run]
     PROMPT[Neuer Prompt] --> TEST
     TEST --> CMP{Vergleich}
     CMP -->|besser| OK[Deploy]
@@ -3833,16 +3747,48 @@ async def test_extraction_golden(case):
 | Pass-Rate als objektive Qualitätsmetrik | Dataset-Pflege ist dauerhafter Aufwand |
 
 
+#### Variante: CI-Integration (Automated Eval Pipeline)
+
+Evals, die lokal laufen, werden unter Zeitdruck übersprungen — genau dann, wenn sie am wichtigsten wären. CI-Integration macht Evals verpflichtend: ein Merge, der die Pass-Rate unter den Schwellwert drückt, wird geblockt.
+
+**Typische CI-Pipeline:**
+1. Prompt-Änderung wird gepusht
+2. CI-Job lädt das Golden Dataset
+3. LLM-Judge bewertet alle Cases
+4. Aggregierte Pass-Rate wird mit Baseline verglichen
+5. Bei Regression (Pass-Rate < Schwellwert) → Merge blockiert
+
+```yaml
+# .github/workflows/eval.yaml
+name: LLM Evals
+on: [pull_request]
+jobs:
+  run-evals:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: uv sync
+      - run: uv run python -m evals.run --dataset golden_v3.jsonl --judge gpt-4o
+      - run: |
+          if [ $(cat eval_result.txt) -lt 85 ]; then
+            echo "Pass-Rate zu niedrig — Merge blockiert"
+            exit 1
+          fi
+```
+
+Das verschiebt die Qualitätsentscheidung von „nach dem Deployment, wenn Nutzer klagen" auf „vor dem Merge, wenn der Fix noch einfach ist".
+
+
 #### Verwandte Muster
 
 
-→ [LLM-as-Judge Pattern](#121-llm-as-judge) · [Automated Eval Pipeline Pattern](#124-eval-pipeline-automatisiert)
+→ [LLM-as-Judge Pattern](#101-llm-as-judge-pattern) · [Automated Eval Pipeline Pattern](#102-golden-dataset-regression-pattern)
 
 > ❌ **Häufiger Fehler:** Prompts ohne Baseline-Vergleich in Produktion deployen. Was sich für den Entwickler besser liest, kann auf Edge Cases schlechter performen. Bereits 10–15 Golden Cases decken die häufigsten Regressionen ab und kosten weniger als 1 Stunde Aufwand.
 
 ---
 
-### 12.3 Behavioral Testing Pattern
+### 10.3 Behavioral Testing Pattern
 
 > **Kategorie:** E · Qualität & Evaluation
 
@@ -3858,7 +3804,7 @@ Golden Datasets decken nur bekannte Fälle ab — unbekannte Edge Cases werden n
 #### Lösung
 
 
-**Warum Eigenschaften statt exakter Werte?** LLMs sind nicht-deterministisch — derselbe Input produziert leicht unterschiedliche Outputs. Ein Test der exakt `"Lärmschutzwand"` erwartet, bricht bei minimaler Prompt-Änderung. Ein Eigenschaftstest der prüft "die Antwort enthält immer einen Zahlenbereich wenn Lärmpegel erwähnt werden" ist stabil gegenüber Formulierungsvarianten und deckt neue, unbekannte Edge Cases ab — ohne dass man jeden vorab kennen muss.
+**Warum Eigenschaften statt exakter Werte?** LLMs sind nicht-deterministisch — derselbe Input produziert leicht unterschiedliche Outputs. Ein Test der exakt `"Lärmschutzwand"` erwartet, bricht bei minimaler Prompt-Änderung. Ein Eigenschaftstest der prüft „die Antwort enthält immer einen Zahlenbereich wenn Lärmpegel erwähnt werden" ist stabil gegenüber Formulierungsvarianten und deckt neue, unbekannte Edge Cases ab — ohne dass man jeden vorab kennen muss.
 
 Tests prüfen Eigenschaften der Ausgabe, nicht exakte Werte.
 
@@ -3868,12 +3814,12 @@ Tests prüfen Eigenschaften der Ausgabe, nicht exakte Werte.
 
 ```mermaid
 graph TD
-    PROP[Eigenschaft\nz.B. Monotonie] --> GEN[Test-Case\nGenerator]
+    PROP[Eigenschaft<br/>z.B. Monotonie] --> GEN[Test-Case<br/>Generator]
     GEN --> C1[Input A]
     GEN --> C2[Input B]
     C1 --> LLM[LLM]
     C2 --> LLM
-    LLM --> CHK{Eigenschaft\nerfuellt?}
+    LLM --> CHK{Eigenschaft<br/>erfuellt?}
     CHK -->|Ja| PASS[OK]
     CHK -->|Nein| FAIL[Fehler]
 ```
@@ -3923,113 +3869,17 @@ async def test_extraction_properties():
 #### Verwandte Muster
 
 
-→ [Golden Dataset & Regression Pattern](#122-golden-dataset--regression-testing) · [LLM-as-Judge Pattern](#121-llm-as-judge)
+→ [Golden Dataset & Regression Pattern](#102-golden-dataset-regression-pattern) · [LLM-as-Judge Pattern](#101-llm-as-judge-pattern)
 
 
 ---
 
-### 12.4 Automated Eval Pipeline Pattern
 
-> **Kategorie:** E · Qualität & Evaluation
-
-> **Intent:** Automatisiert Eval-Läufe als CI-Schritt, der Prompt-Deployments bei Regressions-Detektion blockiert.
-
-
-#### Problem
-
-
-Manuelle Evaluation skaliert nicht bei vielen Prompt-Iterationen.
-
-
-#### Lösung
-
-
-**Warum Evals im CI statt als optionaler lokaler Schritt?** Evals die lokal laufen, werden unter Zeitdruck übersprungen — genau dann wenn sie am wichtigsten wären. CI-Integration macht Evals verpflichtend: ein Merge der die Pass-Rate unter den Schwellwert drückt, wird geblockt. Das verschiebt die Qualitätsentscheidung von "nach dem Deployment wenn Nutzer klagen" auf "vor dem Merge wenn der Fix noch einfach ist".
-
-**Warum Evals im CI statt als optionaler lokaler Schritt?** Evals die lokal laufen, werden übersprungen wenn Zeitdruck entsteht — genau dann wenn sie am wichtigsten wären. CI-Integration macht Evals verpflichtend: ein Merge der die Pass-Rate unter den Schwellwert drückt, wird geblockt. Das verschiebt den Zeitpunkt der Qualitätsentscheidung von "nach dem Deployment wenn Nutzer klagen" auf "vor dem Merge wenn der Fix noch einfach ist".
-
-Automatisierte Eval-Pipeline als CI-Schritt.
-
-
-#### Struktur
-
-
-```mermaid
-flowchart TD
-    GC["📝 Git Commit\nPrompt-Änderung"] --> CI["🔄 CI Pipeline"]
-
-    CI --> GD["📋 Golden Dataset\n50 Cases durchlaufen"]
-    CI --> JG["⚖️ LLM-as-Judge\n10 Cases — Sample"]
-
-    GD --> PR["Pass-Rate\nberechnen"]
-    JG --> JS["Ø Judge-Score\nberechnen"]
-
-    PR & JS --> CMP["🔍 Vergleich mit\nletzter Baseline"]
-
-    CMP -->|"Pass-Rate ≥ 90%\nKein Rückgang > 5%"| OK["✅ Merge erlaubt\nBaseline aktualisieren"]
-    CMP -->|"Zu niedrig\noder Regression"| FAIL["❌ Merge geblockt\nReport mit Failures"]
-
-    style OK   fill:#e8f5e9,stroke:#4CAF50
-    style FAIL fill:#ffebee,stroke:#f44336
-    style CMP  fill:#fff3e0,stroke:#FF9800
-```
-
-*Diagramm: Automatisierte Eval-Pipeline als CI-Schritt — bei jedem Git-Commit werden parallel Golden Dataset (50 Cases) und LLM-as-Judge (10 Sample-Cases) ausgeführt. Pass-Rate und Judge-Score werden gegen die letzte Baseline verglichen: bei ≥ 90 % und kein Rückgang > 5 % wird Merge erlaubt, andernfalls blockiert.*
-
-
-#### Implementierungshinweise
-
-
-```python
-async def run_eval_pipeline(prompt_version: str) -> EvalReport:
-    # 1. Funktionale Tests
-    golden_results = await run_golden_dataset()
-
-    # 2. Qualitative Bewertung (teurer, deshalb kleines Sample)
-    judge_results = await run_llm_judge(sample_size=10)
-
-    # 3. Vergleich mit Baseline
-    baseline = load_baseline_metrics()
-    regression = detect_regression(golden_results, baseline)
-
-    report = EvalReport(
-        version=prompt_version,
-        pass_rate=golden_results.pass_rate,
-        judge_score=judge_results.avg_score,
-        regressions=regression.failed_cases,
-        passed=golden_results.pass_rate >= 0.90 and not regression.critical,
-    )
-
-    # Baseline aktualisieren wenn besser
-    if report.passed and report.pass_rate > baseline.pass_rate:
-        save_baseline(report)
-
-    return report
-```
-
-
-#### Konsequenzen
-
-
-| ✅ Vorteile | ⚠️ Trade-offs |
-|---|---|
-| Vollautomatischer CI-Gate verhindert Prompt-Regressionen | CI-Laufzeit steigt durch LLM-Calls |
-| Baseline-Tracking über alle Prompt-Versionen | Eval-Sample muss repräsentativ sein für aussagekräftige Ergebnisse |
-
-
-#### Verwandte Muster
-
-
-→ [LLM-as-Judge Pattern](#121-llm-as-judge) · [Golden Dataset & Regression Pattern](#122-golden-dataset--regression-testing)
-
-
----
-
-## 13. Caching
+## 11. Caching
 
 > 🟢 **Einstieg** — 13.1 (Exact Hash Cache), 13.3 (Embedding Cache) · 🟡 **Fortgeschritten** — 13.2 (Semantisches Caching) · 🔴 **Expert** — 13.4 (Cache-Invalidierung)
 
-### 13.1 Exact Hash Cache Pattern
+### 11.1 Exact Hash Cache Pattern
 
 > **Kategorie:** H · Performance & Caching
 
@@ -4055,11 +3905,11 @@ SHA256-Hash des Prompts als Cache-Key in Redis.
 
 ```mermaid
 graph LR
-    PROMPT[Prompt] --> HASH[SHA-256\nHash]
-    HASH --> CHK{Cache\nHit?}
+    PROMPT[Prompt] --> HASH[SHA-256<br/>Hash]
+    HASH --> CHK{Cache<br/>Hit?}
     CHK -->|Ja| CACHE[(Cache)]
     CHK -->|Nein| LLM[LLM API]
-    LLM --> STORE[Im Cache\nspeichern]
+    LLM --> STORE[Im Cache<br/>speichern]
     CACHE --> OUT[Antwort]
     STORE --> OUT
 ```
@@ -4106,20 +3956,77 @@ class CachedLLMClient:
 
 | ✅ Vorteile | ⚠️ Trade-offs |
 |---|---|
-| 40–70% LLM-Kosten gespart bei Entwicklung und Tests | Cache muss bei Prompt-Änderungen invalidiert werden (→ 13.4) |
+| 40–70% LLM-Kosten gespart bei Entwicklung und Tests | Cache muss bei Prompt-Änderungen invalidiert werden (→ 11.1 (Variante)) |
 | Sofort einsetzbar ohne Schema-Änderungen | Kein Schutz vor semantisch ähnlichen, aber leicht anders formulierten Queries |
+
+
+#### Variante: Embedding Cache
+
+Für Embedding-APIs gilt das gleiche Prinzip, nur mit anderem Cache-Key-Input: Der Hash wird über den zu embeddenden Text gebildet, nicht über einen Prompt. Vorteil: Bei Re-Indexierungen oder inkrementellen Updates werden unveränderte Texte nicht neu an die Embedding-API geschickt.
+
+```python
+async def get_embedding_cached(text: str) -> list[float]:
+    key = f"emb:{hashlib.sha256(text.encode()).hexdigest()}"
+    if cached := await redis.get(key):
+        return json.loads(cached)
+    vec = await embedding_client.embed(text)
+    await redis.setex(key, 30 * 86400, json.dumps(vec))  # 30 Tage TTL
+    return vec
+```
+
+Ersparnis bei stabilen Korpora: 90 %+ der Embedding-Kosten bei Re-Indexierungen.
+
+
+#### Variante: Chunk-Cache bei Dokumentverarbeitung
+
+Bei Pipelines, die dasselbe Dokument wiederholt verarbeiten (Re-Indexierung, Pipeline-Varianten, Eval-Läufe), lohnt sich Caching auf Chunk-Ebene. Der Key kombiniert Dateihash und Chunk-Index, sodass unveränderte Dokumente nie erneut durch die LLM-Extraktion laufen:
+
+```python
+def chunk_cache_key(file_hash: str, chunk_index: int, extractor_version: str) -> str:
+    return f"chunk:{extractor_version}:{file_hash}:{chunk_index}"
+
+async def extract_chunk_cached(chunk: Chunk, version: str) -> dict:
+    key = chunk_cache_key(chunk.file_hash, chunk.index, version)
+    if cached := await redis.get(key):
+        return json.loads(cached)
+    result = await llm_extract(chunk)
+    await redis.setex(key, 7 * 86400, json.dumps(result))
+    return result
+```
+
+Wichtig: Den `extractor_version`-Namespace bei Prompt-Änderungen erhöhen — sonst liefert der Cache veraltete Extraktionen (→ Cache Invalidation, 11.3).
+
+
+#### Variante: Cache Invalidation über Versions-Namespace
+
+Ein stiller Killer von LLM-Caches: Prompt-Änderungen werden deployed, der Cache liefert aber weiterhin Antworten der alten Prompt-Version — unbemerkt über Wochen. Die Lösung ist kein Flush-Mechanismus, sondern ein **Versions-Namespace** im Cache-Key: Bei jeder Prompt-Änderung wird die Version erhöht, alte Cache-Einträge werden dadurch automatisch unerreichbar und durch TTL-Ablauf verdrängt.
+
+```python
+PROMPT_VERSION = "v1.4"  # In Config, erhöhen bei Prompt-Änderung
+
+def versioned_cache_key(model: str, content_hash: str) -> str:
+    return f"llm:{model}:{PROMPT_VERSION}:{content_hash}"
+
+# Optional: Cleanup alter Versionen
+async def invalidate_old_versions(current_version: str):
+    async for key in redis.scan_iter("llm:*"):
+        if f":{current_version}:" not in key.decode():
+            await redis.delete(key)
+```
+
+Genauso für Model-Wechsel: Der Modellname ist Teil des Keys, ein Wechsel invalidiert die betroffenen Einträge automatisch. Kein manuelles Flushing, kein Rate-Limit-Sturm nach dem Deployment.
 
 
 #### Verwandte Muster
 
 
-→ [Cache Invalidation Pattern](#134-cache-invalidierung) · [Semantic Cache Pattern](#132-semantisches-caching-vektorhnlichkeit) · [Embedding Cache Pattern](#133-embedding-cache)
+→ [Cache Invalidation Pattern](#113-server-seitiges-prompt-caching) · [Semantic Cache Pattern](#112-semantic-cache-pattern) · [Embedding Cache Pattern](#111-exact-hash-cache-pattern)
 
-> ❌ **Häufiger Fehler:** Den Cache ohne TTL betreiben oder bei Prompt-Änderungen vergessen zu invalidieren. Das führt zu alten Antworten mit neuem Prompt-Verhalten. Immer Prompt-Version in den Cache-Key einbauen (→ 13.4 Cache-Invalidierung).
+> ❌ **Häufiger Fehler:** Den Cache ohne TTL betreiben oder bei Prompt-Änderungen vergessen zu invalidieren. Das führt zu alten Antworten mit neuem Prompt-Verhalten. Immer Prompt-Version in den Cache-Key einbauen (→ 11.1 (Variante) Cache-Invalidierung).
 
 ---
 
-### 13.2 Semantic Cache Pattern
+### 11.2 Semantic Cache Pattern
 
 > **Kategorie:** H · Performance & Caching
 
@@ -4135,7 +4042,7 @@ class CachedLLMClient:
 #### Lösung
 
 
-**Warum semantisches Caching statt nur exaktem Hash?** "Wie hoch ist der Lärmpegel?" und "Was ist der gemessene Schallpegel?" sind inhaltlich identische Fragen — Hash-Caching hilft nicht. Embedding-Ähnlichkeit erkennt diese Äquivalenz. Der Schwellwert von 0,95 ist bewusst hoch: darunter riskiert man, semantisch ähnliche aber faktisch verschiedene Fragen mit derselben Antwort zu bedienen.
+**Warum semantisches Caching statt nur exaktem Hash?** „Wie hoch ist der Lärmpegel?" und „Was ist der gemessene Schallpegel?" sind inhaltlich identische Fragen — Hash-Caching hilft nicht. Embedding-Ähnlichkeit erkennt diese Äquivalenz. Der Schwellwert von 0,95 ist bewusst hoch: darunter riskiert man, semantisch ähnliche aber faktisch verschiedene Fragen mit derselben Antwort zu bedienen.
 
 Neue Query gegen gecachte Queries embedden und bei hoher Ähnlichkeit den Cache-Eintrag zurückgeben.
 
@@ -4145,14 +4052,14 @@ Neue Query gegen gecachte Queries embedden und bei hoher Ähnlichkeit den Cache-
 
 ```mermaid
 flowchart TD
-    Q["🔍 LLM-Anfrage"] --> EH{"Exakter\nHash-Cache-Hit?"}
+    Q["🔍 LLM-Anfrage"] --> EH{"Exakter<br/>Hash-Cache-Hit?"}
 
-    EH -->|"✅ Ja"| EC["⚡ Sofort zurückgeben\nLatenz ~1ms, Kosten $0"]
+    EH -->|"✅ Ja"| EC["⚡ Sofort zurückgeben<br/>Latenz ~1ms, Kosten $0"]
     EH -->|"❌ Nein"| EMB["Anfrage embedden"]
 
-    EMB --> SH{"Semantischer\nCache-Hit?\nÄhnlichkeit ≥ 0.95"}
-    SH -->|"✅ Ja"| SC["⚡ Cache-Treffer\nLatenz ~10ms, Kosten $0"]
-    SH -->|"❌ Nein"| LLM["🤖 LLM-API aufrufen\nLatenz 1–30s, Kosten $$$"]
+    EMB --> SH{"Semantischer<br/>Cache-Hit?<br/>Ähnlichkeit ≥ 0.95"}
+    SH -->|"✅ Ja"| SC["⚡ Cache-Treffer<br/>Latenz ~10ms, Kosten $0"]
+    SH -->|"❌ Nein"| LLM["🤖 LLM-API aufrufen<br/>Latenz 1–30s, Kosten $$$"]
 
     LLM --> STORE["💾 In Hash-Cache + Semantischen Cache speichern"]
     STORE --> RET["📤 Antwort"]
@@ -4232,195 +4139,38 @@ async def cached_rag_query(user_query: str) -> str:
 #### Verwandte Muster
 
 
-→ [Exact Hash Cache Pattern](#131-exaktes-caching-hash-basiert) · [Embedding Cache Pattern](#133-embedding-cache)
+→ [Exact Hash Cache Pattern](#111-exact-hash-cache-pattern) · [Embedding Cache Pattern](#111-exact-hash-cache-pattern)
 
 
 ---
 
-### 13.3 Embedding Cache Pattern
+
+
+### 11.3 Server-seitiges Prompt-Caching
 
 > **Kategorie:** H · Performance & Caching
 
-> **Intent:** Spart Embedding-API-Kosten bei Re-Indexierung unveränderter Texte durch Content-Hash als Cache-Key.
+> **Intent:** Reduziert Token-Kosten und Latenz durch LLM-Provider-seitiges Caching stabiler Prompt-Präfixe — orthogonal zum clientseitigen Response-Caching.
 
 
 #### Problem
 
 
-Embeddings sind teuer (API-Kosten, Latenz) — gleiches Dokument wird beim Re-Indexieren neu embedded.
+Große, stabile System-Prompts (Instruktionen, Referenzdokumente, Kontext) werden bei jedem LLM-Call erneut verarbeitet — das kostet Input-Token und erhöht die Latenz.
 
 
 #### Lösung
 
 
-Content-Hash als Cache-Key für Embeddings.
-
-
-#### Struktur
-
-
-```mermaid
-graph LR
-    TEXT[Text] --> HASH[Hash]
-    HASH --> CHK{Cached?}
-    CHK -->|Ja| VEC[(Embedding\nCache)]
-    CHK -->|Nein| EMB[Embedding\nModel]
-    EMB --> SAVE[Speichern]
-    VEC --> OUT[Vektor]
-    SAVE --> OUT
-```
-
-*Diagramm: Embedding-Cache — Text wird gehasht; bei Cache-Hit kommt der Vektor aus dem Cache; bei Cache-Miss wird das Embedding-Modell aufgerufen und das Ergebnis gespeichert. Spart 100 % Embedding-Kosten bei Re-Indexierung unveränderter Chunks.*
-
-
-#### Implementierungshinweise
-
-
-```python
-import hashlib
-import numpy as np
-
-class EmbeddingCache:
-    def __init__(self, storage):  # Redis, SQLite, etc.
-        self._storage = storage
-
-    def _key(self, text: str) -> str:
-        return f"emb:{hashlib.sha256(text.encode()).hexdigest()}"
-
-    async def embed(self, text: str) -> list[float]:
-        key = self._key(text)
-
-        if cached := await self._storage.get(key):
-            return json.loads(cached)
-
-        vector = await embed_api(text)  # Teurer API-Call
-        await self._storage.set(key, json.dumps(vector))
-        return vector
-
-    async def embed_batch(self, texts: list[str]) -> list[list[float]]:
-        results = [None] * len(texts)
-        uncached_indices = []
-        uncached_texts = []
-
-        # Cache-Hits sofort auflösen
-        for i, text in enumerate(texts):
-            if cached := await self._storage.get(self._key(text)):
-                results[i] = json.loads(cached)
-            else:
-                uncached_indices.append(i)
-                uncached_texts.append(text)
-
-        # Nur nicht-gecachte Texte embedden
-        if uncached_texts:
-            vectors = await embed_api_batch(uncached_texts)
-            for i, (idx, vector) in enumerate(zip(uncached_indices, vectors)):
-                results[idx] = vector
-                await self._storage.set(self._key(uncached_texts[i]), json.dumps(vector))
-
-        return results
-```
-
-
-#### Konsequenzen
-
-
-| ✅ Vorteile | ⚠️ Trade-offs |
-|---|---|
-| 100% Embedding-Kosten gespart bei Re-Indexierung unveränderter Chunks | Nur sinnvoll wenn gleiche Texte mehrfach embedded werden |
-| Transparenter Drop-in für Embedding-API-Calls | Cache-Invalidierung bei Content-Änderungen muss koordiniert sein |
-
-
-#### Verwandte Muster
-
-
-→ [Exact Hash Cache Pattern](#131-exaktes-caching-hash-basiert) · [Failure-Isolated Indexing Pattern](#61-failure-isolated-indexierung)
-
-
----
-
-### 13.4 Cache Invalidation Pattern
-
-> **Kategorie:** H · Performance & Caching
-
-> **Intent:** Stellt sicher, dass gecachte Antworten nach Prompt- oder Modellwechseln automatisch ungültig werden durch Versions-Namespace im Cache-Key.
-
-
-#### Problem
-
-
-Gecachte Antworten werden veraltet wenn sich Prompts oder Modelle ändern.
-
-
-#### Lösung
-
-
-**Warum versions-basierte Keys statt TTL?** Ein TTL von 24h bedeutet: bis zu 24h liefert das System veraltete Antworten nach einer Prompt-Änderung — ohne sichtbaren Fehler. Versions-basierte Keys invalidieren sofort: ein neuer Prompt-Hash erzeugt automatisch einen neuen Key, der alte Eintrag verfällt natürlich. Kein manuelles Flush, keine Race-Condition zwischen Deployment und Cache-Expiry.
-
-Cache-Namespace mit Prompt-Version und Modell-Version.
-
-
-#### Struktur
-
-
-```mermaid
-graph LR
-    CHANGE[Dokument\ngeaendert] --> HASH[Neuer Hash]
-    HASH --> CMP{Hash\nidentisch?}
-    CMP -->|Ja| KEEP[Cache\nbeibehalten]
-    CMP -->|Nein| INV[Cache\ninvalidieren]
-    INV --> RECOMP[Neu berechnen]
-```
-
-*Diagramm: Cache-Invalidierung — bei Dokumentänderung wird ein neuer Hash berechnet; stimmt er mit dem alten überein, bleibt der Cache gültig; unterscheidet er sich, wird der Cache-Eintrag invalidiert und das Ergebnis neu berechnet.*
-
-
-#### Implementierungshinweise
-
-
-```python
-def versioned_cache_key(model: str, prompt_version: str, content_hash: str) -> str:
-    return f"llm:{model}:{prompt_version}:{content_hash}"
-
-# Bei Prompt-Änderung: Neue Version → alter Cache automatisch ignoriert
-PROMPT_VERSION = "v1.4"  # In Config, nicht im Cache-Key hardcoded
-
-# Cache-Cleanup (optional, bei Platzproblemen):
-async def invalidate_old_versions(current_version: str):
-    # Alle Keys mit anderer Version löschen
-    async for key in redis.scan_iter("llm:*"):
-        if f":{current_version}:" not in key.decode():
-            await redis.delete(key)
-```
-
-
-#### Konsequenzen
-
-
-| ✅ Vorteile | ⚠️ Trade-offs |
-|---|---|
-| Prompt-Updates invalidieren Cache automatisch | Alte Cache-Einträge belegen Speicher bis zum Cleanup |
-| Kein manuelles Cache-Flushing nötig | Versions-Key muss konsistent über alle Services verwendet werden |
-
-
-#### Verwandte Muster
-
-
-→ [Exact Hash Cache Pattern](#131-exaktes-caching-hash-basiert) · [Versioned Prompt Management Pattern](#166-versioniertes-system-prompt-management)
-
-
----
-### Server-seitiges Prompt-Caching
-
-> **Kategorie:** H · Performance & Caching
-
-**Problem:** Große, stabile System-Prompts (Instruktionen, Referenzdokumente, Kontext) werden bei jedem LLM-Call erneut verarbeitet — das kostet Input-Token und erhöht die Latenz.
-
-**Lösung:** LLM-Anbieter cachen den Prompt-Präfix serverseitig zwischen Requests. Nur der variable Teil (Nutzerfrage) wird jedesmal vollständig verarbeitet. Ersparnis: bis zu 90 % der Input-Token-Kosten bei stabilen System-Prompts.
+LLM-Anbieter cachen den Prompt-Präfix serverseitig zwischen Requests. Nur der variable Teil (Nutzerfrage) wird jedes Mal vollständig verarbeitet. Ersparnis: bis zu 90 % der Input-Token-Kosten bei stabilen System-Prompts.
 
 **Voraussetzungen:**
 - System-Prompt muss über Anbieter-Schwellwert liegen (typisch 1 024–2 048 Token)
-- Prompt-Reihenfolge muss exakt gleich bleiben (cached Teil immer zuerst)
+- Prompt-Reihenfolge muss exakt gleich bleiben (gecachter Teil immer zuerst)
 - Manche Anbieter benötigen explizites `cache_control`-Flag
+
+
+#### Struktur
 
 ```python
 messages = [
@@ -4438,7 +4188,7 @@ messages = [
 
 ```mermaid
 graph LR
-    SP["System-Prompt\n(groß, stabil)"] -->|Erster Call| PROC[Vollständige\nVerarbeitung]
+    SP["System-Prompt<br/>(groß, stabil)"] -->|Erster Call| PROC[Vollständige<br/>Verarbeitung]
     PROC --> PCACHE[(Anbieter-Cache)]
     USR[User-Query] -->|Folge-Calls| LLM[LLM]
     PCACHE -->|Cache-Hit| LLM
@@ -4449,13 +4199,28 @@ graph LR
 
 **Abgrenzung zu 13.1/13.2 (eigener Cache):** Server-seitiges Caching findet auf Anbieter-Ebene statt — es reduziert *Token-Verbrauch*, nicht API-Calls. Eigener semantischer Cache reduziert API-Calls. Beide Strategien kombinieren sich ideal.
 
+
+#### Konsequenzen
+
+
+| ✅ Vorteile | ⚠️ Trade-offs |
+|---|---|
+| Deutliche Token-Kosten-Reduktion bei großen System-Prompts | Provider-spezifisch; Verhalten und Preis-Modell unterscheiden sich |
+| Reduziert Time-to-First-Token spürbar | Cache ist ephemeral — bei Provider-seitigem Eviction erneute Vollverarbeitung |
+
+
+#### Verwandte Muster
+
+
+→ [Exact Hash Cache Pattern](#111-exact-hash-cache-pattern) · [Semantic Cache Pattern](#112-semantic-cache-pattern) · [Cache Invalidation Pattern](#113-server-seitiges-prompt-caching)
+
 ---
 
-## 14. Structured Generation
+## 12. Structured Generation
 
 > 🟢 **Einstieg** — 14.1 (Tool Use / Function Calling), 14.2 (Instructor) · 🟡 **Fortgeschritten** — 14.3 (Schema-Design) · 🔴 **Expert** — 14.4 (Streaming mit Structured Generation)
 
-### 14.1 Tool Use / Function Calling Pattern
+### 12.1 Tool Use / Function Calling Pattern
 
 > **Kategorie:** C · LLM-Output-Verarbeitung
 
@@ -4479,10 +4244,10 @@ Structured Outputs der API nutzen — das Modell generiert garantiert schema-kon
 
 ```mermaid
 graph LR
-    LLM[LLM] -->|tool_call| TOOL[Tool\nz.B. search]
+    LLM[LLM] -->|tool_call| TOOL[Tool<br/>z.B. search]
     TOOL --> RES[Ergebnis]
     RES --> LLM
-    LLM -->|Final| OUT[Strukturierter\nOutput]
+    LLM -->|Final| OUT[Strukturierter<br/>Output]
 ```
 
 *Diagramm: Tool Use / Function Calling — das LLM ruft per tool_call ein Tool auf (z. B. search); das Tool liefert sein Ergebnis zurück ans LLM; das LLM verarbeitet das Ergebnis und produziert den finalen strukturierten Output.*
@@ -4571,12 +4336,12 @@ async def extract_structured(text: str) -> DocumentMetadata:
 #### Verwandte Muster
 
 
-→ [Schema-First Generation Pattern](#142-instructor--schema-validierung-first-structured-generation) · [ReAct Loop Pattern](#151-react--reason--act) · [Tool Registry Pattern](#152-tool-definition-und--validation)
+→ [Schema-First Generation Pattern](#122-schema-first-generation-pattern) · [ReAct Loop Pattern](#131-react-loop-pattern) · [Tool Registry Pattern](#132-tool-registry-pattern)
 
 
 ---
 
-### 14.2 Schema-First Generation Pattern
+### 12.2 Schema-First Generation Pattern
 
 > **Kategorie:** C · LLM-Output-Verarbeitung
 
@@ -4603,8 +4368,8 @@ Jedes LLM-Framework hat eine andere API für Structured Outputs.
 ```mermaid
 graph LR
     PROMPT[Prompt] --> LLM[LLM]
-    SCHEMA[Pydantic\nSchema] --> LLM
-    LLM --> INST[Instructor\nValidation]
+    SCHEMA[Pydantic<br/>Schema] --> LLM
+    LLM --> INST[Instructor<br/>Validation]
     INST -->|Valid| OBJ[Python Objekt]
     INST -->|Invalid| RETRY[Auto-Retry]
     RETRY --> LLM
@@ -4683,99 +4448,53 @@ print(metadata.project_name.source)
 | Provider-unabhängig (gleicher Code für Anthropic/OpenAI) |  |
 
 
+#### Variante: Schema-Design-Richtlinien
+
+Die Qualität von Schema-First-Generation steht und fällt mit dem Schema selbst. Ein Schema, das Halluzinationen einlädt, produziert halluzinierte Outputs — auch mit Instructor. Fünf Prinzipien für halluzinations-resistente Schemas:
+
+**1. Enums statt freier Strings.** Ein `document_type: str` lädt das Modell ein, zu erfinden. Ein `document_type: Literal["Planfeststellungsbeschluss", "Plangenehmigung", "Sonstige"]` zwingt es in die Taxonomie (→ 2.5).
+
+**2. Constraints statt optionaler Felder.** `Field(min_length=10, max_length=500)` ist besser als `Optional[str]` — das Modell sieht die Länge als harte Vorgabe statt als Vorschlag.
+
+**3. Defaults für Unsicherheit.** Felder, bei denen „keine Angabe" eine valide Antwort ist, bekommen einen expliziten Default oder `None` als typisierten Wert — nicht leeren String, nicht `"Unbekannt"`.
+
+**4. Flache Schemas vor tiefen.** Vier Ebenen Verschachtelung sind die Obergrenze. Tiefer wird die Fehlerrate stark steigen — das Modell verliert den Kontext, welche Ebene gerade gefüllt wird.
+
+**5. Beispiele im `description`-Feld.** Pydantic-`Field(description="Format: YYYY-MM-DD, z.B. 2026-04-20")` wird als Prompt-Hinweis sichtbar. Beispiele im Schema sind effektiver als eine separate Beispielsektion im User-Prompt.
+
+```python
+from typing import Literal, Optional
+from pydantic import BaseModel, Field
+
+class DocumentMetadata(BaseModel):
+    document_type: Literal["Planfeststellungsbeschluss", "Plangenehmigung", "Sonstige"] = Field(
+        description="Typ nach VwVfG, bevorzugt den spezifischsten zutreffenden"
+    )
+    date: Optional[str] = Field(
+        default=None,
+        description="ISO-8601-Format YYYY-MM-DD, z.B. 2026-04-20"
+    )
+    applicant: Optional[str] = Field(
+        default=None,
+        min_length=2, max_length=200,
+        description="Name des Antragstellers; None wenn nicht erkennbar"
+    )
+```
+
+Ein gut designtes Schema reduziert die Notwendigkeit für Auto-Repair-Schichten (→ 15.1) erheblich.
+
+
 #### Verwandte Muster
 
 
-→ [Schema Design Pattern](#143-schema-design-fr-structured-generation) · [LLM Response Validator Pattern](#171-llm-response-validator-mit-auto-repair) · [Validation Feedback Loop Pattern](#172-validation-error-feedback-loop)
+→ [Schema Design Pattern](#123-streaming-structured-generation-pattern) · [LLM Response Validator Pattern](#151-llm-response-validator-pattern) · [Validation Feedback Loop Pattern](#152-validation-feedback-loop-pattern)
 
 > ❌ **Häufiger Fehler:** Manuell `json.loads(response.text)` verwenden und hoffen dass das LLM sich ans Format hält. In Produktion bricht das regelmäßig — durch Markdown-Wrapper, fehlende Felder oder falsche Typen. Instructor oder Tool Use sind die robuste Alternative.
 
 ---
 
-### 14.3 Schema Design Pattern
 
-> **Kategorie:** C · LLM-Output-Verarbeitung
-
-> **Intent:** Entwirft LLM-Output-Schemas so, dass sie Halluzinationen minimieren: Enums statt freier Strings, Constraints statt optionaler Felder, Defaults statt Required.
-
-
-#### Problem
-
-
-Freie Felder im Schema (z.B. `category: str`) laden das LLM zur Kreativität ein — es erfindet Kategorien, variiert die Schreibweise oder liefert Null-Werte wo ein Default sinnvoller wäre. Das führt zu Validierungsfehlern, inkonsistenten Daten und schwer debuggbaren Produktionsproblemen.
-
-
-#### Struktur
-
-
-```mermaid
-graph TD
-    TASK[Aufgabe] --> FLAT{Komplex?}
-    FLAT -->|Nein| SIMPLE[Flaches Schema\nwenige Felder]
-    FLAT -->|Ja| NEST[Verschachteltes\nSchema]
-    SIMPLE --> LLM[LLM Extraktion]
-    NEST --> LLM
-    LLM --> VAL[Pydantic\nValidation]
-```
-
-*Diagramm: Schema-Design-Entscheidung — einfache Aufgaben erhalten ein flaches Schema (wenige Felder), komplexe Aufgaben ein verschachteltes Schema; beide werden durch ein LLM extrahiert und anschließend per Pydantic validiert.*
-
-
-#### Implementierungshinweise
-
-
-```python
-from pydantic import BaseModel, Field, field_validator
-from typing import Literal, Annotated
-import re
-
-class RiskScore(BaseModel):
-    score: Annotated[int, Field(ge=0, le=100)]  # Constraint: 0-100
-    note: str = Field(
-        min_length=10,
-        description="Beginnt mit 'Prüfen, ob...'"
-    )
-
-    @field_validator("note")
-    @classmethod
-    def note_format(cls, v: str) -> str:
-        if not v.startswith("Prüfen, ob"):
-            raise ValueError("Note muss mit 'Prüfen, ob' beginnen")
-        return v
-
-class ClassificationResult(BaseModel):
-    # Enum erzwingt geschlossene Taxonomie
-    category: Literal["artenschutz", "laermschutz", "wasserrecht", "boden", "sonstige"]
-    confidence: Annotated[float, Field(ge=0.0, le=2.0)]
-    # Optional mit Default — kein Required-Fehler bei fehlendem Feld
-    reasoning: str | None = None
-
-class BatchResult(BaseModel):
-    # Mengen-Constraint direkt im Schema
-    results: list[ClassificationResult] = Field(
-        description="Exakt ein Ergebnis pro Eingabe-Chunk"
-    )
-```
-
-
-#### Konsequenzen
-
-
-| ✅ Vorteile | ⚠️ Trade-offs |
-|---|---|
-| Halluzinationen reduziert durch Enums statt freier Strings | Zu restriktive Schemas blockieren valide LLM-Antworten |
-| Constraints direkt im Schema dokumentiert | Schema-Design erfordert Verständnis von LLM-Fehlermustern |
-
-
-#### Verwandte Muster
-
-
-→ [Schema-First Generation Pattern](#142-instructor--schema-validierung-first-structured-generation) · [Closed Taxonomy Pattern](#25-geschlossene-taxonomie-fr-klassifikation)
-
-
----
-
-### 14.4 Streaming Structured Generation Pattern
+### 12.3 Streaming Structured Generation Pattern
 
 > **Kategorie:** C · LLM-Output-Verarbeitung
 
@@ -4849,67 +4568,12 @@ async def stream_extraction(text: str):
 #### Verwandte Muster
 
 
-→ [Schema-First Generation Pattern](#142-instructor--schema-validierung-first-structured-generation) · [SSE Abort-Chain Pattern](#181-sse-streaming-mit-abortcontroller-chaining)
+→ [Schema-First Generation Pattern](#122-schema-first-generation-pattern) · [SSE Abort-Chain Pattern](#161-llm-cost-tracking-pattern)
 
 
 ---
-### Tool Use / Function Calling
 
-> **Kategorie:** C · LLM-Output-Verarbeitung | F · Agent-Patterns
-
-**Problem:** Structured Generation liefert strukturierte *Daten* (JSON). Für *Aktionen* — das Aufrufen externer APIs, Datenbanken oder Funktionen — braucht das LLM einen anderen Mechanismus: es muss entscheiden, welches Tool mit welchen Parametern aufgerufen wird.
-
-**Lösung:** Tool-Schemata als Vertrag definieren. Das LLM gibt keine finale Antwort, sondern eine Aufruf-Deklaration zurück. Die Anwendung führt das Tool aus und gibt das Ergebnis zurück ans LLM (bidirektionaler Austausch).
-
-```python
-tools = [
-    {
-        "name": "search_documents",
-        "description": "Sucht in der Wissensdatenbank nach relevanten Dokumenten",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "query":       {"type": "string"},
-                "max_results": {"type": "integer", "default": 5}
-            },
-            "required": ["query"]
-        }
-    }
-]
-
-# 1. LLM entscheidet, welches Tool mit welchen Argumenten
-response   = await llm.chat(messages=messages, tools=tools)
-tool_call  = response.tool_use  # {"name": "search_documents", "input": {...}}
-
-# 2. Anwendung führt Tool aus
-result = await execute_tool(tool_call.name, tool_call.input)
-
-# 3. Ergebnis zurück → LLM formuliert finale Antwort
-messages.append({"role": "tool", "content": str(result)})
-final = await llm.chat(messages=messages)
-```
-
-```mermaid
-sequenceDiagram
-    participant APP as Anwendung
-    participant LLM as LLM
-    participant TOOL as Tool / API
-
-    APP->>LLM: Frage + Tool-Schemata
-    LLM-->>APP: Tool-Aufruf + Parameter
-    APP->>TOOL: Ausführen
-    TOOL-->>APP: Ergebnis
-    APP->>LLM: Tool-Ergebnis
-    LLM-->>APP: Finale Antwort
-```
-
-*Diagramm: Tool Use / Function Calling — bidirektionaler Austausch: Anwendung schickt Frage + Tool-Schemata ans LLM; LLM antwortet mit Tool-Aufruf + Parametern; Anwendung führt das Tool aus und schickt das Ergebnis zurück; LLM formuliert daraus die finale Antwort.*
-
-**Abgrenzung zu Structured Generation (14.1/14.2):** Structured Generation → LLM gibt strukturierte Daten zurück (einseitig). Tool Use → LLM *ruft etwas auf* und bekommt ein Ergebnis (bidirektional). Bei Agents ist Tool Use der Kern der ReAct-Schleife (→ 15.2).
-
----
-
-## 15. Agent-Patterns
+## 13. Agent-Patterns
 
 > ⚠️ **Zuerst lesen:** [Entscheidungsregel Agent vs. deterministischer Prozess](#agent-vs-deterministischer-prozess--entscheidungsregel) — die meisten Systeme brauchen keinen Agent. · 🟡 **Fortgeschritten** — 15.1 (ReAct), 15.3 (HitL Checkpoints) · 🔴 **Expert** — 15.4 (Agent-Memory), 15.5 (Agent-Evaluation)
 
@@ -4922,15 +4586,15 @@ Agents = LLMs die eigenständig Entscheidungen treffen, Tools nutzen und multi-s
 
 ```mermaid
 graph TD
-    START[Neue Aufgabe] --> Q1{Lösungsweg\nvorab bekannt?}
-    Q1 -->|Ja| Q2{Anzahl\nVerzweigungen?}
+    START[Neue Aufgabe] --> Q1{Lösungsweg<br/>vorab bekannt?}
+    Q1 -->|Ja| Q2{Anzahl<br/>Verzweigungen?}
     Q1 -->|Nein| AGENT[🤖 Agent]
 
-    Q2 -->|< 5| DET[⚙️ Deterministischer\nProzess]
+    Q2 -->|< 5| DET[⚙️ Deterministischer<br/>Prozess]
     Q2 -->|≥ 5 oder variabel| AGENT
 
-    DET --> DET_OK["✅ Vorhersagbar\n✅ Auditierbar\n✅ Kostengünstig\n⚠️ Versagt bei unbekannten Fällen"]
-    AGENT --> AGT_OK["✅ Flexibel bei Variabilität\n✅ Löst komplexe Fälle\n⚠️ Black Box\n⚠️ HitL Pflicht\n⚠️ Höhere LLM-Kosten"]
+    DET --> DET_OK["✅ Vorhersagbar<br/>✅ Auditierbar<br/>✅ Kostengünstig<br/>⚠️ Versagt bei unbekannten Fällen"]
+    AGENT --> AGT_OK["✅ Flexibel bei Variabilität<br/>✅ Löst komplexe Fälle<br/>⚠️ Black Box<br/>⚠️ HitL Pflicht<br/>⚠️ Höhere LLM-Kosten"]
 ```
 
 *Diagramm: Entscheidungsbaum Agent vs. deterministischer Prozess — ist der Lösungsweg vorab bekannt? Wenn nein → Agent. Wenn ja: unter 5 Verzweigungen → deterministischer Prozess (vorhersagbar, auditierbar, günstig); ab 5 Verzweigungen oder variablem Weg → Agent (flexibel, aber Black Box mit HitL-Pflicht).*
@@ -4949,7 +4613,7 @@ graph TD
 
 > ❌ **Häufiger Fehler:** Einen Agent bauen, weil es modern klingt — obwohl ein deterministischer Workflow mit 4–5 Schritten ausreichend wäre. Agents sind schwerer zu testen, debuggen und auditieren. Die Entscheidungsregel oben ist ernst gemeint: erst ab ≥ 5 variablen Verzweigungen lohnt sich ein Agent.
 
-### 15.1 ReAct Loop Pattern
+### 13.1 ReAct Loop Pattern
 
 > **Kategorie:** F · Agent-Patterns
 
@@ -5046,12 +4710,14 @@ async def react_agent(user_query: str, tools: dict[str, Callable], max_steps: in
 #### Verwandte Muster
 
 
-→ [Tool Registry Pattern](#152-tool-definition-und--validation) · [Human-in-the-Loop Checkpoint Pattern](#153-human-in-the-loop-checkpoints) · [Agent Memory Pattern](#154-agent-memory)
+→ [Tool Registry Pattern](#132-tool-registry-pattern) · [Human-in-the-Loop Checkpoint Pattern](#133-human-in-the-loop-checkpoint-pattern) · [Agent Memory Pattern](#134-agent-memory-pattern)
+
+> ⚡ **Anti-Muster:** Kategorie 7 — *Einen Agent bauen, weil es modern klingt* (→ [Anti-Patterns](#kategorie-7-agent-design))
 
 
 ---
 
-### 15.2 Tool Registry Pattern
+### 13.2 Tool Registry Pattern
 
 > **Kategorie:** F · Agent-Patterns
 
@@ -5075,8 +4741,8 @@ Tools als Schema-Validierung-validierte Funktionen definieren.
 
 ```mermaid
 graph LR
-    DEF[Tool\nDefinition] --> REG[Tool Registry]
-    REG --> VAL[JSON Schema\nValidation]
+    DEF[Tool<br/>Definition] --> REG[Tool Registry]
+    REG --> VAL[JSON Schema<br/>Validation]
     CALL[LLM Tool Call] --> VAL
     VAL -->|Valid| EXEC[Ausfuehrung]
     VAL -->|Invalid| ERR[Fehler an LLM]
@@ -5163,12 +4829,12 @@ async def search_documents(query: str, limit: int = 5) -> list[dict]:
 #### Verwandte Muster
 
 
-→ [ReAct Loop Pattern](#151-react--reason--act) · [Tool Use / Function Calling Pattern](#141-tool-use--function-calling-statt-json-parsing)
+→ [ReAct Loop Pattern](#131-react-loop-pattern) · [Tool Use / Function Calling Pattern](#121-tool-use-function-calling-pattern)
 
 
 ---
 
-### 15.3 Human-in-the-Loop Checkpoint Pattern
+### 13.3 Human-in-the-Loop Checkpoint Pattern
 
 > **Kategorie:** F · Agent-Patterns
 
@@ -5194,14 +4860,14 @@ Explizite Checkpoint-Punkte im Agent-Loop.
 
 ```mermaid
 flowchart TD
-    A["🤖 Agent möchte\nTool ausführen"] --> R{"Risiko-\nbewertung"}
+    A["🤖 Agent möchte<br/>Tool ausführen"] --> R{"Risiko-<br/>bewertung"}
 
-    R -->|"LOW\nsearch, read"| AUTO["⚡ Automatisch ausführen\nkein Logging nötig"]
-    R -->|"MEDIUM\nwrite, update"| LOG["📋 Ausführen\n+ Audit-Log"]
-    R -->|"HIGH\ndelete, send, update_db"| HUM["👤 Mensch\ngefragt"]
+    R -->|"LOW<br/>search, read"| AUTO["⚡ Automatisch ausführen<br/>kein Logging nötig"]
+    R -->|"MEDIUM<br/>write, update"| LOG["📋 Ausführen<br/>+ Audit-Log"]
+    R -->|"HIGH<br/>delete, send, update_db"| HUM["👤 Mensch<br/>gefragt"]
 
     HUM -->|"✅ Genehmigt"| EXEC["▶️ Tool ausführen"]
-    HUM -->|"❌ Abgelehnt"| REJ["🚫 Abgebrochen\nAgent informiert"]
+    HUM -->|"❌ Abgelehnt"| REJ["🚫 Abgebrochen<br/>Agent informiert"]
 
     AUTO --> EXEC
     LOG  --> EXEC
@@ -5271,12 +4937,12 @@ async def execute_with_checkpoint(
 #### Verwandte Muster
 
 
-→ [ReAct Loop Pattern](#151-react--reason--act) · [Durable Workflow Pattern](#71-durable-workflows-fr-lange-ki-pipelines)
+→ [ReAct Loop Pattern](#131-react-loop-pattern) · [Durable Workflow Pattern](#71-durable-workflow-pattern)
 
 
 ---
 
-### 15.4 Agent Memory Pattern
+### 13.4 Agent Memory Pattern
 
 > **Kategorie:** F · Agent-Patterns
 
@@ -5301,13 +4967,13 @@ Externes Memory-System mit drei Ebenen.
 ```mermaid
 flowchart TB
     subgraph MEM ["🧠 Agent Memory — 3 Ebenen"]
-        W["⚡ Working Memory\nAktueller Prompt-Kontext\nBegrenzt: ~8k Tokens\nflüchtig"]
-        E["📚 Episodic Memory\nKomprimierte Gesprächshistorie\nCache-Speicher — kurzlebig\nTage/Wochen"]
-        S["🗄️ Semantic Memory\nLangzeit-Fakten & Muster\nVektordatenbank\ndauerhaft"]
+        W["⚡ Working Memory<br/>Aktueller Prompt-Kontext<br/>Begrenzt: ~8k Tokens<br/>flüchtig"]
+        E["📚 Episodic Memory<br/>Komprimierte Gesprächshistorie<br/>Cache-Speicher — kurzlebig<br/>Tage/Wochen"]
+        S["🗄️ Semantic Memory<br/>Langzeit-Fakten & Muster<br/>Vektordatenbank<br/>dauerhaft"]
     end
 
     Q["💬 User Query"] --> W
-    S -->|"recall(query)\nTop-3 relevante Fakten"| W
+    S -->|"recall(query)<br/>Top-3 relevante Fakten"| W
     E -->|"summarize_history()"| W
 
     W --> LLM["🤖 LLM"]
@@ -5403,12 +5069,12 @@ async def agent_with_memory(query: str, memory: AgentMemory) -> str:
 #### Verwandte Muster
 
 
-→ [ReAct Loop Pattern](#151-react--reason--act) · [Semantic Cache Pattern](#132-semantisches-caching-vektorhnlichkeit)
+→ [ReAct Loop Pattern](#131-react-loop-pattern) · [Semantic Cache Pattern](#112-semantic-cache-pattern)
 
 
 ---
 
-### 15.5 Agent Evaluation Pattern
+### 13.5 Agent Evaluation Pattern
 
 > **Kategorie:** F · Agent-Patterns
 
@@ -5435,7 +5101,7 @@ graph LR
     TASK[Test-Task] --> AGT[Agent]
     AGT --> STEPS[Schritte]
     AGT --> OUT[Ergebnis]
-    STEPS --> CHK1{Max Steps\neingehalten?}
+    STEPS --> CHK1{Max Steps<br/>eingehalten?}
     OUT --> CHK2{Korrekt?}
     CHK1 --> SCORE[Score]
     CHK2 --> SCORE
@@ -5503,17 +5169,28 @@ async def evaluate_agent(case: AgentEvalCase) -> AgentEvalResult:
 #### Verwandte Muster
 
 
-→ [LLM-as-Judge Pattern](#121-llm-as-judge) · [Golden Dataset & Regression Pattern](#122-golden-dataset--regression-testing)
+→ [LLM-as-Judge Pattern](#101-llm-as-judge-pattern) · [Golden Dataset & Regression Pattern](#102-golden-dataset-regression-pattern)
 
 
 ---
-### Multi-Turn Memory Management
+
+### 13.6 Multi-Turn Memory Management Pattern
 
 > **Kategorie:** F · Agent-Patterns
 
-**Problem:** Kontextfenster von LLMs sind begrenzt. Bei langen Konversationen oder dauerhaft laufenden Agents gehen frühe Informationen verloren (Truncation) oder die Kosten explodieren (gesamter Verlauf mitschicken).
+> **Intent:** Hält den LLM-Gesprächskontext bei langen Konversationen innerhalb der Kontextfenster-Grenzen durch Rolling Window, Summary Compression und Entity Memory.
 
-**Lösung:** Dreistufige Speicherverwaltung mit aktiver Kompression. Nicht der gesamte Verlauf, sondern eine semantisch verdichtete Version wird im Kontext geführt.
+
+#### Problem
+
+
+Kontextfenster von LLMs sind begrenzt. Bei langen Konversationen oder dauerhaft laufenden Agents gehen frühe Informationen verloren (Truncation) oder die Kosten explodieren (gesamter Verlauf mitschicken).
+
+
+#### Lösung
+
+
+Dreistufige Speicherverwaltung mit aktiver Kompression. Nicht der gesamte Verlauf, sondern eine semantisch verdichtete Version wird im Kontext geführt.
 
 | Strategie | Wann sinnvoll | Mechanismus |
 |---|---|---|
@@ -5521,11 +5198,34 @@ async def evaluate_agent(case: AgentEvalCase) -> AgentEvalResult:
 | **Summary Compression** | Konversationen > 20 Turns | LLM komprimiert ältere Turns zu Summary |
 | **Entity Memory** | Wichtige Entitäten persistent | Key-Value-Store für extrahierte Schlüsselbegriffe |
 
+
+#### Struktur
+
+
+```mermaid
+graph TD
+    NEW[Neue Nachricht] --> ADD[In Verlauf<br/>aufnehmen]
+    ADD --> CHK{Verlauf<br/>> Limit?}
+    CHK -->|Nein| CTX[Kontext<br/>aufbauen]
+    CHK -->|Ja| COMP[LLM-Kompression<br/>ältere Turns]
+    COMP --> SUM[Summary<br/>aktualisiert]
+    SUM --> CTX
+    CTX --> LLM[LLM-Call]
+```
+
+*Diagramm: Multi-Turn Memory Management — neue Nachricht wird in den Verlauf aufgenommen; ist der Verlauf unter dem Limit, wird direkt ein Kontext aufgebaut; ist das Limit überschritten, komprimiert ein LLM die älteren Turns zu einer Summary; die aktuelle Summary + die letzten N Turns bilden den Kontext für den LLM-Call.*
+
+
+#### Implementierungshinweise
+
+
 ```python
 class ConversationMemory:
     def __init__(self, window: int = 10, compress_after: int = 20):
         self.turns: list[Turn] = []
         self.summary: str = ""
+        self.window = window
+        self.compress_after = compress_after
 
     async def add(self, role: str, content: str):
         self.turns.append(Turn(role, content))
@@ -5547,28 +5247,30 @@ class ConversationMemory:
         return ctx
 ```
 
-```mermaid
-graph TD
-    NEW[Neue Nachricht] --> ADD[In Verlauf\naufnehmen]
-    ADD --> CHK{Verlauf\n> Limit?}
-    CHK -->|Nein| CTX[Kontext\naufbauen]
-    CHK -->|Ja| COMP[LLM-Kompression\nältere Turns]
-    COMP --> SUM[Summary\naktualisiert]
-    SUM --> CTX
-    CTX --> LLM[LLM-Call]
-```
+**Abgrenzung zu 15.4 Agent-Memory (3 Ebenen):** Agent-Memory speichert domänenspezifisches Langzeit-Wissen in einer Vektordatenbank (semantisch, persistent). Multi-Turn Memory verwaltet den *Gesprächsverlauf* innerhalb einer Session. Beide Muster ergänzen sich.
 
-*Diagramm: Multi-Turn Memory Management — neue Nachricht wird in den Verlauf aufgenommen; ist der Verlauf unter dem Limit, wird direkt ein Kontext aufgebaut; ist das Limit überschritten, komprimiert ein LLM die älteren Turns zu einer Summary; die aktuelle Summary + die letzten N Turns bilden den Kontext für den LLM-Call.*
 
-**Abgrenzung zu 15.5 Agent-Memory (3 Ebenen):** Agent-Memory speichert domänenspezifisches Langzeit-Wissen in einer Vektordatenbank (semantisch, persistent). Multi-Turn Memory verwaltet den *Gesprächsverlauf* innerhalb einer Session. Beide Muster ergänzen sich.
+#### Konsequenzen
+
+
+| ✅ Vorteile | ⚠️ Trade-offs |
+|---|---|
+| Konversationen können beliebig lang werden, ohne Kontextfenster zu sprengen | Kompression kostet zusätzliche LLM-Calls (bei Rolling-Window-Grenze) |
+| Kosten pro Call bleiben konstant statt linear zu wachsen | Information aus älteren Turns ist nur als Zusammenfassung verfügbar, nicht wörtlich |
+
+
+#### Verwandte Muster
+
+
+→ [Agent Memory Pattern](#134-agent-memory-pattern) · [Token Budget Management Pattern](#145-token-budget-management-pattern) · [Summarization Pattern](#15-summarization-pattern)
 
 ---
 
-## 16. Erweiterte RAG-Muster
+## 14. Erweiterte RAG-Muster
 
 > 🟡 **Fortgeschritten** — 16.2 (Query-Boosting), 16.4 (Model Priority-Chain), 16.5 (Token-Budget) · 🔴 **Expert** — 16.1 (Hybrid-RAG mit RRF), 16.3 (Query Expansion), 16.6 (Versioniertes Prompt-Management), 16.8 (Cross-Encoder Reranking), 16.9 (HNSW Index Tuning)
 
-### 16.1 Hybrid RAG with RRF Pattern
+### 14.1 Hybrid RAG with RRF Pattern
 
 > **Kategorie:** A · RAG & Retrieval
 
@@ -5592,9 +5294,9 @@ Beide Suchmethoden kombinieren und die Ranking-Listen per **Reciprocal Rank Fusi
 
 ```mermaid
 graph LR
-    Q[Query] --> VS[Vektorsuche\npgvector]
-    Q --> BM[BM25-Suche\nPostgreSQL]
-    VS -->|Rank-Liste A| RRF[Reciprocal\nRank Fusion\n1÷k+rank]
+    Q[Query] --> VS[Vektorsuche<br/>pgvector]
+    Q --> BM[BM25-Suche<br/>PostgreSQL]
+    VS -->|Rank-Liste A| RRF[Reciprocal<br/>Rank Fusion<br/>1÷k+rank]
     BM -->|Rank-Liste B| RRF
     RRF -->|Fusioniertes Ranking| R[Ergebnisse]
 ```
@@ -5648,12 +5350,12 @@ async def hybrid_search(
 #### Verwandte Muster
 
 
-→ [Rich Chunk Metadata Pattern](#31-reiche-chunk-metadaten) · [Adaptive Query Boosting Pattern](#162-adaptives-query-boosting) · [Hypothetical Questions (HyDE) Pattern](#24-hypothetical-questions-hyde-ansatz)
+→ [Rich Chunk Metadata Pattern](#31-rich-chunk-metadata-pattern) · [Adaptive Query Boosting Pattern](#142-adaptive-query-boosting-pattern) · [Hypothetical Questions (HyDE) Pattern](#24-hypothetical-questions-hyde-pattern)
 
 
 ---
 
-### 16.2 Adaptive Query Boosting Pattern
+### 14.2 Adaptive Query Boosting Pattern
 
 > **Kategorie:** A · RAG & Retrieval
 
@@ -5735,12 +5437,12 @@ async function boostedSearch(query: string) {
 #### Verwandte Muster
 
 
-→ [LLM Query Expansion Pattern](#163-llm-query-expansion-mit-budget-tracking) · [Hybrid-RAG with RRF Pattern](#161-hybrid-rag-mit-reciprocal-rank-fusion)
+→ [LLM Query Expansion Pattern](#143-llm-query-expansion-pattern) · [Hybrid-RAG with RRF Pattern](#141-hybrid-rag-with-rrf-pattern)
 
 
 ---
 
-### 16.3 LLM Query Expansion Pattern
+### 14.3 LLM Query Expansion Pattern
 
 > **Kategorie:** A · RAG & Retrieval
 
@@ -5756,7 +5458,7 @@ Kurze Nutzer-Queries liefern schlechte Retrieval-Ergebnisse. LLM-basierte Erweit
 #### Lösung
 
 
-**Warum Query-Varianten statt einer einzelnen Suche?** Nutzer formulieren in ihrem Vokabular, Dokumente in Fachterminologie: "Lärmschutz" vs. "Schallimmissionsschutz". Jede Variante trifft andere Chunks. RRF-Fusion hebt Chunks, die in mehreren Rankings hoch erscheinen — ein robusteres Signal als ein einzelner Ähnlichkeitsscore.
+**Warum Query-Varianten statt einer einzelnen Suche?** Nutzer formulieren in ihrem Vokabular, Dokumente in Fachterminologie: „Lärmschutz" vs. „Schallimmissionsschutz". Jede Variante trifft andere Chunks. RRF-Fusion hebt Chunks, die in mehreren Rankings hoch erscheinen — ein robusteres Signal als ein einzelner Ähnlichkeitsscore.
 
 Query per LLM zu 3–5 Varianten expandieren, Kosten in Redis cachen und per PostgreSQL budgetieren:
 
@@ -5770,7 +5472,7 @@ graph LR
     LLM --> V1[Variante 1]
     LLM --> V2[Variante 2]
     LLM --> V3[Variante 3]
-    V1 --> MERGE[Merged\nResults]
+    V1 --> MERGE[Merged<br/>Results]
     V2 --> MERGE
     V3 --> MERGE
     MERGE --> OUT[Ergebnisse]
@@ -5827,12 +5529,12 @@ async expandQuery(query: string, userId: string): Promise<string[]> {
 #### Verwandte Muster
 
 
-→ [Adaptive Query Boosting Pattern](#162-adaptives-query-boosting) · [Exact Hash Cache Pattern](#131-exaktes-caching-hash-basiert) · [Token Budget Management Pattern](#165-token-budget-management-mit-tiktoken-singleton)
+→ [Adaptive Query Boosting Pattern](#142-adaptive-query-boosting-pattern) · [Exact Hash Cache Pattern](#111-exact-hash-cache-pattern) · [Token Budget Management Pattern](#145-token-budget-management-pattern)
 
 
 ---
 
-### 16.4 Model Priority Chain Pattern
+### 14.4 Model Priority Chain Pattern
 
 > **Kategorie:** D · LLM-Integration & Routing
 
@@ -5939,15 +5641,36 @@ async selectModelForTask(task: LLMTask, requestModel?: string): Promise<string> 
 | Explizite Fallback-Kette ohne Magic | Alle Stufen müssen dokumentiert sein |
 
 
+#### Variante: Kosten-basiertes Routing
+
+Die Priority Chain lässt sich statt einer starren Hierarchie auch mit einer **Kosten-Policy** kombinieren: Teure Modelle kommen nur dann zum Einsatz, wenn günstigere die Aufgabe nachweislich nicht lösen können.
+
+```python
+MODEL_TIERS = [
+    ("claude-haiku-4-5",  0.001, ["classification", "extraction_simple"]),
+    ("claude-sonnet-4-6", 0.003, ["extraction_complex", "reasoning"]),
+    ("claude-opus-4-7",   0.015, ["critical_decisions", "legal_analysis"]),
+]
+
+def resolve_model_by_cost(task_type: str, budget_remaining: float) -> str:
+    for model, cost, supported_tasks in MODEL_TIERS:
+        if task_type in supported_tasks and cost <= budget_remaining:
+            return model
+    raise BudgetExceededError(f"Kein Modell in Budget: {budget_remaining}")
+```
+
+Typische Ersparnisse: 60–80 % der LLM-Kosten durch konsequentes Downgrading auf Haiku bei einfachen Klassifikationsaufgaben. Die Capability-aware Routing-Logik aus dem Gateway-Pattern (→ 7.2) sorgt dafür, dass nur tatsächlich geeignete Modelle in Frage kommen.
+
+
 #### Verwandte Muster
 
 
-→ [LLM Gateway Pattern](#72-llm-gateway-muster) · [Model Capability Flags Pattern](#167-llm-modell-fhigkeits-flags) · [Circuit Breaker Pattern](#175-circuit-breaker-fr-llm-calls)
+→ [LLM Gateway Pattern](#72-llm-gateway-pattern) · [Model Capability Flags Pattern](#147-cross-encoder-reranking-pattern) · [Circuit Breaker Pattern](#154-circuit-breaker-pattern)
 
 
 ---
 
-### 16.5 Token Budget Management Pattern
+### 14.5 Token Budget Management Pattern
 
 > **Kategorie:** B · Prompt Engineering
 
@@ -5963,7 +5686,7 @@ LLM-Context-Fenster werden überschritten → API-Fehler. Token-Counting per Tik
 #### Lösung
 
 
-**Warum explizites Budget statt einfach alles einschließen?** Mehr Kontext ist nicht besser: LLMs verlieren bei überfülltem Fenster Fokus auf die relevantesten Chunks ("Lost-in-the-Middle"-Problem). Ein Budget erzwingt Priorisierung — Top-K relevante Chunks statt erste K gefundene. Gleichzeitig verhindert es unerwartet hohe Kosten bei großen Dokumentkollektionen.
+**Warum explizites Budget statt einfach alles einschließen?** Mehr Kontext ist nicht besser: LLMs verlieren bei überfülltem Fenster Fokus auf die relevantesten Chunks („Lost-in-the-Middle"-Problem). Ein Budget erzwingt Priorisierung — Top-K relevante Chunks statt erste K gefundene. Gleichzeitig verhindert es unerwartet hohe Kosten bei großen Dokumentkollektionen.
 
 Tiktoken als Singleton, konservative Budgetverteilung mit System-Nachricht-Priorisierung:
 
@@ -5973,12 +5696,12 @@ Tiktoken als Singleton, konservative Budgetverteilung mit System-Nachricht-Prior
 
 ```mermaid
 graph LR
-    MSG[Nachrichten] --> SYS[System-Msg\nimmer behalten]
-    MSG --> CONV[Konversation\nneueste zuerst]
-    SYS --> BUDGET[Budget-Check\nLimit - Reserve]
+    MSG[Nachrichten] --> SYS[System-Msg<br/>immer behalten]
+    MSG --> CONV[Konversation<br/>neueste zuerst]
+    SYS --> BUDGET[Budget-Check<br/>Limit - Reserve]
     CONV --> BUDGET
-    BUDGET --> FIT[Passende\nNachrichten]
-    FIT --> OUT[Gefuelltes\nContext-Fenster]
+    BUDGET --> FIT[Passende<br/>Nachrichten]
+    FIT --> OUT[Gefuelltes<br/>Context-Fenster]
 ```
 
 *Diagramm: Token-Budget-Management — System-Nachricht wird immer beibehalten; Konversationsnachrichten (neueste zuerst) werden sequenziell hinzugefügt bis das Budget (Limit minus Reserve) erschöpft ist; das Ergebnis ist ein optimal gefülltes Kontextfenster.*
@@ -6056,12 +5779,12 @@ class TokenCounter {
 #### Verwandte Muster
 
 
-→ [Server-Side Prompt Cache Pattern](#server-seitiges-prompt-caching) · [Versioned Prompt Management Pattern](#166-versioniertes-system-prompt-management)
+→ [Server-Side Prompt Cache Pattern](#server-seitiges-prompt-caching) · [Versioned Prompt Management Pattern](#146-versioned-prompt-management-pattern)
 
 
 ---
 
-### 16.6 Versioned Prompt Management Pattern
+### 14.6 Versioned Prompt Management Pattern
 
 > **Kategorie:** B · Prompt Engineering
 
@@ -6085,12 +5808,12 @@ Datenbank-gestütztes Prompt-Management mit role_type × language_code Matrix:
 
 ```mermaid
 graph LR
-    ADMIN[Admin] --> NEW[Neue Version\nerstellen]
-    NEW --> DB[(SystemPrompt\nDB)]
+    ADMIN[Admin] --> NEW[Neue Version<br/>erstellen]
+    NEW --> DB[(SystemPrompt<br/>DB)]
     ADMIN --> PUB[publishVersion]
-    PUB --> DEACT[Alte Versionen\ndeaktivieren]
-    DEACT --> ACT[Neue Version\naktivieren]
-    SVC[Service] --> GET[getActivePrompt\nrole + lang]
+    PUB --> DEACT[Alte Versionen<br/>deaktivieren]
+    DEACT --> ACT[Neue Version<br/>aktivieren]
+    SVC[Service] --> GET[getActivePrompt<br/>role + lang]
     GET --> DB
 ```
 
@@ -6158,40 +5881,13 @@ class SystemPromptService {
 #### Verwandte Muster
 
 
-→ [Cache Invalidation Pattern](#134-cache-invalidierung) · [Token Budget Management Pattern](#165-token-budget-management-mit-tiktoken-singleton)
+→ [Cache Invalidation Pattern](#113-server-seitiges-prompt-caching) · [Token Budget Management Pattern](#145-token-budget-management-pattern)
 
 
 ---
 
-### 16.7 Model Capability Flags Pattern
 
-> **Kategorie:** D · LLM-Integration & Routing
-
-> **Intent:** Deklariert Modell-Fähigkeiten (Vision, Function Calling, Context-Limit) als Flags in der DB für capability-aware Routing und sichere Fallbacks.
-
-
-#### Problem
-
-Modell-Upgrades brechen capability-abhängigen Code: `if model == "claude-opus-4-6": use_vision()` ist ein hartcodierter Fähigkeits-Check, der bei jedem Modellwechsel manuell angepasst werden muss. Über Dutzende Stellen verteilt entsteht ein fragiles Geflecht aus Modell-Name-Strings im Code.
-
-#### Konsequenzen
-
-
-| ✅ Vorteile | ⚠️ Trade-offs |
-|---|---|
-| Capability-aware Routing verhindert Runtime-Fehler | Capability-Flags müssen bei neuen Modellen manuell gepflegt werden |
-| Neue Modelle ohne Code-Änderungen registrierbar | Falsche Flags können zu Runtime-Fehlern bei falschen Modellen führen |
-
-
-#### Verwandte Muster
-
-
-→ [Model Priority Chain Pattern](#164-model-priority-chain) · [LLM Gateway Pattern](#72-llm-gateway-muster)
-
-
----
-
-### 16.8 Cross-Encoder Reranking Pattern
+### 14.7 Cross-Encoder Reranking Pattern
 
 > **Kategorie:** A · RAG & Retrieval
 
@@ -6319,12 +6015,12 @@ async def two_stage_retrieval(
 #### Verwandte Muster
 
 
-→ [Hybrid-RAG with RRF Pattern](#161-hybrid-rag-mit-reciprocal-rank-fusion) · [Adaptive Query Boosting Pattern](#162-adaptives-query-boosting) · [HNSW Index Tuning Pattern](#169-hnsw--ann-index-tuning-pattern) · [LLM Query Expansion Pattern](#163-llm-query-expansion-mit-budget-tracking)
+→ [Hybrid-RAG with RRF Pattern](#141-hybrid-rag-with-rrf-pattern) · [Adaptive Query Boosting Pattern](#142-adaptive-query-boosting-pattern) · [HNSW Index Tuning Pattern](#148-hnsw-ann-index-tuning-pattern) · [LLM Query Expansion Pattern](#143-llm-query-expansion-pattern)
 
 
 ---
 
-### 16.9 HNSW / ANN Index Tuning Pattern
+### 14.8 HNSW / ANN Index Tuning Pattern
 
 > **Kategorie:** A · RAG & Retrieval
 
@@ -6480,16 +6176,16 @@ def measure_recall(
 #### Verwandte Muster
 
 
-→ [Hybrid-RAG with RRF Pattern](#161-hybrid-rag-mit-reciprocal-rank-fusion) · [Cross-Encoder Reranking Pattern](#168-cross-encoder-reranking-pattern) · [Embedding Cache Pattern](#133-embedding-cache) · [Full Observability Stack Pattern](#91-vollstndiger-observability-stack)
+→ [Hybrid-RAG with RRF Pattern](#141-hybrid-rag-with-rrf-pattern) · [Cross-Encoder Reranking Pattern](#147-cross-encoder-reranking-pattern) · [Embedding Cache Pattern](#111-exact-hash-cache-pattern) · [Full Observability Stack Pattern](#81-full-observability-stack-pattern)
 
 
 ---
 
-## 17. LLM-Robustheit & Qualitätssicherung
+## 15. LLM-Robustheit & Qualitätssicherung
 
 > 🟢 **Einstieg** — 17.5 (Circuit Breaker), 17.6 (Fallback Hierarchy), 17.7 (Fail-Fast Policy) · 🟡 **Fortgeschritten** — 17.1 (LLM Response Validator), 17.2 (Validation Feedback Loop), 17.4 (Semantic Deduplication), 17.8 (LLM Metrics) · 🔴 **Expert** — 17.3 (Multi-Dimensional Confidence Scorer), 17.9 (Document-Context Classification)
 
-### 17.1 LLM Response Validator Pattern
+### 15.1 LLM Response Validator Pattern
 
 > **Kategorie:** C · LLM-Output-Verarbeitung
 
@@ -6515,10 +6211,10 @@ Einen Validator vor die Schema-Validierung-Validierung schalten, der häufige LL
 
 ```mermaid
 graph LR
-    LLM[LLM Response] --> V[Validator\nAuto-Repair]
-    V -->|Repairs dokumentiert| P[Pydantic\nValidation]
+    LLM[LLM Response] --> V[Validator<br/>Auto-Repair]
+    V -->|Repairs dokumentiert| P[Pydantic<br/>Validation]
     P -->|Valid| M[Typed Model]
-    P -->|Invalid| FB[Fallback\nDefault]
+    P -->|Invalid| FB[Fallback<br/>Default]
     V -.->|Audit Trail| L[Logging]
 ```
 
@@ -6569,16 +6265,47 @@ class LLMResponseValidator:
 | Audit-Trail dokumentiert alle Korrekturen | Zu aggressive Reparaturen können valide Ausgaben verändern |
 
 
+#### Variante: Multi-dimensionales Confidence Scoring
+
+Ein einzelner Confidence-Score von einem LLM ist wenig aussagekräftig. „0.8" sagt nicht, *warum* das Modell sicher ist — und erlaubt keine gezielte Nachbesserung. Für Downstream-Entscheidungen (HitL-Trigger, Auto-Archiv, Ablehnung) ist differenzierteres Scoring oft nötig.
+
+**Prinzip:** Qualität entlang mehrerer Dimensionen bewerten, gewichtet zu einem Gesamtscore kombinieren. Typische Dimensionen für Extraktions-Pipelines: Struktur (Pflichtfelder, Logik-Tiefe), Semantik (Beschreibungsqualität), Domäne (Rechtsreferenzen), Quelle (Zitat-Präzision), Konsistenz (Kohärenz zwischen Feldern).
+
+```python
+class ConfidenceScorer:
+    WEIGHTS = {
+        "structural_completeness": 0.25,
+        "semantic_clarity":        0.20,
+        "domain_precision":        0.20,
+        "source_reliability":      0.15,
+        "consistency":             0.20,
+    }
+
+    def calculate(self, extraction: ExtractedRule) -> tuple[float, dict]:
+        scores = {
+            "structural_completeness": self._score_structure(extraction),
+            "semantic_clarity":        self._score_semantics(extraction),
+            "domain_precision":        self._score_domain(extraction),
+            "source_reliability":      self._score_sources(extraction),
+            "consistency":             self._score_consistency(extraction),
+        }
+        total = sum(s * self.WEIGHTS[d] for d, s in scores.items())
+        return total, scores  # Einzelscores mitliefern für Debugging
+```
+
+Der Vorteil gegenüber einem einzelnen Score: Bei niedriger Gesamt-Confidence zeigen die Einzelscores, *wo* das Problem liegt. „Struktur 0.9, Quelle 0.2" → Prompt so anpassen, dass Quellzitate eingefordert werden. Das ersetzt Rätselraten durch gezielte Verbesserung.
+
+
 #### Verwandte Muster
 
 
-→ [Validation Feedback Loop Pattern](#172-validation-error-feedback-loop) · [Schema-First Generation Pattern](#142-instructor--schema-validierung-first-structured-generation) · [Fallback Hierarchy Pattern](#176-mehrstufige-fallback-hierarchie-fr-kritische-felder)
+→ [Validation Feedback Loop Pattern](#152-validation-feedback-loop-pattern) · [Schema-First Generation Pattern](#122-schema-first-generation-pattern) · [Fallback Hierarchy Pattern](#155-fallback-hierarchy-pattern)
 
 > ❌ **Häufiger Fehler:** Pydantic direkt auf rohen LLM-Output anwenden ohne Vorverarbeitung. LLMs liefern konsistent bestimmte Fehler (fehlende Felder, falsche Listenformate, leere Strings statt null) — die ein einfacher Validator zuverlässig repariert, bevor die Schema-Validierung sie als harten Fehler behandelt.
 
 ---
 
-### 17.2 Validation Feedback Loop Pattern
+### 15.2 Validation Feedback Loop Pattern
 
 > **Kategorie:** C · LLM-Output-Verarbeitung
 
@@ -6588,15 +6315,15 @@ class LLMResponseValidator:
 #### Problem
 
 
-Wenn die LLM-Antwort die Schema-Validierung-Validierung nicht besteht, einfach erneut zu fragen bringt oft denselben Fehler.
+Wenn die LLM-Antwort die Schema-Validierung nicht besteht, einfach erneut zu fragen bringt oft denselben Fehler.
 
 
 #### Lösung
 
 
-**Warum Feedback-Loop statt blindem Retry?** Ein blindes Retry mit identischem Prompt produziert identische Fehler — das Modell hat keine neue Information. Der Feedback-Loop gibt dem Modell den konkreten Validierungsfehler als Kontext: "Feld `date` muss ISO-8601-Format haben, du hast `15. März 2024` geliefert." Das Modell korrigiert gezielt statt zufällig.
+**Warum Feedback-Loop statt blindem Retry?** Ein blindes Retry mit identischem Prompt produziert identische Fehler — das Modell hat keine neue Information. Der Feedback-Loop gibt dem Modell den konkreten Validierungsfehler als Kontext: „Feld `date` muss ISO-8601-Format haben, du hast `15. März 2024` geliefert." Das Modell korrigiert gezielt statt zufällig.
 
-Validierungsfehler strukturiert an den LLM-Retry-Call zurückgeben — der LLM kann sich selbst korrigieren:
+Validierungsfehler strukturiert an den LLM-Retry-Call zurückgeben — der LLM kann sich selbst korrigieren.
 
 
 #### Struktur
@@ -6605,31 +6332,14 @@ Validierungsfehler strukturiert an den LLM-Retry-Call zurückgeben — der LLM k
 ```mermaid
 graph LR
     LLM[LLM Call] --> PARSE[JSON Parse]
-    PARSE --> VAL{Pydantic\nValid?}
-    VAL -->|Ja| OK[Strukturiertes\nErgebnis]
-    VAL -->|Nein| ERR[Fehler\nsammeln]
-    ERR --> RETRY[Retry Prompt\n+ Fehlerliste]
+    PARSE --> VAL{Pydantic<br/>Valid?}
+    VAL -->|Ja| OK[Strukturiertes<br/>Ergebnis]
+    VAL -->|Nein| ERR[Fehler<br/>sammeln]
+    ERR --> RETRY[Retry Prompt<br/>+ Fehlerliste]
     RETRY --> LLM
 ```
 
 *Diagramm: Validation Error Feedback Loop — LLM-Call → JSON-Parse → Pydantic-Validierung; bei Fehler werden alle Fehlermeldungen gesammelt und strukturiert in den Retry-Prompt eingebaut; der LLM kann sich damit gezielt selbst korrigieren.*
-
-```mermaid
-graph LR
-    RULE[Extrahierte Regel] --> S1[Struktur\n0.25]
-    RULE --> S2[Semantik\n0.20]
-    RULE --> S3[Domaene\n0.20]
-    RULE --> S4[Quelle\n0.15]
-    RULE --> S5[Konsistenz\n0.20]
-    S1 --> AGG[Gewichteter\nMittelwert]
-    S2 --> AGG
-    S3 --> AGG
-    S4 --> AGG
-    S5 --> AGG
-    AGG --> CONF[Confidence\n0.0 - 2.0]
-```
-
-*Diagramm: Multi-Dimensional Confidence Scorer — eine extrahierte Regel wird entlang von 5 Dimensionen (Struktur 25 %, Semantik 20 %, Domäne 20 %, Quelle 15 %, Konsistenz 20 %) einzeln bewertet; alle Scores fließen gewichtet in einen Gesamtscore (0.0–2.0).*
 
 
 #### Implementierungshinweise
@@ -6670,36 +6380,6 @@ Bitte korrigiere diese Fehler:
         return await self.structure(raw_rule, feedback={"validation_errors": errors})
 ```
 
-```python
-# src/services/confidence_scorer.py
-class ConfidenceScorer:
-    WEIGHTS = {
-        "structural_completeness": 0.25,  # Pflichtfelder, Logic-Tiefe, Conditions-Anzahl
-        "semantic_clarity":        0.20,  # Beschreibungslänge, Schlüsselwörter
-        "domain_precision":        0.20,  # Rechtsreferenzen, Action-Typen
-        "source_reliability":      0.15,  # Qualität der Rechtsgrundlagen
-        "consistency":             0.20,  # Kohärenz zwischen Feldern
-    }
-
-    def calculate_confidence(self, rule: StructuredRuleV3Model) -> float:
-        scores = {
-            "structural_completeness": self._score_structure(rule),
-            "semantic_clarity":        self._score_semantics(rule),
-            "domain_precision":        self._score_domain(rule),
-            "source_reliability":      self._score_sources(rule),
-            "consistency":             self._score_consistency(rule),
-        }
-        return sum(
-            score * self.WEIGHTS[dim]
-            for dim, score in scores.items()
-        )
-
-    def _score_structure(self, rule) -> float:
-        # Punkte für: action vorhanden, logic-Tiefe >1, conditions >0,
-        # norm_hierarchy gesetzt, legal_references vorhanden
-        ...
-```
-
 
 #### Konsequenzen
 
@@ -6713,12 +6393,13 @@ class ConfidenceScorer:
 #### Verwandte Muster
 
 
-→ [LLM Response Validator Pattern](#171-llm-response-validator-mit-auto-repair) · [Schema Design Pattern](#143-schema-design-fr-structured-generation)
+→ [LLM Response Validator Pattern](#151-llm-response-validator-pattern) · [Schema Design Pattern](#123-streaming-structured-generation-pattern)
 
 
 ---
 
-### 17.4 Semantic Deduplication Pattern
+
+### 15.3 Semantic Deduplication Pattern
 
 > **Kategorie:** A · RAG & Retrieval
 
@@ -6734,7 +6415,7 @@ LLMs extrahieren aus demselben Dokument-Chunk oft semantisch gleiche Regeln mit 
 #### Lösung
 
 
-**Warum Embedding-basiert statt String-Matching?** Exaktes String-Matching übersieht semantische Duplikate: "Lärmschutzwand entlang B27" und "Schallschutzanlage Bundesstraße 27" sind dasselbe Objekt — 0 % Zeichenübereinstimmung. Embeddings erfassen semantische Äquivalenz. Ein Cosine-Similarity-Score ≥ 0,85 identifiziert zuverlässig Doppelextraktionen, die bei Einzelbetrachtung korrekt aussehen.
+**Warum Embedding-basiert statt String-Matching?** Exaktes String-Matching übersieht semantische Duplikate: „Lärmschutzwand entlang B27" und „Schallschutzanlage Bundesstraße 27" sind dasselbe Objekt — 0 % Zeichenübereinstimmung. Embeddings erfassen semantische Äquivalenz. Ein Cosine-Similarity-Score ≥ 0,85 identifiziert zuverlässig Doppelextraktionen, die bei Einzelbetrachtung korrekt aussehen.
 
 Embeddings vergleichen, Kosinus-Ähnlichkeit berechnen, Duplikate identifizieren — die Regel mit höchstem Confidence-Score gewinnt:
 
@@ -6744,13 +6425,13 @@ Embeddings vergleichen, Kosinus-Ähnlichkeit berechnen, Duplikate identifizieren
 
 ```mermaid
 graph LR
-    RULES[Regeln] --> EMB[Batch\nEmbedding]
-    EMB --> SIM[Kosinus-\nAehnlichkeit]
-    SIM --> GRP{Aehnlichkeit\n>= 0.85?}
-    GRP -->|Ja| DUP[Duplikat-\nGruppe]
+    RULES[Regeln] --> EMB[Batch<br/>Embedding]
+    EMB --> SIM[Kosinus-<br/>Aehnlichkeit]
+    SIM --> GRP{Aehnlichkeit<br/>>= 0.85?}
+    GRP -->|Ja| DUP[Duplikat-<br/>Gruppe]
     GRP -->|Nein| KEEP[Behalten]
-    DUP --> BEST[Hoechster\nConfidence Score]
-    BEST --> OUT[Deduplizierte\nRegeln]
+    DUP --> BEST[Hoechster<br/>Confidence Score]
+    BEST --> OUT[Deduplizierte<br/>Regeln]
     KEEP --> OUT
 ```
 
@@ -6814,12 +6495,12 @@ class SemanticDeduplicator:
 #### Verwandte Muster
 
 
-→ [Multi-Dimensional Confidence Scorer Pattern](#173-multi-dimensional-confidence-scorer) · [Semantic Cache Pattern](#132-semantisches-caching-vektorhnlichkeit)
+→ [Multi-Dimensional Confidence Scorer Pattern](#153-semantic-deduplication-pattern) · [Semantic Cache Pattern](#112-semantic-cache-pattern)
 
 
 ---
 
-### 17.5 Circuit Breaker Pattern
+### 15.4 Circuit Breaker Pattern
 
 > **Kategorie:** D · LLM-Integration & Routing
 
@@ -6944,13 +6625,13 @@ class ResilientLLMClient:
 #### Verwandte Muster
 
 
-→ [Exponential Backoff Pattern](#186-exponential-backoff-mit-graceful-fallback) · [LLM Gateway Pattern](#72-llm-gateway-muster) · [LLM Metrics Pattern](#178-prometheus-llm-metriken)
+→ [Exponential Backoff Pattern](#155-fallback-hierarchy-pattern) · [LLM Gateway Pattern](#72-llm-gateway-pattern) · [LLM Metrics Pattern](#82-llm-metrics-pattern-prometheus)
 
 > ❌ **Häufiger Fehler:** LLM-Calls ohne Circuit Breaker direkt in synchrone Request-Handler einbauen. Bei einem API-Ausfall hängen dann alle laufenden Requests bis zum Timeout — das System wird unresponsiv. Circuit Breaker und Exponential Backoff gehören in jede LLM-Integration die in Produktion geht.
 
 ---
 
-### 17.6 Fallback Hierarchy Pattern
+### 15.5 Fallback Hierarchy Pattern
 
 > **Kategorie:** C · LLM-Output-Verarbeitung
 
@@ -6976,13 +6657,13 @@ Bestimmte Felder (z.B. `norm_hierarchy`) dürfen im Ausgabemodell **niemals null
 
 ```mermaid
 graph TD
-    LLM[LLM Antwort] --> S1{Stufe 1\nDirekt nutzbar?}
+    LLM[LLM Antwort] --> S1{Stufe 1<br/>Direkt nutzbar?}
     S1 -->|Ja| OK[Ergebnis]
-    S1 -->|Nein| S2{Stufe 2\nPre-Validation?}
+    S1 -->|Nein| S2{Stufe 2<br/>Pre-Validation?}
     S2 -->|Ja| OK
-    S2 -->|Nein| S3{Stufe 3\nPydantic-Fehler?}
-    S3 -->|Pattern| S4[Pattern-\nMatching]
-    S3 -->|Fehler| S5[Minimal-\nDefault]
+    S2 -->|Nein| S3{Stufe 3<br/>Pydantic-Fehler?}
+    S3 -->|Pattern| S4[Pattern-<br/>Matching]
+    S3 -->|Fehler| S5[Minimal-<br/>Default]
     S4 --> OK
     S5 --> OK
 ```
@@ -7046,12 +6727,12 @@ def _extract_norm_hierarchy_fallback(self, raw_rule, document_context=None):
 #### Verwandte Muster
 
 
-→ [LLM Response Validator Pattern](#171-llm-response-validator-mit-auto-repair) · [Fail-Fast Policy Pattern](#177-fail-fast-policy-fr-ki-pipelines) · [Circuit Breaker Pattern](#175-circuit-breaker-fr-llm-calls)
+→ [LLM Response Validator Pattern](#151-llm-response-validator-pattern) · [Fail-Fast Policy Pattern](#156-fail-fast-policy-pattern) · [Circuit Breaker Pattern](#154-circuit-breaker-pattern)
 
 
 ---
 
-### 17.7 Fail-Fast Policy Pattern
+### 15.6 Fail-Fast Policy Pattern
 
 > **Kategorie:** D · LLM-Integration & Routing
 
@@ -7061,7 +6742,7 @@ def _extract_norm_hierarchy_fallback(self, raw_rule, document_context=None):
 #### Problem
 
 
-Fallback-Logik in KI-Pipelines (z.B. "wenn LLM-Service down, nehme regelbasiertes System") führt zu schwer debuggbaren Zuständen — Tests testen den Fallback, nicht den Hauptpfad.
+Fallback-Logik in KI-Pipelines (z.B. „wenn LLM-Service down, nehme regelbasiertes System") führt zu schwer debuggbaren Zuständen — Tests testen den Fallback, nicht den Hauptpfad.
 
 
 #### Lösung
@@ -7077,14 +6758,50 @@ Explizite Architektur-Entscheidung **gegen** Fallbacks — klare Exceptions stat
 
 ```mermaid
 graph LR
-    KERN[Kernfaehigkeit\nLLM / OCR] --> CALL[Direkter Aufruf]
-    CALL -->|Fehler| EXC[Exception\npropagiert]
-    EXC --> API[User-facing\nEndpoint]
-    API -->|Grenze| FB[Fallback\nerlaubt]
+    KERN[Kernfaehigkeit<br/>LLM / OCR] --> CALL[Direkter Aufruf]
+    CALL -->|Fehler| EXC[Exception<br/>propagiert]
+    EXC --> API[User-facing<br/>Endpoint]
+    API -->|Grenze| FB[Fallback<br/>erlaubt]
     CALL -->|Erfolg| OK[Ergebnis]
 ```
 
 *Diagramm: Fail-Fast Policy — Kernfähigkeiten (LLM/OCR) werden direkt aufgerufen; Fehler werden als Exception nach oben propagiert bis zum User-facing Endpoint; nur an der Systemgrenze (Endpoint) sind Fallbacks erlaubt.*
+
+
+#### Implementierungshinweise
+
+
+```python
+# ❌ ANTI-PATTERN: Stiller Fallback in der Business-Logik
+def extract_metadata_bad(text: str) -> dict:
+    try:
+        result = llm_extract(text)
+        return result
+    except Exception:
+        return {}  # Daten gehen verloren, niemand merkt es
+
+
+# ✅ FAIL-FAST: Exception propagiert, Problem wird sichtbar
+def extract_metadata_good(text: str) -> dict:
+    # Kein try/except hier — Fehler propagiert zum Aufrufer
+    return llm_extract(text)
+
+
+# ✅ Fallback nur an der Systemgrenze (API-Endpoint)
+@app.post("/api/documents/{doc_id}/metadata")
+async def endpoint_extract_metadata(doc_id: str) -> dict:
+    try:
+        text = await load_document(doc_id)
+        return extract_metadata_good(text)
+    except LLMTimeoutError:
+        # Hier ist der kontrollierte Ort für graceful degradation
+        raise HTTPException(503, "LLM-Extraktion temporär nicht verfügbar")
+    except LLMValidationError as e:
+        # Fachlicher Fehler — an User weiterreichen
+        raise HTTPException(422, f"Extraktion fehlgeschlagen: {e}")
+```
+
+**Faustregel:** `try/except` in Business-Logik ist ein Code-Smell — außer die Exception wird mit konkreter Fachlogik behandelt (z. B. „bei LLM-Timeout auf kleineres Modell fallbacken"). Ein pauschales `except: return default_value` ist fast immer falsch.
 
 
 #### Konsequenzen
@@ -7099,232 +6816,18 @@ graph LR
 #### Verwandte Muster
 
 
-→ [Circuit Breaker Pattern](#175-circuit-breaker-fr-llm-calls) · [Fallback Hierarchy Pattern](#176-mehrstufige-fallback-hierarchie-fr-kritische-felder)
+→ [Circuit Breaker Pattern](#154-circuit-breaker-pattern) · [Fallback Hierarchy Pattern](#155-fallback-hierarchy-pattern)
 
 > ❌ **Häufiger Fehler:** Stille Fallbacks einbauen die schwer zu erkennen sind: `except: return default_value`. In Entwicklung sieht alles gut aus, in Produktion liefert das System leise falsche Ergebnisse ohne jeden Hinweis. Fail-Fast macht Fehler sofort sichtbar — das ist eine Stärke, kein Mangel.
 
 ---
 
-### 17.8 LLM Metrics Pattern
 
-> **Kategorie:** E · Qualität & Evaluation
-
-> **Intent:** Instrumentiert alle LLM-Calls mit LLM-spezifischen Prometheus-Metriken (Latenz-Histogramm mit angepassten Buckets, Timeout-Rate, Circuit-Breaker-State).
-
-
-#### Problem
-
-
-Standard-API-Monitoring reicht für LLM-intensive Systeme nicht — wichtig sind LLM-spezifische KPIs: Latenz pro Modell, Timeout-Rate, Circuit-Breaker-State.
-
-
-#### Lösung
-
-
-**Warum LLM-spezifische Metriken statt Standard-HTTP-Monitoring?** HTTP-Statuscodes zeigen ob ein Request ankam — nicht ob das LLM brauchbare Ergebnisse lieferte. Latenz-Histogramme mit Standard-Buckets (100ms, 500ms) sind nutzlos wenn LLM-Calls typisch 2–30 Sekunden dauern. Und der Circuit-Breaker-State ist vollständig unsichtbar in normalen API-Metriken. LLM-spezifische Buckets, Timeout-Rate und Modell-Labels sind der Unterschied zwischen "wir sehen dass etwas langsam ist" und "wir sehen welches Modell bei welchem Task-Typ auf 429 läuft".
-
-Dedizierte Prometheus-Metriken für alle LLM-Operationen:
-
-
-#### Struktur
-
-
-```mermaid
-graph LR
-    LLM[LLM Call] --> CNT[Counter\nRequests Total]
-    LLM --> HIST[Histogram\nDuration]
-    LLM --> GAUGE[Gauge\nTimeout Rate]
-    CB[Circuit Breaker] --> STATE[Gauge\nState 0/1/2]
-    CNT --> PROM[(Prometheus)]
-    HIST --> PROM
-    GAUGE --> PROM
-    STATE --> PROM
-    PROM --> GRAF[Grafana]
-```
-
-*Diagramm: Prometheus LLM-Metriken — jeder LLM-Call speist Counter (Requests Total), Histogram (Duration) und Gauge (Timeout Rate); der Circuit Breaker speist einen State-Gauge (0=closed, 1=open, 2=half_open); alle Metriken fließen in Prometheus und werden in Grafana visualisiert.*
-
-
-#### Implementierungshinweise
-
-
-```python
-# src/services/metrics.py
-from prometheus_client import Counter, Histogram, Gauge
-
-# LLM Request Metrics
-llm_requests_total = Counter(
-    "llm_requests_total", "Total LLM requests",
-    ["model", "status"]  # status: success | timeout | rate_limit | error
-)
-llm_duration_seconds = Histogram(
-    "llm_duration_seconds", "LLM request duration in seconds",
-    ["model"],
-    buckets=[0.1, 0.5, 1, 5, 10, 30, 60, 120]  # LLM-typische Zeitskala!
-)
-llm_timeout_rate = Gauge(
-    "llm_timeout_rate", "Current LLM timeout rate",
-    ["model"]
-)
-
-# Circuit Breaker State
-circuit_breaker_state = Gauge(
-    "circuit_breaker_state", "Circuit breaker state (0=closed, 1=open, 2=half_open)",
-    ["service"]
-)
-
-# Nutzung:
-async def call_llm(model: str, prompt: str):
-    start = time.time()
-    try:
-        result = await llm_api.complete(prompt)
-        llm_requests_total.labels(model=model, status="success").inc()
-        return result
-    except TimeoutError:
-        llm_requests_total.labels(model=model, status="timeout").inc()
-        raise
-    finally:
-        llm_duration_seconds.labels(model=model).observe(time.time() - start)
-```
-
-
-#### Konsequenzen
-
-
-| ✅ Vorteile | ⚠️ Trade-offs |
-|---|---|
-| LLM-spezifische Metriken sofort in Grafana sichtbar | Histogramm-Buckets müssen an LLM-Latenzprofil angepasst werden |
-| Circuit-Breaker-State als Gauge überwachbar | Metriken-Granularität (pro Modell) erhöht Prometheus-Cardinality |
-
-
-#### Verwandte Muster
-
-
-→ [Full Observability Stack Pattern](#91-vollstndiger-observability-stack) · [Circuit Breaker Pattern](#175-circuit-breaker-fr-llm-calls)
-
-
----
-
-### 17.9 Document-Context Classification Pattern
-
-> **Kategorie:** B · Prompt Engineering
-
-> **Intent:** Verbessert Klassifikations-Confidence durch Einbeziehung des Gesamtdokument-Kontexts (Dokumenttyp, Rechtsgrundlage) als optionalen Boost-Parameter.
-
-
-#### Problem
-
-
-LLM-Extraktion kann den Kontext des Gesamtdokuments nicht nutzen — jeder Chunk wird isoliert verarbeitet, obwohl der Dokumenttitel oder die Dokumentart wichtige Hinweise enthält.
-
-
-#### Lösung
-
-
-`DocumentContext` als optionalen Parameter durch die gesamte Pipeline führen und für Confidence Boosting nutzen:
-
-
-#### Struktur
-
-
-```mermaid
-graph LR
-    CHUNK[Chunk] --> CLS[Pattern\nKlassifikation]
-    CTX[DocumentContext\nTyp + Titel] --> BOOST{Context\nvorhanden?}
-    CLS --> BOOST
-    BOOST -->|Nein| BASE[Basis-Score]
-    BOOST -->|Bundesgesetz| HIGH[+30% Boost]
-    BOOST -->|Mit Rechtsgrundlage| MED[+10% Boost]
-    BASE --> OUT[ClassificationResult]
-    HIGH --> OUT
-    MED --> OUT
-```
-
-*Diagramm: Dokument-kontext-bewusste Klassifikation — Chunk wird per Pattern-Klassifikation bewertet; ist ein DocumentContext vorhanden, wird der Score kontextabhängig geboostet: Bundesgesetz +30 %, vorhandene Rechtsgrundlage +10 %; ohne Context bleibt der Basis-Score.*
-
-
-#### Implementierungshinweise
-
-
-```python
-@dataclass
-class DocumentContext:
-    document_title: str          # "Bebauungsplan XY 2023"
-    document_type: str           # "bebauungsplan" | "planfeststellung" | "satzung"
-    issuing_authority: str       # "Gemeinde Musterstadt"
-    date: str | None = None
-    legal_basis: list[str] = field(default_factory=list)
-
-class PatternHierarchyClassifier:
-    def classify_with_context(
-        self,
-        document_title: str,
-        content: str,
-        document_context: DocumentContext | None = None,
-    ) -> ClassificationResult | None:
-        # Ohne Context: Pattern-Matching auf Text
-        result = self._classify_patterns(document_title, content)
-
-        # Mit Context: Confidence boosten
-        if document_context and result:
-            if document_context.document_type == "bundesgesetz":
-                result.confidence = min(2.0, result.confidence * 2.3)  # +30% Boost
-            if document_context.legal_basis:
-                result.confidence = min(2.0, result.confidence * 2.1)
-
-        return result
-```
-
-
-#### Konsequenzen
-
-
-| ✅ Vorteile | ⚠️ Trade-offs |
-|---|---|
-| Confidence-Boost ohne Training | Boost-Faktoren sind heuristisch — müssen empirisch validiert werden |
-| Optionaler Parameter — backward-kompatibel | Falscher DocumentContext kann Confidence fälschlicherweise erhöhen |
-
-
-#### Verwandte Muster
-
-
-→ [Closed Taxonomy Pattern](#25-geschlossene-taxonomie-fr-klassifikation) · [Multi-Dimensional Confidence Scorer Pattern](#173-multi-dimensional-confidence-scorer)
-
-
----
-
-### 17.10 File-Based Chunk Cache Pattern
-
-> **Kategorie:** H · Performance & Caching
-
-> **Intent:** Cached LLM-Extraktionsergebnisse auf Chunk-Ebene durch (file_hash, chunk_index) als Key — verhindert redundante LLM-Calls bei Re-Verarbeitungen.
-
-
-#### Problem
-
-Beim iterativen Prompt-Entwickeln wird dasselbe Dokument dutzende Male geparst, gechunkt und embedded — jedes Mal mit identischem Ergebnis. Bei 100 Dokumenten mit je 50 Chunks kostet allein der Embedding-Schritt mehrere Minuten und signifikante API-Kosten pro Entwicklungs-Run.
-
-#### Konsequenzen
-
-
-| ✅ Vorteile | ⚠️ Trade-offs |
-|---|---|
-| Eliminiert redundante LLM-Calls bei Re-Verarbeitung | TTL-Verwaltung muss bei Dateiänderungen konsistent sein |
-| TTL-basiert — automatisch ungültig bei Ablauf | file_hash-Berechnung kostet I/O pro Datei |
-
-
-#### Verwandte Muster
-
-
-→ [Exact Hash Cache Pattern](#131-exaktes-caching-hash-basiert) · [File-Based Chunk Cache Pattern](#1710-file-basiertes-chunk-caching-fr-llm-extraktion)
-
----
-
-## 18. LLM-Kosten-Management
+## 16. LLM-Kosten-Management
 
 > ⚠️ **Produktions-Pflicht:** Ohne Kosten-Tracking und Budget-Limits explodieren LLM-Kosten bei Scale ohne Warnung. · 🟢 **Einstieg** — 18.1 (Cost Tracking), 18.2 (Model Routing) · 🟡 **Fortgeschritten** — 18.3 (Per-User Budgets)
 
-### 18.1 LLM-Cost-Tracking Pattern
+### 16.1 LLM-Cost-Tracking Pattern
 
 > **Kategorie:** I · Betrieb & Infrastruktur
 
@@ -7441,114 +6944,12 @@ async def tracked_llm_call(
 #### Verwandte Muster
 
 
-→ [Model Routing Pattern](#182-model-routing-nach-kosten) · [Per-User Budget Pattern](#183-per-user-budget-limits) · [Observability Stack Pattern](#91-vollstndiger-observability-stack)
+→ [Model Routing Pattern](#144-model-priority-chain-pattern) · [Per-User Budget Pattern](#162-per-user-budget-limits) · [Observability Stack Pattern](#81-full-observability-stack-pattern)
 
 ---
 
-### 18.2 Model Routing nach Kosten
 
-> **Kategorie:** D · LLM-Integration & Routing
-
-> **Intent:** Wählt automatisch das günstigste Modell das für einen Task ausreicht — teure Modelle nur wenn nötig, günstige für Bulk-Operationen.
-
-
-#### Problem
-
-
-Ein System verwendet dasselbe leistungsfähige (und teure) Modell für alle Aufgaben: Screening, Extraktion, Klassifikation, Zusammenfassung. Das ist einfach zu implementieren aber teuer — viele Tasks wären mit einem günstigeren Modell gleichwertig lösbar.
-
-
-#### Lösung
-
-
-Task-Typ-zu-Modell-Routing: Jede Aufgabe bekommt das günstigste Modell das empirisch nachweisbar ausreicht. Die Entscheidung liegt in einer zentralen Konfiguration, nicht verstreut im Code.
-
-
-#### Struktur
-
-
-```mermaid
-graph TD
-    TASK[Task-Typ] --> R{Routing
-Konfiguration}
-    R -->|screening, filter| CHEAP["claude-haiku-4-5
-0.80$ / 1M Token"]
-    R -->|extraction, classify| MID["claude-sonnet-4-6
-3.00$ / 1M Token"]
-    R -->|complex_reasoning, legal| EXP["claude-opus-4-6
-15.00$ / 1M Token"]
-    CHEAP --> EVAL{Qualität
-ausreichend?}
-    EVAL -->|Nein| ESCALATE[Escalation
-an nächstes Modell]
-    EVAL -->|Ja| OUT[Ergebnis]
-```
-
-*Diagramm: Kostenbasiertes Model-Routing — Task-Typ bestimmt das initiale Modell; günstige Modelle für Bulk-Operationen, teure nur für komplexe Anforderungen. Optional: automatische Eskalation wenn Qualitätsschwelle nicht erreicht wird.*
-
-
-#### Implementierungshinweise
-
-
-```python
-from enum import Enum
-
-class TaskComplexity(Enum):
-    BULK      = "bulk"      # Screening, simple Filter  → Haiku
-    STANDARD  = "standard"  # Extraktion, Klassifikation → Sonnet
-    COMPLEX   = "complex"   # Reasoning, Juristik       → Opus
-
-TASK_MODEL_MAP: dict[str, str] = {
-    # Bulk-Operationen — maximale Parallelisierung, minimale Kosten
-    "screening":            "claude-haiku-4-5",
-    "classification":       "claude-haiku-4-5",
-    "simple_extraction":    "claude-haiku-4-5",
-
-    # Standard-Operationen — Balance Qualität/Kosten
-    "extraction":           "claude-sonnet-4-6",
-    "summarization":        "claude-sonnet-4-6",
-    "rag_answer":           "claude-sonnet-4-6",
-    "structured_output":    "claude-sonnet-4-6",
-
-    # Komplexe Operationen — höchste Qualität
-    "legal_analysis":       "claude-opus-4-6",
-    "complex_reasoning":    "claude-opus-4-6",
-    "multi_doc_synthesis":  "claude-opus-4-6",
-}
-
-async def call_with_routing(
-    task_type: str,
-    messages: list[dict],
-    override_model: str | None = None,
-) -> str:
-    model = override_model or TASK_MODEL_MAP.get(task_type, "claude-sonnet-4-6")
-    return await tracked_llm_call(
-        model=model,
-        task_type=task_type,
-        fn=llm_client.complete,
-        model=model,
-        messages=messages,
-    )
-```
-
-
-#### Konsequenzen
-
-
-| ✅ Vorteile | ⚠️ Trade-offs |
-|---|---|
-| Direkte Kostenreduktion — Haiku ist ~19× günstiger als Opus | Routing-Tabelle muss bei neuen Modellen gepflegt werden |
-| Zentrales Routing — kein `model=` verstreut im Code | Qualitätsunterschiede zwischen Modellen müssen empirisch getestet werden (Golden Dataset!) |
-
-
-#### Verwandte Muster
-
-
-→ [LLM-Cost-Tracking Pattern](#181-llm-cost-tracking-pattern) · [Model Priority Chain Pattern](#164-model-priority-chain) · [Golden Dataset & Regression Pattern](#122-golden-dataset--regression-testing)
-
----
-
-### 18.3 Per-User Budget Limits
+### 16.2 Per-User Budget Limits
 
 > **Kategorie:** I · Betrieb & Infrastruktur
 
@@ -7654,16 +7055,16 @@ class BudgetManager:
 #### Verwandte Muster
 
 
-→ [LLM-Cost-Tracking Pattern](#181-llm-cost-tracking-pattern) · [Multi-Tenancy Pattern](#19-multi-tenancy--mandantentrennung) · [Thread-Safe Rate Limiter Pattern](#52-thread-safe-async-rate-limiter)
+→ [LLM-Cost-Tracking Pattern](#161-llm-cost-tracking-pattern) · [Multi-Tenancy Pattern](#19-multimodal-analysis-pattern) · [Thread-Safe Rate Limiter Pattern](#52-thread-safe-rate-limiter-pattern)
 
 
 ---
 
-## 19. Multi-Tenancy & Mandantentrennung
+## 17. Multi-Tenancy & Mandantentrennung
 
 > 🟡 **Fortgeschritten** — 19.1 (Tenant-Isolierung), 19.2 (Tenant-spezifisches Prompt-Management)
 
-### 19.1 Tenant-Isolierung in LLM-Pipelines
+### 17.1 Tenant-Isolierung in LLM-Pipelines
 
 > **Kategorie:** I · Betrieb & Infrastruktur | J · Sicherheit
 
@@ -7772,13 +7173,13 @@ def get_tenant_rate_limit(tenant_tier: str) -> int:
 #### Verwandte Muster
 
 
-→ [Per-User Budget Pattern](#183-per-user-budget-limits) · [Prompt Injection Defense Pattern](#41-prompt-injection-defense-pattern) · [Exact Hash Cache Pattern](#131-exact-hash-cache-pattern) · [Observability Stack Pattern](#91-vollstndiger-observability-stack)
+→ [Per-User Budget Pattern](#162-per-user-budget-limits) · [Prompt Injection Defense Pattern](#41-prompt-injection-defense-pattern) · [Exact Hash Cache Pattern](#111-exact-hash-cache-pattern) · [Observability Stack Pattern](#81-full-observability-stack-pattern)
 
 > ❌ **Häufiger Fehler:** Tenant-Isolierung nur auf Anwendungsebene (z.B. WHERE tenant_id = ?) aber nicht im Vektordatenbank-Filter. Semantic-Search-Queries ohne Tenant-Filter können Chunks anderer Tenants zurückliefern — ein stilles Datenleck das in Logs nicht sichtbar ist.
 
 ---
 
-### 19.2 Tenant-spezifisches System-Prompt-Management
+### 17.2 Tenant-spezifisches System-Prompt-Management
 
 > **Kategorie:** B · Prompt Engineering | I · Betrieb & Infrastruktur
 
@@ -7848,7 +7249,7 @@ async def get_system_prompt(task_type: str) -> str:
 #### Verwandte Muster
 
 
-→ [Versioned Prompt Management Pattern](#166-versioned-prompt-management-pattern) · [Golden Dataset & Regression Pattern](#122-golden-dataset--regression-testing) · [Tenant-Isolierung Pattern](#191-tenant-isolierung-in-llm-pipelines)
+→ [Versioned Prompt Management Pattern](#146-versioned-prompt-management-pattern) · [Golden Dataset & Regression Pattern](#102-golden-dataset-regression-pattern) · [Tenant-Isolierung Pattern](#171-tenant-isolierung-in-llm-pipelines)
 
 
 
@@ -7869,13 +7270,10 @@ async def get_system_prompt(task_type: str) -> str:
 | 1.5 | Summarization Pattern | Empfohlen | Mittel | 🟢 |
 | 1.6 | Autonomous Agent Pattern | Pflicht | Hoch | 🔴 |
 | 1.7 | Anomaly Detection Pattern | Empfohlen | Mittel | 🟡 |
-| 1.8 | Forecast Pattern | Empfohlen | Niedrig | 🟡 |
-| 1.9 | Process Automation Pattern | Optional | Niedrig | 🟢 |
-| 1.10 | Multimodal Analysis Pattern | Empfohlen | Hoch | 🟡 |
-| 1.11 | Document Comparison Pattern | Optional | Niedrig | 🟢 |
-| 1.12 | Validation & Plausibility Pattern | Optional | Niedrig | 🟢 |
-| 1.13 | Ranking & Recommendation Pattern | Empfohlen | Niedrig | 🟡 |
-| 1.14 | Translation & Simplification Pattern | Empfohlen | Niedrig | 🟢 |
+| 1.8 | Process Automation Pattern | Optional | Niedrig | 🟢 |
+| 1.9 | Multimodal Analysis Pattern | Empfohlen | Hoch | 🟡 |
+| 1.10 | Document Comparison Pattern | Optional | Niedrig | 🟢 |
+| 1.11 | Translation & Simplification Pattern | Empfohlen | Niedrig | 🟢 |
 
 ### KI & LLM-Muster (Sektion 2)
 
@@ -7885,7 +7283,7 @@ async def get_system_prompt(task_type: str) -> str:
 | 2.2 | Evidence + Source Pattern | Niedrig | Hoch | 🟢 ⚠️ |
 | 2.3 | Recall-First Screening Pattern | Niedrig | Hoch | 🟢 |
 | 2.4 | Hypothetical Questions (HyDE) Pattern | Mittel | Hoch | 🟡 |
-| 2.5 | Closed Taxonomy Pattern | Niedrig | Mittel | 🟢 |
+| 2.5 | Closed Taxonomy Pattern *(inkl. Variante: Document-Context-Boost)* | Niedrig | Mittel | 🟢 |
 | 2.6 | Multi-Stage KI-Pipeline Pattern | Hoch | Hoch | 🔴 |
 
 ### Datenverarbeitungs-Muster (Sektion 3)
@@ -7901,7 +7299,7 @@ async def get_system_prompt(task_type: str) -> str:
 | # | Muster | Aufwand | Impact | Niveau |
 |---|---|---|---|---|
 | 4.1 | Prompt Injection Defense Pattern | Mittel | Hoch | 🟡 ⚠️ |
-| 4.1b | Output Guardrails | Mittel | Hoch | 🟡 ⚠️ |
+| 4.1b | Output Guardrails Pattern | Mittel | Hoch | 🟡 ⚠️ |
 | 4.2 | PII-Redaktion vor dem LLM-Call | Mittel | Hoch | 🟡 ⚠️ |
 
 ### Concurrency-Muster (Sektion 5)
@@ -7909,8 +7307,7 @@ async def get_system_prompt(task_type: str) -> str:
 | # | Muster | Aufwand | Impact | Niveau |
 |---|---|---|---|---|
 | 5.1 | Sliding Window Executor Pattern | Niedrig | Hoch | 🟡 ⚠️ |
-| 5.2 | Thread-Safe Rate Limiter Pattern | Niedrig | Mittel | 🟡 |
-| 5.3 | Per-Model Throttling Pattern | Niedrig | Mittel | 🟢 |
+| 5.2 | Thread-Safe Rate Limiter Pattern *(inkl. Variante: Per-Model Throttling)* | Niedrig | Mittel | 🟡 |
 
 ### RAG-Muster (Sektion 6)
 
@@ -7924,123 +7321,101 @@ async def get_system_prompt(task_type: str) -> str:
 | # | Muster | Aufwand | Impact | Niveau |
 |---|---|---|---|---|
 | 7.1 | Durable Workflow Pattern | Hoch | Hoch | 🔴 ⚠️ |
-| 7.2 | LLM Gateway Pattern | Niedrig | Hoch | 🟢 ⚠️ |
+| 7.2 | LLM Gateway Pattern *(inkl. Variante: Capability-aware Routing)* | Niedrig | Hoch | 🟢 ⚠️ |
 
-### Infrastruktur & Deployment (Sektion 8)
-
-| # | Muster | Aufwand | Impact | Niveau |
-|---|---|---|---|---|
-| 8.1 | Two-Layer Compose Pattern | Niedrig | Mittel | 🟢 |
-| 8.2 | Secrets Management Pattern | Niedrig | Hoch | 🟢 ⚠️ |
-
-### Observability (Sektion 9)
+### Observability (Sektion 8)
 
 | # | Muster | Aufwand | Impact | Niveau |
 |---|---|---|---|---|
-| 9.1 | Full Observability Stack Pattern (OTel) | Mittel | Hoch | 🟡 ⚠️ |
+| 8.1 | Full Observability Stack Pattern (OTel) | Mittel | Hoch | 🟡 ⚠️ |
+| 8.2 | LLM Metrics Pattern (Prometheus) | Niedrig | Hoch | 🟡 ⚠️ |
 
-### Code-Organisation (Sektion 10)
-
-| # | Muster | Aufwand | Impact | Niveau |
-|---|---|---|---|---|
-| 10.1 | Monorepo Workspace Pattern (uv) | Niedrig | Mittel | 🟢 |
-| 10.2 | Living Service README Pattern | Niedrig | Mittel | 🟢 |
-
-### Prompt Engineering (Sektion 11)
+### Prompt Engineering (Sektion 9)
 
 | # | Muster | Aufwand | Impact | Niveau |
 |---|---|---|---|---|
-| 11.1 | Positive + Negative Examples Pattern | Niedrig | Hoch | 🟢 |
-| 11.2 | Structured Output Constraints Pattern | Niedrig | Hoch | 🟢 |
-| 11.3 | Domain Context Pattern | Niedrig | Mittel | 🟢 |
-| 11.4 | Edge Case Constraints Pattern | Niedrig | Mittel | 🟡 |
-| 11.5 | Batch Count Control Pattern | Niedrig | Mittel | 🔴 |
-| 11.6 | Prefill-Muster | Niedrig | Niedrig | 🟢 |
+| 9.1 | Positive + Negative Examples Pattern | Niedrig | Hoch | 🟢 |
+| 9.2 | Structured Output Constraints Pattern | Niedrig | Hoch | 🟢 |
+| 9.3 | Prompt-Context-Engineering Pattern | Niedrig | Mittel | 🟢 |
+| 9.4 | Batch Count Control Pattern | Niedrig | Mittel | 🔴 |
+| 9.5 | Prefill Pattern (Forced Completion Start) | Niedrig | Niedrig | 🟢 |
 
-### Evals & LLM-Testing (Sektion 12)
-
-| # | Muster | Aufwand | Impact | Niveau |
-|---|---|---|---|---|
-| 12.1 | LLM-as-Judge Pattern | Mittel | Hoch | 🟡 |
-| 12.2 | Golden Dataset & Regression Pattern | Mittel | Hoch | 🟢 ⚠️ |
-| 12.3 | Behavioral Testing Pattern | Mittel | Mittel | 🟡 |
-| 12.4 | Automated Eval Pipeline Pattern | Hoch | Hoch | 🔴 |
-
-### Caching (Sektion 13)
+### Evals & LLM-Testing (Sektion 10)
 
 | # | Muster | Aufwand | Impact | Niveau |
 |---|---|---|---|---|
-| 13.1 | Exact Hash Cache Pattern | Niedrig | Hoch | 🟢 ⚠️ |
-| 13.2 | Semantic Cache Pattern | Mittel | Hoch | 🟡 |
-| 13.3 | Embedding Cache Pattern | Niedrig | Mittel | 🟢 |
-| 13.4 | Cache Invalidation Pattern | Mittel | Mittel | 🔴 |
-| 13.5 | Server-seitiges Prompt-Caching | Niedrig | Hoch | 🟢 |
+| 10.1 | LLM-as-Judge Pattern | Mittel | Hoch | 🟡 |
+| 10.2 | Golden Dataset & Regression Pattern *(inkl. Variante: CI-Integration)* | Mittel | Hoch | 🟢 ⚠️ |
+| 10.3 | Behavioral Testing Pattern | Mittel | Mittel | 🟡 |
 
-### Structured Generation (Sektion 14)
+### Caching (Sektion 11)
 
 | # | Muster | Aufwand | Impact | Niveau |
 |---|---|---|---|---|
-| 14.1 | Tool Use / Function Calling Pattern | Niedrig | Hoch | 🟢 |
-| 14.2 | Schema-First Generation Pattern (Instructor) | Niedrig | Hoch | 🟢 ⚠️ |
-| 14.3 | Schema Design Pattern | Niedrig | Hoch | 🟡 |
-| 14.4 | Streaming Structured Generation Pattern | Mittel | Mittel | 🔴 |
+| 11.1 | Exact Hash Cache Pattern *(inkl. Varianten: Embedding Cache, Chunk-Cache, Cache Invalidation)* | Niedrig | Hoch | 🟢 ⚠️ |
+| 11.2 | Semantic Cache Pattern | Mittel | Hoch | 🟡 |
+| 11.3 | Server-seitiges Prompt-Caching | Niedrig | Hoch | 🟢 |
 
-### Agent-Patterns (Sektion 15)
-
-| # | Muster | Aufwand | Impact | Niveau |
-|---|---|---|---|---|
-| 15.1 | ReAct Loop Pattern | Mittel | Hoch | 🟡 |
-| 15.2 | Tool Registry Pattern | Mittel | Mittel | 🟡 |
-| 15.3 | Human-in-the-Loop Checkpoint Pattern | Niedrig | Hoch | 🟡 ⚠️ |
-| 15.4 | Agent Memory Pattern (3 Ebenen) | Hoch | Mittel | 🔴 |
-| 15.5 | Agent Evaluation Pattern | Mittel | Mittel | 🟡 |
-| 15.6 | Multi-Turn Memory Management | Mittel | Mittel | 🟡 |
-
-### Erweiterte RAG-Muster (Sektion 16)
+### Structured Generation (Sektion 12)
 
 | # | Muster | Aufwand | Impact | Niveau |
 |---|---|---|---|---|
-| 16.1 | Hybrid-RAG mit Reciprocal Rank Fusion | Mittel | Hoch | 🔴 |
-| 16.2 | Adaptive Query Boosting Pattern | Niedrig | Hoch | 🟡 |
-| 16.3 | LLM Query Expansion Pattern | Mittel | Hoch | 🟡 |
-| 16.4 | Model Priority Chain Pattern | Niedrig | Hoch | 🟡 |
-| 16.5 | Token Budget Management Pattern | Niedrig | Hoch | 🟡 |
-| 16.6 | Versioned Prompt Management Pattern | Mittel | Hoch | 🔴 |
-| 16.7 | Model Capability Flags Pattern | Niedrig | Mittel | 🟡 |
-| 16.8 | Cross-Encoder Reranking Pattern | Mittel | Hoch | 🔴 |
-| 16.9 | HNSW / ANN Index Tuning Pattern | Mittel | Hoch | 🔴 |
+| 12.1 | Tool Use / Function Calling Pattern | Niedrig | Hoch | 🟢 |
+| 12.2 | Schema-First Generation Pattern (Instructor) *(inkl. Variante: Schema-Design-Richtlinien)* | Niedrig | Hoch | 🟢 ⚠️ |
+| 12.3 | Streaming Structured Generation Pattern | Mittel | Mittel | 🔴 |
 
-### LLM-Robustheit & Qualitätssicherung (Sektion 17)
+### Agent-Patterns (Sektion 13)
 
 | # | Muster | Aufwand | Impact | Niveau |
 |---|---|---|---|---|
-| 17.1 | LLM Response Validator + Auto-Repair | Mittel | Hoch | 🟡 ⚠️ |
-| 17.2 | Validation Error Feedback Loop | Niedrig | Hoch | 🟡 |
-| 17.3 | Multi-Dimensional Confidence Scorer | Mittel | Hoch | 🔴 |
-| 17.4 | Semantic Deduplication Pattern | Mittel | Mittel | 🔴 |
-| 17.5 | Circuit Breaker Pattern | Mittel | Hoch | 🟡 ⚠️ |
-| 17.6 | Fallback Hierarchy Pattern | Mittel | Hoch | 🟡 |
-| 17.7 | Fail-Fast Policy Pattern | Niedrig | Hoch | 🟢 |
-| 17.8 | LLM Metrics Pattern (Prometheus) | Niedrig | Hoch | 🟡 ⚠️ |
-| 17.9 | Document-Context Classification Pattern | Mittel | Mittel | 🟡 |
-| 17.10 | File-Based Chunk Cache Pattern | Niedrig | Mittel | 🟢 |
+| 13.1 | ReAct Loop Pattern | Mittel | Hoch | 🟡 |
+| 13.2 | Tool Registry Pattern | Mittel | Mittel | 🟡 |
+| 13.3 | Human-in-the-Loop Checkpoint Pattern | Niedrig | Hoch | 🟡 ⚠️ |
+| 13.4 | Agent Memory Pattern (3 Ebenen) | Hoch | Mittel | 🔴 |
+| 13.5 | Agent Evaluation Pattern | Mittel | Mittel | 🟡 |
+| 13.6 | Multi-Turn Memory Management Pattern | Mittel | Mittel | 🟡 |
 
-### LLM-Kosten-Management (Sektion 18)
+### Erweiterte RAG-Muster (Sektion 14)
 
 | # | Muster | Aufwand | Impact | Niveau |
 |---|---|---|---|---|
-| 18.1 | LLM-Cost-Tracking Pattern | Niedrig | Hoch | 🟢 ⚠️ |
-| 18.2 | Model Routing nach Kosten | Niedrig | Hoch | 🟢 |
-| 18.3 | Per-User Budget Limits | Mittel | Hoch | 🟡 |
+| 14.1 | Hybrid-RAG mit Reciprocal Rank Fusion | Mittel | Hoch | 🔴 |
+| 14.2 | Adaptive Query Boosting Pattern | Niedrig | Hoch | 🟡 |
+| 14.3 | LLM Query Expansion Pattern | Mittel | Hoch | 🟡 |
+| 14.4 | Model Priority Chain Pattern *(inkl. Variante: Kosten-basiertes Routing)* | Niedrig | Hoch | 🟡 |
+| 14.5 | Token Budget Management Pattern | Niedrig | Hoch | 🟡 |
+| 14.6 | Versioned Prompt Management Pattern | Mittel | Hoch | 🔴 |
+| 14.7 | Cross-Encoder Reranking Pattern | Mittel | Hoch | 🔴 |
+| 14.8 | HNSW / ANN Index Tuning Pattern | Mittel | Hoch | 🔴 |
 
-### Multi-Tenancy & Mandantentrennung (Sektion 19)
+### LLM-Robustheit & Qualitätssicherung (Sektion 15)
 
 | # | Muster | Aufwand | Impact | Niveau |
 |---|---|---|---|---|
-| 19.1 | Tenant-Isolierung in LLM-Pipelines | Mittel | Hoch | 🟡 ⚠️ |
-| 19.2 | Tenant-spezifisches Prompt-Management | Mittel | Mittel | 🟡 |
+| 15.1 | LLM Response Validator + Auto-Repair *(inkl. Variante: Multi-dimensionales Confidence Scoring)* | Mittel | Hoch | 🟡 ⚠️ |
+| 15.2 | Validation Feedback Loop Pattern | Niedrig | Hoch | 🟡 |
+| 15.3 | Semantic Deduplication Pattern | Mittel | Mittel | 🔴 |
+| 15.4 | Circuit Breaker Pattern | Mittel | Hoch | 🟡 ⚠️ |
+| 15.5 | Fallback Hierarchy Pattern | Mittel | Hoch | 🟡 |
+| 15.6 | Fail-Fast Policy Pattern | Niedrig | Hoch | 🟢 |
+
+### LLM-Kosten-Management (Sektion 16)
+
+| # | Muster | Aufwand | Impact | Niveau |
+|---|---|---|---|---|
+| 16.1 | LLM-Cost-Tracking Pattern | Niedrig | Hoch | 🟢 ⚠️ |
+| 16.2 | Per-User Budget Limits | Mittel | Hoch | 🟡 |
+
+### Multi-Tenancy & Mandantentrennung (Sektion 17)
+
+| # | Muster | Aufwand | Impact | Niveau |
+|---|---|---|---|---|
+| 17.1 | Tenant-Isolierung in LLM-Pipelines | Mittel | Hoch | 🟡 ⚠️ |
+| 17.2 | Tenant-spezifisches Prompt-Management | Mittel | Mittel | 🟡 |
 
 > ⚠️ = Pflicht-Muster — vor erstem Produktions-Deployment implementieren
+>
+> *Varianten* sind zusätzliche Unterabschnitte innerhalb eines Musters, die eine spezifische Anpassung oder einen verwandten Anwendungsfall beschreiben.
 
 
 ---
@@ -8055,10 +7430,10 @@ async def get_system_prompt(task_type: str) -> str:
 → Fachliche Dokumente verwenden andere Begriffe als Nutzer-Queries. HyDE-Fragen (→ 2.4) überbrücken diese Lücke direkt — besonders bei juristischen, technischen oder medizinischen Inhalten ist der Recall-Gewinn erheblich.
 
 **❌ Den Reranker direkt auf allen Dokumenten laufen lassen**
-→ Cross-Encoder skaliert O(n) — bei 100.000 Chunks ist das nicht akzeptabel. Stufe 1 (Bi-Encoder Top-50) ist immer der notwendige Vorfilter (→ 16.8).
+→ Cross-Encoder skaliert O(n) — bei 100.000 Chunks ist das nicht akzeptabel. Stufe 1 (Bi-Encoder Top-50) ist immer der notwendige Vorfilter (→ 14.7).
 
 **❌ `ef_construction` nach dem Index-Build erhöhen wollen**
-→ Das hat keine Wirkung — der Index muss neu gebaut werden. `ef` (Suchzeit-Parameter) kann jederzeit geändert werden. Beides zu verwechseln kostet Zeit (→ 16.9).
+→ Das hat keine Wirkung — der Index muss neu gebaut werden. `ef` (Suchzeit-Parameter) kann jederzeit geändert werden. Beides zu verwechseln kostet Zeit (→ 14.8).
 
 **❌ Die Reduce-Phase mit zu vielen Map-Ergebnissen überlasten**
 → Faustregel: max. 50 Chunks pro Reduce-Call. Bei größeren Dokumenten Reduce in Stufen ausführen — hierarchisches Map-Reduce (→ 2.1).
@@ -8074,7 +7449,7 @@ async def get_system_prompt(task_type: str) -> str:
 → PII-Redaktion (→ 4.2) ist eine konkrete, implementierbare technische Maßnahme — kein vollständiger DSGVO-Compliance-Ersatz, aber ein unverzichtbarer Baustein für Systeme die mit personenbezogenen Dokumenten arbeiten.
 
 **❌ Tenant-Isolierung nur auf Anwendungsebene implementieren**
-→ `WHERE tenant_id = ?` reicht nicht. Semantic-Search-Queries ohne Vektordatenbank-Filter können Chunks anderer Tenants zurückliefern — ein stilles Datenleck das in Logs nicht sichtbar ist (→ 19.1).
+→ `WHERE tenant_id = ?` reicht nicht. Semantic-Search-Queries ohne Vektordatenbank-Filter können Chunks anderer Tenants zurückliefern — ein stilles Datenleck das in Logs nicht sichtbar ist (→ 17.1).
 
 ---
 
@@ -8084,10 +7459,10 @@ async def get_system_prompt(task_type: str) -> str:
 → `from anthropic import Anthropic` überall verstreut bedeutet: Bei einem Provider-Wechsel oder API-Key-Rotation müssen Dutzende Stellen angefasst werden. Ein zentraler Gateway-Endpunkt kostet einen Tag und spart Wochen (→ 7.2).
 
 **❌ LLM-Calls ohne Circuit Breaker in Request-Handler einbauen**
-→ Bei einem API-Ausfall hängen alle laufenden Requests bis zum Timeout — das System wird unresponsiv. Circuit Breaker und Exponential Backoff gehören in jede LLM-Integration die in Produktion geht (→ 17.5).
+→ Bei einem API-Ausfall hängen alle laufenden Requests bis zum Timeout — das System wird unresponsiv. Circuit Breaker und Exponential Backoff gehören in jede LLM-Integration die in Produktion geht (→ 15.4).
 
 **❌ Stille Fallbacks verwenden: `except: return default_value`**
-→ In Entwicklung sieht alles gut aus, in Produktion liefert das System leise falsche Ergebnisse ohne jeden Hinweis. Fail-Fast macht Fehler sofort sichtbar — das ist eine Stärke, kein Mangel (→ 17.7).
+→ In Entwicklung sieht alles gut aus, in Produktion liefert das System leise falsche Ergebnisse ohne jeden Hinweis. Fail-Fast macht Fehler sofort sichtbar — das ist eine Stärke, kein Mangel (→ 15.6).
 
 **❌ Lange Pipelines ohne Durable-Execution ausführen**
 → Bei Server-Restart, Netzwerkfehler oder Timeout geht der gesamte Fortschritt verloren. Workflow-Engines wie Temporal speichern jeden Schritt persistent — ein Crash-Recovery ohne Datenverlust (→ 7.1).
@@ -8097,10 +7472,10 @@ async def get_system_prompt(task_type: str) -> str:
 ### Kategorie 4: Structured Generation & Validierung
 
 **❌ Manuell `json.loads(response.text)` verwenden**
-→ In Produktion bricht das regelmäßig — durch Markdown-Wrapper, fehlende Felder oder falsche Typen. `instructor` oder Tool Use sind die robuste Alternative (→ 14.2).
+→ In Produktion bricht das regelmäßig — durch Markdown-Wrapper, fehlende Felder oder falsche Typen. `instructor` oder Tool Use sind die robuste Alternative (→ 12.2).
 
 **❌ Pydantic direkt auf rohen LLM-Output anwenden ohne Vorverarbeitung**
-→ LLMs liefern konsistent bestimmte Fehler (fehlende Felder, falsche Listenformate, leere Strings statt null), die ein Validator zuverlässig repariert bevor die Schema-Validierung sie als harten Fehler behandelt (→ 17.1).
+→ LLMs liefern konsistent bestimmte Fehler (fehlende Felder, falsche Listenformate, leere Strings statt null), die ein Validator zuverlässig repariert bevor die Schema-Validierung sie als harten Fehler behandelt (→ 15.1).
 
 ---
 
@@ -8110,25 +7485,130 @@ async def get_system_prompt(task_type: str) -> str:
 → Bei 500+ LLM-Calls führt das sofort zu Rate-Limit-Errors und 429-Responses. Der Sliding-Window-Executor hält immer exakt N Tasks in-flight — ohne Batch-Pausen (→ 5.1).
 
 **❌ Den Cache ohne TTL betreiben oder bei Prompt-Änderungen nicht invalidieren**
-→ Das führt zu alten Antworten mit neuem Prompt-Verhalten. Immer die Prompt-Version in den Cache-Key einbauen (→ 13.4).
+→ Das führt zu alten Antworten mit neuem Prompt-Verhalten. Immer die Prompt-Version in den Cache-Key einbauen (→ 11.1 (Variante)).
 
 ---
 
 ### Kategorie 6: Evals & Observability
 
 **❌ Prompts ohne Baseline-Vergleich in Produktion deployen**
-→ Was sich für den Entwickler besser liest, kann auf Edge Cases schlechter performen. Bereits 10–15 Golden Cases decken die häufigsten Regressionen ab und kosten weniger als 1 Stunde Aufwand (→ 12.2).
+→ Was sich für den Entwickler besser liest, kann auf Edge Cases schlechter performen. Bereits 10–15 Golden Cases decken die häufigsten Regressionen ab und kosten weniger als 1 Stunde Aufwand (→ 10.2).
 
-**❌ Observability als "nice to have" behandeln**
-→ LLM-Systeme ohne strukturierte Logs und Traces sind kaum debuggbar — Latenzprobleme, Rate-Limit-Hits und Halluzinationen sind ohne Metrics unsichtbar. OTel von Tag 1 an einbauen kostet einen halben Tag; nachträglich sind es Wochen (→ 9.1).
+**❌ Observability als „nice to have" behandeln**
+→ LLM-Systeme ohne strukturierte Logs und Traces sind kaum debuggbar — Latenzprobleme, Rate-Limit-Hits und Halluzinationen sind ohne Metrics unsichtbar. OTel von Tag 1 an einbauen kostet einen halben Tag; nachträglich sind es Wochen (→ 8.1).
 
 ---
 
 ### Kategorie 7: Agent-Design
 
 **❌ Einen Agent bauen, weil es modern klingt**
-→ Obwohl ein deterministischer Workflow mit 4–5 Schritten ausreichend wäre. Agents sind schwerer zu testen, debuggen und auditieren. Die Entscheidungsregel in Sektion 15 ist ernst gemeint: erst ab ≥ 5 variablen Verzweigungen lohnt sich ein Agent (→ 15.1).
+→ Obwohl ein deterministischer Workflow mit 4–5 Schritten ausreichend wäre. Agents sind schwerer zu testen, debuggen und auditieren. Die Entscheidungsregel in Sektion 13 ist ernst gemeint: erst ab ≥ 5 variablen Verzweigungen lohnt sich ein Agent (→ 13.1).
 
+
+## Anhang A: Patterns als Steuerungssprache für Coding-Agents
+
+Der stärkste Hebel, den die Einleitung dieses Buches verspricht, ist dieser: **Patterns sind die Sprache, in der wir mit KI-Agenten über Architektur verhandeln.** Dieser Anhang zeigt, wie sich das konkret im Alltag eines Entwicklers niederschlägt, der Claude Code, Cursor, GitHub Copilot Agent oder vergleichbare Werkzeuge einsetzt.
+
+### Die Kernregel
+
+**Je präziser die Pattern-Referenz im Prompt, desto vorhersagbarer der generierte Code.** Ein Coding-Agent interpoliert aus dem, was er im Prompt sieht — vage Anweisungen produzieren vague Architektur. Die folgenden drei Beispiele zeigen denselben Auftrag in aufsteigender Präzision:
+
+**Stufe 1 — vage Anweisung:**
+> „Baue mir einen Service, der Bestellungen verarbeitet."
+
+Ergebnis: Der Agent entscheidet selbst — oft ein einzelner Endpunkt mit direktem DB-Zugriff, ohne Transaktionssicherheit, ohne Retry-Logik.
+
+**Stufe 2 — mit Pattern-Vokabular:**
+> „Baue einen Service für Bestellverarbeitung nach dem Saga-Pattern. Bei Fehlern sollen kompensierende Transaktionen die vorherigen Schritte rückgängig machen."
+
+Ergebnis: Deutlich strukturierter, aber immer noch offen bei Infrastrukturentscheidungen (Event-Publikation, Idempotenz, State-Management).
+
+**Stufe 3 — Muster-orchestriert:**
+> „Implementiere einen Order-Processing-Service nach dem Saga-Pattern mit kompensierenden Transaktionen. Verwende das Outbox-Pattern für die Event-Publikation (transaktionale Atomarität mit der DB-Schreibung), das Circuit-Breaker-Pattern (→ 15.4 in unserem Pattern-Katalog) für externe Payment-Calls und idempotente Event-Handler auf der Consumer-Seite.„
+
+Ergebnis: Der Agent produziert eine Architektur mit explizit nachvollziehbaren Bausteinen — jeder davon dokumentierbar, testbar, auditierbar.
+
+### Pattern-Prompts aus diesem Buch
+
+Die Muster dieses Buches eignen sich direkt als Prompt-Bausteine. Drei typische Situationen:
+
+**Situation: RAG-System aufbauen.**
+> „Implementiere eine RAG-Pipeline. Folge den Pattern-Referenzen:
+> - Indexierung: Failure-Isolated Indexing (6.1) + Rich Chunk Metadata (3.1)
+> - Retrieval: Hybrid-RAG mit Reciprocal Rank Fusion (16.1), gefolgt von Cross-Encoder Reranking (16.8) für die Top-10
+> - LLM-Antwort: mit Evidence + Source Pattern (2.2) für Auditierbarkeit
+> - Robustheit: LLM Response Validator mit Auto-Repair (17.1), Circuit Breaker (17.5) für den LLM-Call„
+
+**Situation: Neuen Agent bauen.**
+> „Bevor du Code schreibst: Prüfe die Agent-vs-Workflow-Entscheidungsregel (Sektion 13). Wenn die Aufgabe ≥ 5 variable Verzweigungen hat, dann: ReAct-Loop (15.1) mit Tool Registry (15.2) und Pflicht-HitL-Checkpoints (15.3) bei jedem kritischen Schritt. Max-Steps = 10. Tool-Aufrufe über strukturierte Schemata validieren (14.1).„
+
+**Situation: Bestehenden LLM-Code review lassen.**
+> „Prüfe die Datei `order_service.py` gegen die Anti-Patterns aus unserem Katalog. Fokus: `asyncio.gather()` direkt auf Listen (→ 5.1), Silent Fallbacks `except: return default` (→ 15.6), fehlende Observability-Hooks (→ 8.1), fehlende Circuit Breaker bei LLM-Calls (→ 15.4)."
+
+### Minimal viable Pattern-Prompt
+
+Für den täglichen Einsatz reicht ein kurzes Template:
+
+```text
+Aufgabe: <Was soll entstehen>
+Architekturvorgaben:
+- Pattern A (→ Referenz) zum Zweck X
+- Pattern B (→ Referenz) zum Zweck Y
+Randbedingungen:
+- Python 3.11, async-first
+- Tests gegen Golden Dataset (→ 10.2)
+- Fail-Fast, keine Silent Defaults (→ 15.6)
+Lieferung:
+- Implementierung + Docstring mit Pattern-Referenzen
+- Kurzer Abschnitt "Welche Trade-offs wurden akzeptiert?"
+```
+
+Die letzte Zeile ist wichtig: Sie erzwingt, dass der Agent seine eigenen Kompromisse explizit macht — das ist das direkte Gegenmittel gegen unsichtbare *Technische Schulden 2.0*. Was dokumentiert ist, ist auch tilgbar.
+
+### Warum funktioniert das?
+
+Coding-Agents haben die Pattern-Literatur in ihrem Trainingskorpus — GoF, POSA, Enterprise Integration Patterns, aber auch neuere Ressourcen zu RAG, ReAct, Agent-Design. Eine präzise Referenz aktiviert die passende Wissenskontur im Modell. Ohne Referenz muss das Modell raten, welche Abstraktionsebene gewünscht ist.
+
+Für den Entwickler bedeutet das: Das Erlernen eines Pattern-Katalogs ist keine theoretische Übung, sondern eine unmittelbar produktive Investition. Jedes sauber benannte Pattern spart in der Zusammenarbeit mit Coding-Agents Minuten bis Stunden pro Task.
+
+---
+
+## Anhang B: Bibliografie & Weiterführendes
+
+Die Muster in diesem Buch stehen auf den Schultern einer umfangreichen Literatur. Diese Auswahl enthält die wichtigsten Primärquellen und Standardreferenzen.
+
+### Klassische Design-Pattern-Literatur
+
+- **Gamma, E., Helm, R., Johnson, R., Vlissides, J.** (1994). *Design Patterns: Elements of Reusable Object-Oriented Software.* Addison-Wesley. — Das Referenzwerk, das die Pattern-Sprache in die Softwareentwicklung einführte.
+- **Hohpe, G., Woolf, B.** (2003). *Enterprise Integration Patterns.* Addison-Wesley. — Grundlage für Muster wie Saga, Outbox, Message-Routing, die in agentischen Systemen ebenfalls greifen.
+- **Fowler, M.** (2002). *Patterns of Enterprise Application Architecture.* Addison-Wesley.
+
+### LLM- und RAG-Primärquellen
+
+- **Lewis, P. et al.** (2020). *Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.* NeurIPS. — Original-Paper zu RAG.
+- **Yao, S. et al.** (2023). *ReAct: Synergizing Reasoning and Acting in Language Models.* ICLR. — Grundlage für Sektion 13.1.
+- **Gao, L. et al.** (2023). *Precise Zero-Shot Dense Retrieval without Relevance Labels.* ACL. — HyDE-Pattern (→ 2.4, 16.3).
+- **Cormack, G. V., Clarke, C. L. A., Büttcher, S.** (2009). *Reciprocal Rank Fusion Outperforms Condorcet and Individual Rank Learning Methods.* SIGIR. — Grundlage für Sektion 14.1.
+- **Shinn, N. et al.** (2023). *Reflexion: Language Agents with Verbal Reinforcement Learning.* NeurIPS.
+
+### Betrieb und Qualitätssicherung
+
+- **OpenTelemetry-Dokumentation.** opentelemetry.io — Grundlage für Sektion 8.1.
+- **Anthropic: Claude Prompt Engineering Guide.** docs.anthropic.com — Insbesondere zu Prefill, Tool Use und Prompt-Caching.
+- **OpenAI: Structured Outputs Guide.** platform.openai.com/docs — Grundlage für Sektion 12.
+- **Liu, J. et al.** *Instructor: Pythonic Structured Outputs for LLMs.* github.com/instructor-ai/instructor — Bibliothek hinter Sektion 12.2.
+
+### Branchenreports und Diskussionsgrundlagen
+
+- **Thoughtworks Technology Radar.** thoughtworks.com/radar — Halbjährliche Einschätzungen zu KI-Engineering-Praktiken; Prägung des Begriffs *cognitive debt*.
+- **Anthropic: Building Effective Agents.** anthropic.com/engineering — Grundlegende Unterscheidung zwischen Workflow und Agent (→ Sektion 13 Entscheidungsregel).
+
+### Weiterführende Perspektiven
+
+- **Karpathy, A.** *Software 2.0 / 3.0 Essays.* — Einordnung der Rolle von LLMs in der Softwarearchitektur.
+- **Fowler, M.** *Expanding AI Capability Patterns.* martinfowler.com — Aktuelle Pattern-Diskussion für LLM-intensive Systeme.
+
+---
 
 ## Hinweise zur Diagramm-Darstellung
 
