@@ -54,7 +54,7 @@ Das Buch hat drei Einstiegsebenen, die aufeinander aufbauen. Neu-Leser folgen id
 
 1. **Einleitung → Quick-Start:** Acht Fundament-Muster, die jedes KI-Projekt ab Tag 1 braucht. Wer diese kennt, hat bereits 80 % der häufigsten Produktionsprobleme adressiert.
 2. **Business-Muster (Sektion 1):** Welche KI-Fähigkeit löst welchen Use-Case? Diese Sicht steht bewusst vor den technischen Sektionen, weil die Fähigkeit die Implementierung vorgibt — nicht umgekehrt.
-3. **Technische Sektionen (2–19):** Tiefe Implementierungen. Zum systematischen Durcharbeiten oder als Referenz.
+3. **Technische Sektionen (2–17):** Tiefe Implementierungen. Zum systematischen Durcharbeiten oder als Referenz.
 
 Die beiden Navigationshilfen **„Einstiegsleitfaden nach Rolle"** und **„Schnelldiagnose — Welches Muster löst mein Problem?"** unten sind **Referenz-Werkzeuge**, keine Einstiegspunkte: Sie helfen beim Rückgriff auf spezifische Muster, wenn ein konkretes Problem ansteht. Die **Master-Referenztabelle** am Ende des Buches listet alle 82 Muster mit Aufwand, Impact und Niveau-Bewertung — ideal für die Projektplanung.
 
@@ -292,7 +292,7 @@ In den letzten Jahren hat er sich intensiv mit generativer KI und dem Aufbau pro
 
 Business-Muster beschreiben KI-Fähigkeiten auf Anwendungsebene: *Was kann KI für diesen Use-Case leisten?* Sie sind orthogonal zu den technischen Implementierungsmustern (Sektionen 2–17) und dienen als Entscheidungsschicht — welche KI-Fähigkeit für welchen Anwendungsfall, mit welchen Governance-Anforderungen.
 
-> **Hinweis:** Business-Muster enthalten Governance-Profile und Entscheidungsregeln statt Implementierungscode — für die konkrete Umsetzung verweist jedes Muster auf die technischen Sektionen (2–19).
+> **Hinweis:** Business-Muster enthalten Governance-Profile und Entscheidungsregeln statt Implementierungscode — für die konkrete Umsetzung verweist jedes Muster auf die technischen Sektionen (2–17).
 
 Jedes Muster enthält die **6 Bewertungs-Attribute** (→ [Muster-Bewertungs-Framework](#muster-bewertungs-framework-6-attribute)) sowie Verweise auf relevante technische Implementierungsmuster.
 ### Alle 14 Business-Muster im Überblick
@@ -1466,6 +1466,169 @@ async def run_pipeline(claim: Claim, chunks: list[Chunk]) -> PipelineResult:
 
 
 ---
+
+### 2.7 Active Learning Classifier Pattern
+
+> **Kategorie:** 💼 K · Business-Muster | 🔀 D · LLM-Integration & Routing | 🔄 Ja · 🎯 Hybrid · 🔍 XAI Mittel · 👤 HitL Empfohlen · 🔒 Mittel · 📊 Gering
+
+> **Intent:** Kombiniert Embedding-Similarität mit Konfidenz-basierter HitL-Eskalation — das System klassifiziert selbst was es sicher kann, delegiert unsichere Fälle an den Menschen und lernt kontinuierlich aus den Annotationen.
+
+
+#### Problem
+
+
+Ein LLM-Klassifikator braucht viele Trainingsdaten von Beginn an und verbessert sich nicht automatisch. Edge Cases und neue Kategorien erfordern manuelle Pflege. Gleichzeitig ist eine rein manuelle Klassifikation bei hohem Volumen nicht skalierbar.
+
+
+#### Lösung
+
+
+**Warum Embedding-Similarität statt LLM-Klassifikation?** Ein LLM klassifiziert zuverlässig — aber er lernt nicht. Jeder Call ist isoliert, kein Ergebnis verbessert zukünftige Entscheidungen. Ein Embedding-basierter Klassifikator mit Centroid-Vergleich dagegen wächst mit jedem annotierten Beispiel: neue Klassen entstehen durch erste Annotationen, bestehende Klassen schärfen sich durch weitere Beispiele. Der LLM bleibt als Fallback für Grenzfälle erhalten.
+
+**Warum Konfidenz-Schwellwert statt immer HitL?** HitL ist teuer. Der Schwellwert (typisch 0,80–0,92) trennt die sicheren von den unsicheren Fällen. Alles über dem Schwellwert läuft autonom — alles darunter wird eskaliert. Mit wachsender Annotationsdatenbank sinkt die Eskalationsrate organisch.
+
+Das System arbeitet in drei Phasen:
+
+1. **Klassifikation:** Embedding des Eingabeobjekts → Cosine-Similarity zu bekannten Klassen-Centroids → automatische Zuweisung wenn Konfidenz ≥ Schwellwert
+2. **Eskalation:** Bei Konfidenz < Schwellwert → HitL-Queue → Annotation durch Experte
+3. **Lernen:** Annotation wird als neues Trainingsbeispiel gespeichert → Centroid wird aktualisiert
+
+
+#### Struktur
+
+
+```mermaid
+graph LR
+    IN[Eingehendes Objekt] --> EMB[Embedding<br/>Generierung]
+    EMB --> SIM[Cosine-Similarity<br/>zu Klassen-Centroids]
+    SIM --> CONF{Konfidenz<br/>≥ Schwellwert?}
+    CONF -->|Ja| AUTO[Automatische<br/>Klassifikation]
+    CONF -->|Nein| HITL[👤 HitL-<br/>Eskalation]
+    HITL --> ANNOT[Annotation<br/>durch Experte]
+    ANNOT --> STORE[(Embedding-Store<br/>Label + Vektor)]
+    AUTO --> OUT[Klassifiziertes<br/>Ergebnis]
+    STORE -.->|Centroid-Update| SIM
+```
+
+*Diagramm: Active Learning Classifier — Embedding-Generierung → Konfidenz-Check → automatische Klassifikation oder HitL-Eskalation. Annotationen fließen zurück in den Embedding-Store und verbessern zukünftige Klassifikationen.*
+
+
+#### Implementierungshinweise
+
+
+```python
+import numpy as np
+from dataclasses import dataclass, field
+from anthropic import Anthropic
+
+@dataclass
+class ClassificationResult:
+    label: str
+    confidence: float
+    requires_hitl: bool
+
+@dataclass
+class LabelStore:
+    """Speichert Embedding-Beispiele je Klasse."""
+    examples: dict[str, list[np.ndarray]] = field(default_factory=dict)
+
+    def add(self, label: str, embedding: np.ndarray) -> None:
+        self.examples.setdefault(label, []).append(embedding)
+
+    def centroid(self, label: str) -> np.ndarray:
+        return np.mean(self.examples[label], axis=0)
+
+    def nearest(self, embedding: np.ndarray) -> tuple[str, float]:
+        best_label, best_score = "", 0.0
+        for label in self.examples:
+            c = self.centroid(label)
+            score = float(np.dot(embedding, c) /
+                          (np.linalg.norm(embedding) * np.linalg.norm(c)))
+            if score > best_score:
+                best_score, best_label = score, label
+        return best_label, best_score
+
+
+class ActiveLearningClassifier:
+    def __init__(self, threshold: float = 0.85):
+        self.client = Anthropic()
+        self.threshold = threshold
+        self.store = LabelStore()
+
+    def _embed(self, text: str) -> np.ndarray:
+        # Voyage-Embeddings über Anthropic-Client
+        response = self.client.beta.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=10,
+            messages=[{"role": "user", "content": text}],
+        )
+        # Konzept: Embedding-API — in Produktion voyage-3 oder text-embedding-3
+        raise NotImplementedError("Embedding-API einbinden")
+
+    def classify(self, text: str) -> ClassificationResult:
+        emb = self._embed(text)
+
+        if not self.store.examples:
+            return ClassificationResult("UNSICHER", 0.0, True)
+
+        label, confidence = self.store.nearest(emb)
+        requires_hitl = confidence < self.threshold
+
+        return ClassificationResult(
+            label=label if not requires_hitl else "UNSICHER",
+            confidence=confidence,
+            requires_hitl=requires_hitl,
+        )
+
+    def annotate(self, text: str, correct_label: str) -> None:
+        """HitL-Annotation: speichert Beispiel, verbessert Centroid."""
+        emb = self._embed(text)
+        self.store.add(correct_label, emb)
+
+
+# ── Ablauf ────────────────────────────────────────────────────────────────
+clf = ActiveLearningClassifier(threshold=0.85)
+
+# Bootstrapping: erste Annotationen für jede Klasse
+for text, label in [
+    ("Antrag auf Baugenehmigung", "Baurecht"),
+    ("Ummeldung Wohnsitz",        "Einwohnerwesen"),
+    ("Hundesteuer Anmeldung",     "Steuern"),
+]:
+    clf.annotate(text, label)
+
+# Klassifikation
+result = clf.classify("Antrag Zuzug aus dem Ausland")
+if result.requires_hitl:
+    # → in HitL-Queue stellen, Experte annotiert
+    correct_label = "Einwohnerwesen"          # HitL-Entscheidung
+    clf.annotate("Antrag Zuzug aus dem Ausland", correct_label)
+else:
+    print(f"Klasse: {result.label} (Konfidenz: {result.confidence:.2f})")
+```
+
+
+#### Konsequenzen
+
+
+| ✅ Wann geeignet | ⚠️ Trade-offs & Risiken |
+|---|---|
+| Wenn Kategorien stabil aber Volumen hoch — manuelle Klassifikation nicht skalierbar | Bootstrapping-Phase: erste 5–10 Annotationen je Klasse nötig bevor System autonom arbeitet |
+| Wenn Expertenwissen vorhanden aber knapp — HitL nur für echte Grenzfälle | Schwellwert-Tuning kritisch: zu hoch → zu viele Eskalationen, zu niedrig → Fehler häufen sich |
+| Wenn Kategorien sich über Zeit erweitern — neue Klassen entstehen durch erste Annotation | Embedding-Drift: wenn Eingabe-Verteilung sich ändert, können alte Centroids unbrauchbar werden |
+| Wenn Audit-Trail wichtig — jede automatische Entscheidung ist mit Konfidenz dokumentiert | Klassen mit wenigen Beispielen haben instabile Centroids — Mindestgröße ~10 Beispiele empfohlen |
+
+
+#### Verwandte Muster
+
+
+→ [Classification & Routing Pattern](#12-classification-routing-pattern) · [Closed Taxonomy Pattern](#25-closed-taxonomy-pattern) · [Human-in-the-Loop Checkpoint Pattern](#133-human-in-the-loop-checkpoint-pattern) · [Semantic Cache Pattern](#112-semantic-cache-pattern)
+
+**Technische Referenzen:** → Sektion 11.2 (Semantic Cache — gleiches Embedding-Prinzip für Cache-Hits) · Sektion 13.3 (HitL-Checkpoints) · Sektion 14.1 (Hybrid-RAG — kombinierter Embedding-Einsatz)
+
+
+---
+
 
 ## 3. Datenverarbeitungs-Muster
 
@@ -7291,6 +7454,7 @@ async def get_system_prompt(task_type: str) -> str:
 | 2.4 | Hypothetical Questions (HyDE) Pattern | Mittel | Hoch | 🟡 |
 | 2.5 | Closed Taxonomy Pattern *(inkl. Variante: Document-Context-Boost)* | Niedrig | Mittel | 🟢 |
 | 2.6 | Multi-Stage KI-Pipeline Pattern | Hoch | Hoch | 🔴 |
+| 2.7 | Active Learning Classifier Pattern | A · RAG & Retrieval | D · LLM-Integration & Routing | K · Business-Muster | 🟡 | Fortgeschritten |
 
 ### Datenverarbeitungs-Muster (Sektion 3)
 
