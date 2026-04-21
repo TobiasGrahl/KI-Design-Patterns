@@ -1,7 +1,6 @@
-<div align="center">
-  <img src="KI-Design-Patterns-Cover.png"
-       alt="KI-Muster-Bibliothek" width="320"/>
-</div>
+![](KI-Design-Patterns-Cover.png)
+ 
+
 # KI-Muster-Bibliothek
 
 ### Design Patterns für die KI-Softwareentwicklung
@@ -34,18 +33,6 @@ Klassische *technische Schulden* beschreiben suboptimalen Code, der bewusst akze
 
 Design-Patterns sind gegen alle drei Ausprägungen das wirksamste Gegenmittel. Sie geben dem Menschen ein Rahmenwerk, in dem KI-generierter Code bewertbar bleibt; sie geben dem Coding-Agenten präzise Anweisungen, die zu verständlichem Code führen; und sie machen die Kompromisse explizit, die sonst unsichtbar bleiben.
 
----
-
-## Changelog
-
-| Version | Datum | Änderungen |
-|---|---|---|
-| 1.5 | 2026-04 | Konsolidierung von 82 auf 67 Muster: Streichung nicht-LLM-spezifischer Muster (Infrastruktur, Code-Organisation, Forecast, Validation & Plausibility, Ranking & Recommendation); Verschmelzungen als Varianten (Per-Model Throttling, CI-Integration, Embedding-/Chunk-Cache, Capability-aware Routing, Document-Context-Boost, Kosten-basiertes Routing, Cache Invalidation, Schema-Design-Richtlinien, Multi-dimensionales Confidence Scoring, Prompt-Context-Engineering); LLM Metrics in Observability verschoben (neu 8.2); Master-Referenztabelle und Navigations-Hilfen durchgängig neu generiert |
-| 1.4 | 2026-04 | KI-Schulden-Abschnitt definitorisch ausgebaut; Anhang „Patterns als Steuerungssprache für Coding-Agents"; Code-Konventionen und Tech-Stack-Voraussetzungen; Bibliografie; Nummerierungs-Konsolidierung (4.1b Output Guardrails, 11.6 Prefill, 13.5 Prompt-Caching als eigene Muster; doppeltes Tool-Use-Muster entfernt); Business-Muster-Tabellen strukturell korrigiert; Acute-Bugs in 11.1 und 11.2 behoben; Mermaid-Labels auf `<br/>` umgestellt |
-| 1.3 | 2026-04 | Produkt-unabhängige Konzept-Code-Schicht für 7.1, 6.1, 7.2, 3.2, 9.1 (Konzept + Produkt-Mapping-Tabelle); Migrations-Leitfaden ergänzt; Lösung-Abschnitte mit Warum-Erklärungen erweitert; Ghost-Header bereinigt; veraltete 20.3-Referenz entfernt |
-| 1.2 | 2026-04 | Sektionsnummern bereinigt (18=Kosten, 19=Multi-Tenancy); vollständige Master-Referenztabelle (82 Muster — Erweiterung gegenüber v1.0 hauptsächlich durch Sektion 14 „Erweiterte RAG-Muster", Sektion 15 „LLM-Robustheit" und feinere Aufteilung der Sicherheits- und Evals-Muster); Anti-Patterns-Sektion (18 Einträge in 7 Kategorien); Schnelldiagnose-Tabelle erweitert (5 neue Zeilen); fehlende ## Sektions-Header ergänzt; Business-Muster-Intro präzisiert |
-| 1.1 | 2026-04 | Zielgruppen-Sektion, Tech-Stack, Quick-Start, Systemarchitektur-Diagramm, Schwierigkeitsgrade, Anti-Pattern-Callouts, rollenbasierte Navigation; Sektionen 18 (Kosten-Management), 19 (Multi-Tenancy) ergänzt; frühere Sektion 16 (Allgemeine Backend-Muster) entfernt; PII-Redaktion (4.2) ergänzt |
-| 1.0 | 2026-01 | Erstveröffentlichung — 17 Sektionen, 14 Business-Muster, 39+ technische Muster |
 
 ---
 
@@ -73,23 +60,57 @@ Die beiden Navigationshilfen **„Einstiegsleitfaden nach Rolle"** und **„Schn
 
 ---
 
-## Muster-Kategorien
+## Muster-Typen (Querschnitts-Kategorien A–K)
 
-Jedes Muster trägt einen Kategorie-Buchstaben (z. B. *B · Prompt Engineering*). Die vollständige Taxonomie:
+Das Buch ist in **17 Sektionen** gegliedert — das sind die Kapitel, nach denen du navigierst (z. B. Sektion 6: RAG, Sektion 13: Agent-Patterns). Daneben trägt jedes Muster einen **Muster-Typ** (Buchstabe A–K), der seinen technischen Charakter beschreibt — unabhängig davon, in welcher Sektion es steht.
 
-| Code | Kategorie | Kurzbeschreibung |
-|---|---|---|
-| A | RAG & Retrieval | Semantische Suche, Hybrid-Retrieval, Reranking, Index-Tuning |
-| B | Prompt Engineering | Prompt-Konstruktion, Beispiele, Format-Constraints, Prefill |
-| C | LLM-Output-Verarbeitung | Structured Generation, Tool Use, Streaming, Validierung |
-| D | Datenverarbeitung | Chunking, Metadaten, strukturelle Textzerlegung |
-| E | Workflow- & Resilienz-Infrastruktur | Durable Workflows, Gateway, Circuit Breaker, Fallbacks |
-| F | Agent-Patterns | ReAct, Tool Registry, HitL-Checkpoints, Agent-Memory |
-| G | Pipeline- & Workflow-Orchestrierung | Map-Reduce, mehrstufige KI-Pipelines |
-| H | Performance & Caching | Exact/Semantic/Embedding-Cache, Prompt-Caching, Concurrency |
-| I | Observability & Evals | Tracing, Metriken, Golden Datasets, LLM-as-Judge |
-| J | Sicherheit | Prompt Injection Defense, Output Guardrails, PII-Redaktion |
-| K | Business-Muster | Anwendungs-Ebene: welche KI-Fähigkeit für welchen Use-Case |
+Ein Muster in Sektion 14 (Erweiterte RAG-Muster) kann gleichzeitig Typ A (RAG & Retrieval), B (Prompt Engineering) und D (LLM-Integration & Routing) sein — weil es mehrere technische Dimensionen berührt. Die Muster-Typen ermöglichen so eine **Quernavigation**: Wer alle Caching-Muster sucht, findet sie über Typ H — auch wenn sie auf verschiedene Sektionen verteilt sind.
+
+**Sektion = Kapitel im Buch · Muster-Typ = technischer Charakter des Musters**
+
+Die vollständige Typ-Übersicht:
+
+| Icon | Code | Kategorie | Kurzbeschreibung |
+|---|---|---|---|
+| 🔍 | A | RAG & Retrieval | Semantische Suche, Hybrid-Retrieval, Reranking, Index-Tuning |
+| ✏️ | B | Prompt Engineering | Prompt-Konstruktion, Beispiele, Format-Constraints, Prefill |
+| ⚙️ | C | LLM-Output-Verarbeitung | Structured Generation, Tool Use, Streaming, Validierung |
+| 🔀 | D | LLM-Integration & Routing | LLM-Gateway, Modell-Routing, Kosten-Management, Multi-Tenancy |
+| 📋 | E | Qualität & Evaluation | LLM-as-Judge, Golden Dataset, Behavioral Testing, Regression |
+| 🤖 | F | Agent-Patterns | ReAct, Tool Registry, HitL-Checkpoints, Agent-Memory |
+| 🔁 | G | Pipeline- & Workflow-Orchestrierung | Map-Reduce, mehrstufige KI-Pipelines |
+| ⚡ | H | Performance & Caching | Exact/Semantic/Embedding-Cache, Prompt-Caching, Concurrency |
+| 🖥️ | I | Betrieb & Infrastruktur | Deployment, Secrets Management, Observability, LLM-Metriken |
+| 🔐 | J | Sicherheit | Prompt Injection Defense, Output Guardrails, PII-Redaktion |
+| 💼 | K | Business-Muster | Anwendungs-Ebene: welche KI-Fähigkeit für welchen Use-Case |
+
+
+---
+
+## Muster-Bewertungs-Framework (6 Attribute)
+
+Jedes KI-Muster lässt sich entlang von 6 Dimensionen bewerten — nicht nur *was* es kann, sondern *wie* es sich im Produktions- und Compliance-Kontext verhält. Die Ampelfarben signalisieren Risiko und Aufwand. Die Symbole erscheinen im Header jedes technischen Musters.
+
+| Attribut | Günstig 🟢 | Mittel 🟡 | Kritisch 🔴 |
+|---|---|---|---|
+| **🔄 Lernend** — Verbessert sich das System mit Nutzung? | `Nein` — statisch, vorhersagbar | `Feedback` — lernt aus Korrekturen | `Ja` — aktives Nachtraining nötig |
+| **🎯 Determinismus** — Gleiches Input → gleiches Output? | `Determin.` — reproduzierbar, auditierbar | `Hybrid` — teils regelbasiert | `Nicht-det.` — variiert, HitL nötig |
+| **🔍 Erklärbarkeit (XAI)** — Warum hat das System so entschieden? | `Hoch` — vollständig nachvollziehbar | `Mittel` — teilweise erklärbar | `Gering` — Black Box, erhöhter Prüfaufwand |
+| **👤 Human-in-the-Loop (HitL)** — Muss ein Mensch das Ergebnis freigeben? | `Optional` — kann autonom laufen | `Empfohlen` — Qualitätssicherung sinnvoll | `Pflicht` — bei kritischen Outputs zwingend |
+| **🔒 DSGVO-Risiko** — Datenschutzrechtliches Risiko beim Einsatz? | `Niedrig` — keine personenbezogenen Daten | `Mittel` — DSGVO-Prüfung empfohlen | `Hoch` — DSFA Pflicht |
+| **📊 Datenbedarf** — Wie viele Trainings-/Beispieldaten werden benötigt? | `Gering` — LLM-Prompting reicht | `Mittel` — einige hundert Beispiele | `Hoch` — tausende Datenpunkte nötig |
+
+**Schnellbewertung ausgewählter Muster:**
+
+| Muster | 🔄 | 🎯 | 🔍 | 👤 | 🔒 | 📊 |
+|---|---|---|---|---|---|---|
+| RAG / Semantische Suche | Feedback | Determin. | Mittel | Optional | Mittel | Gering |
+| Structured Generation / Extraktion | Feedback | Determin. | Mittel | Empfohlen | Hoch | Gering |
+| LLM-as-Judge / Eval | Ja | Hybrid | Mittel | Empfohlen | Mittel | Mittel |
+| Agent / ReAct | Feedback | Nicht-det. | Gering | Pflicht | Hoch | Hoch |
+| Klassifikation / Routing | Ja | Determin. | Mittel | Empfohlen | Mittel | Mittel |
+| Prompt-Injection-Defense | Nein | Determin. | Hoch | Optional | Niedrig | Gering |
+| Circuit Breaker / Fallback | Nein | Determin. | Hoch | Optional | Niedrig | Gering |
 
 ---
 
@@ -209,33 +230,49 @@ Nicht alle Muster sind gleich wichtig. Diese acht sollten **von Anfang an** impl
 
 ## Inhaltsverzeichnis
 
-> **Schwierigkeitsgrade:** 🟢 Einstieg — direkt anwendbar · 🟡 Fortgeschritten — etwas Vorkenntnisse nötig · 🔴 Expert — tiefes Systemverständnis erforderlich · ⚠️ Pflicht-Muster — vor Produktions-Deployment
+**Einführung & Navigation**
 
+- [Warum dieses Buch](#warum-dieses-buch)
+- [Für wen ist dieses Dokument?](#für-wen-ist-dieses-dokument)
+- [Wie dieses Buch zu lesen ist](#wie-dieses-buch-zu-lesen-ist)
+- [Einstiegsleitfaden — Wo anfangen?](#einstiegsleitfaden-wo-anfangen)
+- [Quick-Start: Die Fundament-Muster](#quick-start-die-fundament-muster-für-ein-neues-ki-projekt)
+- [Schnelldiagnose — Welches Muster löst mein Problem?](#schnelldiagnose-welches-muster-löst-mein-problem)
+- [Muster-Typen (Querschnitts-Kategorien A–K)](#muster-typen-querschnitts-kategorien-ak)
+- [Muster-Bewertungs-Framework (6 Attribute)](#muster-bewertungs-framework-6-attribute)
 
-**Einstiegsschicht — Use-Case-Orientierung:**
+**Einstiegsschicht — Use-Case-Orientierung**
+
 1. [Business-Muster](#1-business-muster) — Welche KI-Fähigkeit für welchen Use-Case?
 
-**Implementierungsschicht — Technische Muster:**
-2. [KI & LLM-Muster](#2-ki--llm-muster)
+**Implementierungsschicht — Technische Muster**
+
+2. [KI & LLM-Muster](#2-ki-llm-muster)
 3. [Datenverarbeitungs-Muster](#3-datenverarbeitungs-muster)
-4. [Sicherheit & Prompt-Schutz](#4-sicherheit--prompt-schutz) — inkl. 4.1b Output Guardrails, 4.2 PII-Redaktion
-5. [Concurrency & Rate Limiting](#5-concurrency--rate-limiting)
+4. [Sicherheit & Prompt-Schutz](#4-sicherheit-prompt-schutz)
+5. [Concurrency & Rate Limiting](#5-concurrency-rate-limiting)
 6. [Retrieval-Augmented Generation (RAG)](#6-retrieval-augmented-generation-rag)
-7. [Workflow-Engine & Resilienz](#7-workflow-engine--resilienz)
+7. [Workflow-Engine & Resilienz](#7-workflow-engine-resilienz)
 8. [Observability](#8-observability)
 9. [Prompt Engineering](#9-prompt-engineering)
-10. [Evals & LLM-Testing](#10-evals--llm-testing)
-11. [Caching](#11-semantic-search-pattern)
-12. [Structured Generation](#12-classification-routing-pattern)
-13. [Agent-Patterns](#13-information-extraction-pattern)
-14. [Erweiterte RAG-Muster](#14-generation-drafting-pattern) — inkl. 14.7 Cross-Encoder Reranking · 14.8 HNSW Index Tuning
-15. [LLM-Robustheit & Qualitätssicherung](#15-summarization-pattern)
-16. [LLM-Kosten-Management](#16-autonomous-agent-pattern)
-17. [Multi-Tenancy & Mandantentrennung](#17-anomaly-detection-pattern)
+10. [Evals & LLM-Testing](#10-evals-llm-testing)
+11. [Caching](#11-caching)
+12. [Structured Generation](#12-structured-generation)
+13. [Agent-Patterns](#13-agent-patterns)
+14. [Erweiterte RAG-Muster](#14-erweiterte-rag-muster)
+15. [LLM-Robustheit & Qualitätssicherung](#15-llm-robustheit-qualitätssicherung)
+16. [LLM-Kosten-Management](#16-llm-kosten-management)
+17. [Multi-Tenancy & Mandantentrennung](#17-multi-tenancy-mandantentrennung)
 
+**Anhang**
+
+- [Master-Referenztabelle — Alle Muster auf einen Blick](#master-referenztabelle-alle-muster-auf-einen-blick)
+- [Anti-Patterns — Häufige Fehler und wie man sie vermeidet](#anti-patterns-häufige-fehler-und-wie-man-sie-vermeidet)
+- [Anhang A: Patterns als Steuerungssprache für Coding-Agents](#anhang-a-patterns-als-steuerungssprache-für-coding-agents)
+- [Hinweise zur Diagramm-Darstellung](#hinweise-zur-diagramm-darstellung)
+- [Changelog](#changelog)
 ---
 
-> **Muster-Bewertungs-Attribute:** 🔄 Lernend (verbessert sich mit Nutzung?) · 🎯 Determinismus (gleiches Input → gleiches Output?) · 🔍 XAI (Erklärbarkeit: Hoch / Mittel / Gering) · 👤 HitL (Human-in-the-Loop: Optional / Empfohlen / Pflicht) · 🔒 DSGVO-Risiko (Niedrig / Mittel / Hoch) · 📊 Datenbedarf (Gering / Mittel / Hoch) — vollständige Beschreibung: [Muster-Bewertungs-Framework](#muster-bewertungs-framework-6-attribute)
 
 ---
 
@@ -251,7 +288,7 @@ In den letzten Jahren hat er sich intensiv mit generativer KI und dem Aufbau pro
 
 ## 1. Business-Muster
 
-> **Kategorie:** K · Business-Muster
+> **Kategorie:** 💼 K · Business-Muster
 
 Business-Muster beschreiben KI-Fähigkeiten auf Anwendungsebene: *Was kann KI für diesen Use-Case leisten?* Sie sind orthogonal zu den technischen Implementierungsmustern (Sektionen 2–17) und dienen als Entscheidungsschicht — welche KI-Fähigkeit für welchen Anwendungsfall, mit welchen Governance-Anforderungen.
 
@@ -277,7 +314,7 @@ Jedes Muster enthält die **6 Bewertungs-Attribute** (→ [Muster-Bewertungs-Fra
 
 ### 1.1 Semantic Search Pattern
 
-> **Kategorie:** K · Business-Muster | 🔄 Feedback · 🎯 Determin. · 🔍 XAI Hoch · 👤 HitL Optional · 🔒 Niedrig · 📊 Gering
+> **Kategorie:** 💼 K · Business-Muster | 🔄 Feedback · 🎯 Determin. · 🔍 XAI Hoch · 👤 HitL Optional · 🔒 Niedrig · 📊 Gering
 
 > **Intent:** Findet semantisch relevante Inhalte in Dokumenten unabhängig von exakter Wortwahl — durch Embedding-basiertes Retrieval statt Keyword-Matching.
 
@@ -326,7 +363,7 @@ graph LR
 
 ### 1.2 Classification & Routing Pattern
 
-> **Kategorie:** K · Business-Muster | 🔄 Ja · 🎯 Determin. · 🔍 XAI Mittel · 👤 HitL Empfohlen · 🔒 Mittel · 📊 Mittel
+> **Kategorie:** 💼 K · Business-Muster | 🔄 Ja · 🎯 Determin. · 🔍 XAI Mittel · 👤 HitL Empfohlen · 🔒 Mittel · 📊 Mittel
 
 > **Intent:** Ordnet eingehende Objekte automatisch definierten Kategorien zu und leitet sie an den richtigen Empfänger oder Folgeschritt weiter.
 
@@ -376,7 +413,7 @@ graph LR
 
 ### 1.3 Information Extraction Pattern
 
-> **Kategorie:** K · Business-Muster | 🔄 Feedback · 🎯 Determin. · 🔍 XAI Mittel · 👤 HitL Empfohlen · 🔒 Hoch · 📊 Mittel
+> **Kategorie:** 💼 K · Business-Muster | 🔄 Feedback · 🎯 Determin. · 🔍 XAI Mittel · 👤 HitL Empfohlen · 🔒 Hoch · 📊 Mittel
 
 > **Intent:** Gewinnt strukturierte Daten aus unstrukturierten Quellen (PDFs, Freitext, Scans) automatisch und skalierbar.
 
@@ -426,7 +463,7 @@ graph LR
 
 ### 1.4 Generation & Drafting Pattern
 
-> **Kategorie:** K · Business-Muster | 🔄 Nein · 🎯 Nicht-det. · 🔍 XAI Gering · 👤 HitL Pflicht · 🔒 Mittel · 📊 Gering
+> **Kategorie:** 💼 K · Business-Muster | 🔄 Nein · 🎯 Nicht-det. · 🔍 XAI Gering · 👤 HitL Pflicht · 🔒 Mittel · 📊 Gering
 
 > **Intent:** Erstellt Textentwürfe (Bescheide, Berichte, E-Mails) auf Basis strukturierten Kontexts als Arbeitsgrundlage für menschliche Sachbearbeiter.
 
@@ -475,7 +512,7 @@ graph LR
 
 ### 1.5 Summarization Pattern
 
-> **Kategorie:** K · Business-Muster | 🔄 Nein · 🎯 Nicht-det. · 🔍 XAI Gering · 👤 HitL Empfohlen · 🔒 Mittel · 📊 Gering
+> **Kategorie:** 💼 K · Business-Muster | 🔄 Nein · 🎯 Nicht-det. · 🔍 XAI Gering · 👤 HitL Empfohlen · 🔒 Mittel · 📊 Gering
 
 > **Intent:** Verdichtet lange Dokumente auf ihre Kernaussagen durch mehrstufige Map-Reduce-Zusammenfassung.
 
@@ -524,7 +561,7 @@ graph LR
 
 ### 1.6 Autonomous Agent Pattern
 
-> **Kategorie:** K · Business-Muster | 🔄 Feedback · 🎯 Nicht-det. · 🔍 XAI Gering · 👤 HitL Pflicht · 🔒 Hoch · 📊 Hoch
+> **Kategorie:** 💼 K · Business-Muster | 🔄 Feedback · 🎯 Nicht-det. · 🔍 XAI Gering · 👤 HitL Pflicht · 🔒 Hoch · 📊 Hoch
 
 > **Intent:** Orchestriert mehrstufige Aufgaben autonom durch dynamische Tool-Auswahl — wenn der Lösungsweg nicht vorab definierbar ist.
 
@@ -578,7 +615,7 @@ graph LR
 
 ### 1.7 Anomaly Detection Pattern
 
-> **Kategorie:** K · Business-Muster | 🔄 Ja · 🎯 Hybrid · 🔍 XAI Gering · 👤 HitL Empfohlen · 🔒 Hoch · 📊 Hoch
+> **Kategorie:** 💼 K · Business-Muster | 🔄 Ja · 🎯 Hybrid · 🔍 XAI Gering · 👤 HitL Empfohlen · 🔒 Hoch · 📊 Hoch
 
 > **Intent:** Erkennt Abweichungen und unbekannte Muster in Daten automatisch, die regelbasierte Prüfungen nicht erfassen.
 
@@ -630,7 +667,7 @@ graph LR
 
 ### 1.8 Process Automation Pattern
 
-> **Kategorie:** K · Business-Muster | 🔄 Nein · 🎯 Determin. · 🔍 XAI Hoch · 👤 HitL Optional · 🔒 Niedrig · 📊 Gering
+> **Kategorie:** 💼 K · Business-Muster | 🔄 Nein · 🎯 Determin. · 🔍 XAI Hoch · 👤 HitL Optional · 🔒 Niedrig · 📊 Gering
 
 > **Intent:** Führt vollständig vordefinierte Abläufe deterministisch aus — ohne LLM zur Laufzeit, auditierbar und günstig.
 
@@ -681,7 +718,7 @@ graph LR
 
 ### 1.9 Multimodal Analysis Pattern
 
-> **Kategorie:** K · Business-Muster | 🔄 Feedback · 🎯 Hybrid · 🔍 XAI Gering · 👤 HitL Empfohlen · 🔒 Hoch · 📊 Hoch
+> **Kategorie:** 💼 K · Business-Muster | 🔄 Feedback · 🎯 Hybrid · 🔍 XAI Gering · 👤 HitL Empfohlen · 🔒 Hoch · 📊 Hoch
 
 > **Intent:** Analysiert heterogene Dokumenttypen (Bilder, Scans, Grafiken) durch Kombination von Vision-Modell und Text-LLM.
 
@@ -731,7 +768,7 @@ graph LR
 
 ### 1.10 Document Comparison Pattern
 
-> **Kategorie:** K · Business-Muster | 🔄 Nein · 🎯 Determin. · 🔍 XAI Hoch · 👤 HitL Optional · 🔒 Niedrig · 📊 Gering
+> **Kategorie:** 💼 K · Business-Muster | 🔄 Nein · 🎯 Determin. · 🔍 XAI Hoch · 👤 HitL Optional · 🔒 Niedrig · 📊 Gering
 
 > **Intent:** Zeigt semantische Unterschiede zwischen zwei Dokumentversionen strukturiert auf — über zeichenbasiertes Diff hinaus.
 
@@ -783,7 +820,7 @@ graph LR
 
 ### 1.11 Translation & Simplification Pattern
 
-> **Kategorie:** K · Business-Muster | 🔄 Nein · 🎯 Nicht-det. · 🔍 XAI Mittel · 👤 HitL Empfohlen · 🔒 Niedrig · 📊 Gering
+> **Kategorie:** 💼 K · Business-Muster | 🔄 Nein · 🎯 Nicht-det. · 🔍 XAI Mittel · 👤 HitL Empfohlen · 🔒 Niedrig · 📊 Gering
 
 > **Intent:** Überführt Fachsprache in einfache Sprache oder andere Zielsprachen ohne manuellen Übersetzungsaufwand.
 
@@ -860,32 +897,6 @@ graph LR
 
 
 
----
-
-### Muster-Bewertungs-Framework (6 Attribute)
-
-Jedes KI-Muster lässt sich entlang von 6 Dimensionen bewerten — nicht nur *was* es kann, sondern *wie* es sich im Produktions- und Compliance-Kontext verhält. Die Ampelfarben signalisieren Risiko und Aufwand.
-
-| Attribut | Günstig 🟢 | Mittel 🟡 | Kritisch 🔴 |
-|---|---|---|---|
-| **🔄 Lernend** — Verbessert sich das System mit Nutzung? | `Nein` — statisch, vorhersagbar | `Feedback` — lernt aus Korrekturen | `Ja` — aktives Nachtraining nötig |
-| **🎯 Determinismus** — Gleiches Input → gleiches Output? | `Determin.` — reproduzierbar, auditierbar | `Hybrid` — teils regelbasiert | `Nicht-det.` — variiert, HitL nötig |
-| **🔍 Erklärbarkeit (XAI)** — Warum hat das System so entschieden? | `Hoch` — vollständig nachvollziehbar | `Mittel` — teilweise erklärbar | `Gering` — Black Box, erhöhter Prüfaufwand |
-| **👤 Human-in-the-Loop (HitL)** — Muss ein Mensch das Ergebnis freigeben? | `Optional` — kann autonom laufen | `Empfohlen` — Qualitätssicherung sinnvoll | `Pflicht` — bei kritischen Outputs zwingend |
-| **🔒 DSGVO-Risiko** — Datenschutzrechtliches Risiko beim Einsatz? | `Niedrig` — keine personenbezogenen Daten | `Mittel` — DSGVO-Prüfung empfohlen | `Hoch` — DSFA Pflicht |
-| **📊 Datenbedarf** — Wie viele Trainings-/Beispieldaten werden benötigt? | `Gering` — LLM-Prompting reicht | `Mittel` — einige hundert Beispiele | `Hoch` — tausende Datenpunkte nötig |
-
-**Schnellbewertung ausgewählter Muster aus dieser Sammlung:**
-
-| Muster | 🔄 | 🎯 | 🔍 | 👤 | 🔒 | 📊 |
-|---|---|---|---|---|---|---|
-| RAG / Semantische Suche (5.x) | Feedback | Determin. | Mittel | Optional | Mittel | Gering |
-| Structured Generation / Extraktion (13.x) | Feedback | Determin. | Mittel | Empfohlen | Hoch | Gering |
-| LLM-as-Judge / Eval (11.x) | Ja | Hybrid | Mittel | Empfohlen | Mittel | Mittel |
-| Agent / ReAct (14.x) | Feedback | Nicht-det. | Gering | Pflicht | Hoch | Hoch |
-| Klassifikation / Routing (17.9) | Ja | Determin. | Mittel | Empfohlen | Mittel | Mittel |
-| Prompt-Injection-Defense (4.1) | Nein | Determin. | Hoch | Optional | Niedrig | Gering |
-| Circuit Breaker / Fallback (17.5–17.6) | Nein | Determin. | Hoch | Optional | Niedrig | Gering |
 
 ---
 
@@ -895,7 +906,7 @@ Jedes KI-Muster lässt sich entlang von 6 Dimensionen bewerten — nicht nur *wa
 
 ### 2.1 Map-Reduce Extraction Pattern
 
-> **Kategorie:** G · Pipeline- & Workflow-Orchestrierung
+> **Kategorie:** 🔁 G · Pipeline- & Workflow-Orchestrierung
 
 > **Intent:** Extrahiert strukturierte Daten aus Dokumenten, die das LLM-Kontextfenster überschreiten, durch parallele Chunk-Verarbeitung (Map) und einen konsolidierenden Reduce-Call.
 
@@ -982,7 +993,7 @@ async def extract_metadata(document: Document) -> Metadata:
 
 ### 2.2 Evidence + Source Pattern
 
-> **Kategorie:** B · Prompt Engineering
+> **Kategorie:** ✏️ B · Prompt Engineering
 
 > **Intent:** Macht jede LLM-Extraktion auditierbar, indem jeder extrahierte Wert zwingend mit einem exakten Quellzitat aus dem Originaldokument verknüpft wird.
 
@@ -1066,7 +1077,7 @@ class ExtractedMetadata(BaseModel):
 
 ### 2.3 Recall-First Screening Pattern
 
-> **Kategorie:** A · RAG & Retrieval
+> **Kategorie:** 🔍 A · RAG & Retrieval
 
 > **Intent:** Optimiert die erste Filterstufe einer mehrstufigen Pipeline auf maximalen Recall — irrelevante Treffer werden in späteren Stufen herausgefiltert, relevante gehen nie verloren.
 
@@ -1145,7 +1156,7 @@ filtered = [
 
 ### 2.4 Hypothetical Questions (HyDE) Pattern
 
-> **Kategorie:** A · RAG & Retrieval
+> **Kategorie:** 🔍 A · RAG & Retrieval
 
 > **Intent:** Überbrückt die Vokabular-Lücke zwischen Nutzer-Queries und Dokumenttexten, indem beim Indexieren hypothetische Nutzerfragen pro Chunk generiert und mitgespeichert werden.
 
@@ -1248,7 +1259,7 @@ async def index_chunk(chunk: Chunk, questions: list[str]) -> None:
 
 ### 2.5 Closed Taxonomy Pattern
 
-> **Kategorie:** A · RAG & Retrieval
+> **Kategorie:** 🔍 A · RAG & Retrieval
 
 > **Intent:** Erzwingt konsistente, filterbare Klassifikations-Labels durch eine vordefinierte Taxonomie — verhindert Halluzinationen bei freier Kategorisierung.
 
@@ -1362,7 +1373,7 @@ Der Dokumentkontext ist ein optionaler *Boost* — die Basis-Klassifikation funk
 
 ### 2.6 Multi-Stage Pipeline Pattern
 
-> **Kategorie:** G · Pipeline- & Workflow-Orchestrierung
+> **Kategorie:** 🔁 G · Pipeline- & Workflow-Orchestrierung
 
 > **Intent:** Teilt eine komplexe KI-Aufgabe in spezialisierte Stufen auf, die unabhängig mit unterschiedlichen Modellen und Schwellenwerten optimiert werden können.
 
@@ -1462,7 +1473,7 @@ async def run_pipeline(claim: Claim, chunks: list[Chunk]) -> PipelineResult:
 
 ### 3.1 Rich Chunk Metadata Pattern
 
-> **Kategorie:** A · RAG & Retrieval
+> **Kategorie:** 🔍 A · RAG & Retrieval
 
 > **Intent:** Reichert Vektordatenbank-Chunks mit strukturierten Metadaten an, um Hybrid-Suche (Vektorähnlichkeit + Metadatenfilter) zu ermöglichen.
 
@@ -1572,7 +1583,7 @@ for hit in results:
 
 ### 3.2 Pass-by-Reference Pattern
 
-> **Kategorie:** I · Betrieb & Infrastruktur
+> **Kategorie:** 🖥️ I · Betrieb & Infrastruktur
 
 > **Intent:** Vermeidet Payload-Limits in Workflow-Engines und Message-Brokern, indem große Objekte im Object Storage liegen und nur ihre UUID weitergegeben wird.
 
@@ -1699,7 +1710,7 @@ class S3ObjectStore:
 
 ### 3.3 Structural Text Deconstruction Pattern
 
-> **Kategorie:** A · RAG & Retrieval | D · Datenverarbeitung
+> **Kategorie:** 🔍 🔍 A · RAG & Retrieval | 🔀 D · LLM-Integration & Routing
 
 > **Intent:** Zerlegt fachliche Texte (Gesetze, Verträge, Spezifikationen) in ihre logischen Bestandteile für präzises Retrieval auf Teilebene.
 
@@ -1804,7 +1815,7 @@ def to_chunks(nodes: list[StructuralNode]) -> list[Chunk]:
 
 ### 4.1 Prompt Injection Defense Pattern
 
-> **Kategorie:** B · Prompt Engineering · J · Sicherheit
+> **Kategorie:** ✏️ B · Prompt Engineering · J · Sicherheit
 
 > **Intent:** Schützt LLM-Calls vor bösartigem externem Inhalt durch mehrschichtige Sanitisierung, Tagging und Sandbox-Isolation bevor der Content das Modell erreicht.
 
@@ -1939,7 +1950,7 @@ response = await llm.chat(system=system, user=user)
 ---
 ### 4.1b Output Guardrails Pattern
 
-> **Kategorie:** J · Sicherheit | C · LLM-Output-Verarbeitung
+> **Kategorie:** 🔐 J · Sicherheit | C · LLM-Output-Verarbeitung
 
 > **Intent:** Schützt nachgelagerte Systeme und Nutzer vor problematischen LLM-Outputs durch eine vorgeschaltete Validierungskette aus PII-Check, Toxizitätsfilter, Compliance-Prüfung und Schema-Validierung.
 
@@ -2020,7 +2031,7 @@ class GuardrailChain:
 
 ### 4.2 PII-Redaktion vor dem LLM-Call
 
-> **Kategorie:** J · Sicherheit
+> **Kategorie:** 🔐 J · Sicherheit
 
 > **Intent:** Entfernt oder pseudonymisiert personenbezogene Daten aus Eingabetexten, bevor diese an externe LLM-Provider gesendet werden — als technische Maßnahme zur DSGVO-Compliance und zum Schutz vor ungewollter Datenweitergabe.
 
@@ -2169,7 +2180,7 @@ def simple_redact(text: str) -> str:
 
 ### 5.1 Sliding Window Executor Pattern
 
-> **Kategorie:** G · Pipeline- & Workflow-Orchestrierung
+> **Kategorie:** 🔁 G · Pipeline- & Workflow-Orchestrierung
 
 > **Intent:** Hält jederzeit exakt N LLM-Tasks gleichzeitig in-flight — ohne Batch-Pausen und ohne API-Überlast durch sofortiges Nachfüllen abgeschlossener Tasks.
 
@@ -2297,7 +2308,7 @@ async def process_all_chunks(chunks: list[Chunk]) -> None:
 
 ### 5.2 Thread-Safe Rate Limiter Pattern
 
-> **Kategorie:** G · Pipeline- & Workflow-Orchestrierung
+> **Kategorie:** 🔁 G · Pipeline- & Workflow-Orchestrierung
 
 > **Intent:** Begrenzt LLM-API-Calls auf ein konfigurierbares Rate-Limit thread-sicher und ohne den asyncio Event Loop zu blockieren.
 
@@ -2430,7 +2441,7 @@ So laufen Haiku-Tasks auf 50 req/min parallel zu GPT-4o-Tasks auf 10 req/min, oh
 
 ### 6.1 Failure-Isolated Indexing Pattern
 
-> **Kategorie:** I · Betrieb & Infrastruktur
+> **Kategorie:** 🖥️ I · Betrieb & Infrastruktur
 
 > **Intent:** Isoliert Indexierungsfehler vom Haupt-Verarbeitungsworkflow, sodass ein fehlgeschlagener Vektordatenbank-Eintrag den Kernprozess nicht abbricht.
 
@@ -2526,7 +2537,7 @@ async def index_document(doc_id: str, text: str) -> None:
 
 ### 6.2 Domain-Specific Chunk Types Pattern
 
-> **Kategorie:** A · RAG & Retrieval
+> **Kategorie:** 🔍 A · RAG & Retrieval
 
 > **Intent:** Verarbeitet heterogene Inhaltstypen (Text, Tabellen, Bilder, Karten) mit spezialisierten Chunking-Strategien und Metadaten pro Typ.
 
@@ -2612,7 +2623,7 @@ async def process_chunk(raw_chunk: RawChunk) -> Chunk:
 
 ### 7.1 Durable Workflow Pattern
 
-> **Kategorie:** G · Pipeline- & Workflow-Orchestrierung
+> **Kategorie:** 🔁 G · Pipeline- & Workflow-Orchestrierung
 
 > **Intent:** Führt lange KI-Pipelines crash-sicher aus, indem jeder Schritt persistent gespeichert wird und nach Ausfällen genau dort fortgesetzt werden kann.
 
@@ -2749,7 +2760,7 @@ class DocumentAnalysisWorkflow:
 
 ### 7.2 LLM Gateway Pattern
 
-> **Kategorie:** D · LLM-Integration & Routing
+> **Kategorie:** 🔀 D · LLM-Integration & Routing
 
 > **Intent:** Entkoppelt alle Services vom LLM-Provider durch einen zentralen Proxy — Provider-Wechsel, Failover und Rate-Limiting werden an einer Stelle verwaltet.
 
@@ -2884,7 +2895,7 @@ So kann ein Service einfach `request.needs_vision=True` setzen und muss keine Mo
 
 ### 8.1 Full Observability Stack Pattern
 
-> **Kategorie:** I · Betrieb & Infrastruktur
+> **Kategorie:** 🖥️ I · Betrieb & Infrastruktur
 
 > **Intent:** Integriert Logs, Traces und Metrics von Anfang an zu einem einheitlichen Observability-Stack, der LLM-spezifische Kennzahlen vollständig abdeckt.
 
@@ -3020,7 +3031,7 @@ with llm_latency.labels(model="sonnet", task_type="extraction").time():
 ---
 ### 8.2 LLM Metrics Pattern (Prometheus)
 
-> **Kategorie:** E · Qualität & Evaluation
+> **Kategorie:** 📋 E · Qualität & Evaluation
 
 > **Intent:** Instrumentiert alle LLM-Calls mit LLM-spezifischen Prometheus-Metriken (Latenz-Histogramm mit angepassten Buckets, Timeout-Rate, Circuit-Breaker-State).
 
@@ -3126,7 +3137,7 @@ async def call_llm(model: str, prompt: str):
 
 ### 9.1 Positive + Negative Examples Pattern
 
-> **Kategorie:** B · Prompt Engineering
+> **Kategorie:** ✏️ B · Prompt Engineering
 
 > **Intent:** Reduziert LLM-Formatierungsfehler durch explizite Gegen-Beispiele im Prompt — zeigt nicht nur wie es sein soll, sondern auch wie nicht.
 
@@ -3211,7 +3222,7 @@ Deine Antwort:
 
 ### 9.2 Structured Output Constraints Pattern
 
-> **Kategorie:** B · Prompt Engineering
+> **Kategorie:** ✏️ B · Prompt Engineering
 
 > **Intent:** Erzwingt strukturierte LLM-Ausgaben durch präzise Format-Constraints und robustes Parsing, das Markdown-Wrapper und Schema-Abweichungen toleriert.
 
@@ -3288,7 +3299,7 @@ def parse_llm_json(response: str) -> dict:
 
 ### 9.3 Prompt-Context-Engineering Pattern
 
-> **Kategorie:** B · Prompt Engineering
+> **Kategorie:** ✏️ B · Prompt Engineering
 
 > **Intent:** Erzwingt präzise und deterministische LLM-Antworten durch zwei komplementäre Maßnahmen im System-Prompt: expliziten Domänenkontext und enumerierte Edge-Case-Regeln.
 
@@ -3372,7 +3383,7 @@ Planfeststellungsverfahren. Beachte folgende Rechtsbegriffe:
 
 ### 9.4 Batch Count Control Pattern
 
-> **Kategorie:** B · Prompt Engineering
+> **Kategorie:** ✏️ B · Prompt Engineering
 
 > **Intent:** Garantiert bei Batch-LLM-Calls, dass die Ausgabe-Anzahl exakt der Eingabe-Anzahl entspricht — mit Fallback auf Einzelcalls bei Abweichung.
 
@@ -3460,7 +3471,7 @@ async def batched_llm_call(
 
 ### 9.5 Prefill Pattern (Forced Completion Start)
 
-> **Kategorie:** B · Prompt Engineering
+> **Kategorie:** ✏️ B · Prompt Engineering
 
 > **Intent:** Erzwingt einen deterministischen Formatbeginn der LLM-Antwort, indem der Assistenten-Turn mit einem vorgegebenen Starttext angefangen wird — ohne zusätzlichen API-Call.
 
@@ -3541,7 +3552,7 @@ LLM-Outputs sind nicht deterministisch — klassische Unit-Tests reichen nicht. 
 
 ### 10.1 LLM-as-Judge Pattern
 
-> **Kategorie:** E · Qualität & Evaluation
+> **Kategorie:** 📋 E · Qualität & Evaluation
 
 > **Intent:** Bewertet LLM-Ausgaben automatisch mit einem stärkeren Richter-LLM anhand einer strukturierten Rubrik — für Fälle ohne binäres Richtig/Falsch.
 
@@ -3628,7 +3639,7 @@ async def evaluate_extraction(
 
 ### 10.2 Golden Dataset & Regression Pattern
 
-> **Kategorie:** E · Qualität & Evaluation
+> **Kategorie:** 📋 E · Qualität & Evaluation
 
 > **Intent:** Erkennt Regressionen bei Prompt-Änderungen durch ein handkuratiertes Testdataset, das bei jeder Änderung vollständig durchlaufen wird.
 
@@ -3785,7 +3796,7 @@ Das verschiebt die Qualitätsentscheidung von „nach dem Deployment, wenn Nutze
 
 ### 10.3 Behavioral Testing Pattern
 
-> **Kategorie:** E · Qualität & Evaluation
+> **Kategorie:** 📋 E · Qualität & Evaluation
 
 > **Intent:** Testet strukturelle Eigenschaften von LLM-Ausgaben (Format-Invarianz, Quell-Treue, Null-Vermeidung) unabhängig vom genauen Inhalt.
 
@@ -3876,7 +3887,7 @@ async def test_extraction_properties():
 
 ### 11.1 Exact Hash Cache Pattern
 
-> **Kategorie:** H · Performance & Caching
+> **Kategorie:** ⚡ H · Performance & Caching
 
 > **Intent:** Vermeidet doppelte LLM-Calls für identische Prompts durch SHA-256-Hash als Cache-Key mit TTL und Prompt-Versionierung.
 
@@ -4023,7 +4034,7 @@ Genauso für Model-Wechsel: Der Modellname ist Teil des Keys, ein Wechsel invali
 
 ### 11.2 Semantic Cache Pattern
 
-> **Kategorie:** H · Performance & Caching
+> **Kategorie:** ⚡ H · Performance & Caching
 
 > **Intent:** Trifft Cache-Hits auch bei semantisch ähnlichen (aber nicht identischen) Anfragen durch Embedding-Ähnlichkeitsvergleich.
 
@@ -4143,7 +4154,7 @@ async def cached_rag_query(user_query: str) -> str:
 
 ### 11.3 Server-seitiges Prompt-Caching
 
-> **Kategorie:** H · Performance & Caching
+> **Kategorie:** ⚡ H · Performance & Caching
 
 > **Intent:** Reduziert Token-Kosten und Latenz durch LLM-Provider-seitiges Caching stabiler Prompt-Präfixe — orthogonal zum clientseitigen Response-Caching.
 
@@ -4217,7 +4228,7 @@ graph LR
 
 ### 12.1 Tool Use / Function Calling Pattern
 
-> **Kategorie:** C · LLM-Output-Verarbeitung
+> **Kategorie:** ⚙️ C · LLM-Output-Verarbeitung
 
 > **Intent:** Ermöglicht LLMs das Aufrufen typsicherer Funktionen mit definierten Parametern — für bidirektionalen Austausch zwischen LLM und Anwendung.
 
@@ -4338,7 +4349,7 @@ async def extract_structured(text: str) -> DocumentMetadata:
 
 ### 12.2 Schema-First Generation Pattern
 
-> **Kategorie:** C · LLM-Output-Verarbeitung
+> **Kategorie:** ⚙️ C · LLM-Output-Verarbeitung
 
 > **Intent:** Garantiert schema-konforme LLM-Ausgaben durch Pydantic-Validierung mit automatischem Retry bei Validierungsfehlern.
 
@@ -4491,7 +4502,7 @@ Ein gut designtes Schema reduziert die Notwendigkeit für Auto-Repair-Schichten 
 
 ### 12.3 Streaming Structured Generation Pattern
 
-> **Kategorie:** C · LLM-Output-Verarbeitung
+> **Kategorie:** ⚙️ C · LLM-Output-Verarbeitung
 
 > **Intent:** Liefert strukturierte LLM-Felder inkrementell während des Streams, sodass die UI reagieren kann bevor die vollständige Antwort vorliegt.
 
@@ -4610,7 +4621,7 @@ graph TD
 
 ### 13.1 ReAct Loop Pattern
 
-> **Kategorie:** F · Agent-Patterns
+> **Kategorie:** 🤖 F · Agent-Patterns
 
 > **Intent:** Strukturiert mehrstufige Agentenaufgaben als Thought → Action → Observation Loop mit definiertem Abbruchkriterium und expliziten Tool-Calls.
 
@@ -4714,7 +4725,7 @@ async def react_agent(user_query: str, tools: dict[str, Callable], max_steps: in
 
 ### 13.2 Tool Registry Pattern
 
-> **Kategorie:** F · Agent-Patterns
+> **Kategorie:** 🤖 F · Agent-Patterns
 
 > **Intent:** Registriert Tools mit JSON-Schema-Validierung, sodass der Agent bei falschen Parametern strukturiertes Feedback erhält statt silent errors.
 
@@ -4831,7 +4842,7 @@ async def search_documents(query: str, limit: int = 5) -> list[dict]:
 
 ### 13.3 Human-in-the-Loop Checkpoint Pattern
 
-> **Kategorie:** F · Agent-Patterns
+> **Kategorie:** 🤖 F · Agent-Patterns
 
 > **Intent:** Unterbricht den Agenten-Loop vor risikoreichem Aktionen zur menschlichen Bestätigung — mit explizitem Risiko-Level pro Tool.
 
@@ -4939,7 +4950,7 @@ async def execute_with_checkpoint(
 
 ### 13.4 Agent Memory Pattern
 
-> **Kategorie:** F · Agent-Patterns
+> **Kategorie:** 🤖 F · Agent-Patterns
 
 > **Intent:** Strukturiert Agent-Gedächtnis in drei Ebenen: flüchtiges Working Memory (Prompt), komprimiertes Episodic Memory, persistentes Semantic Memory (Vektordatenbank).
 
@@ -5071,7 +5082,7 @@ async def agent_with_memory(query: str, memory: AgentMemory) -> str:
 
 ### 13.5 Agent Evaluation Pattern
 
-> **Kategorie:** F · Agent-Patterns
+> **Kategorie:** 🤖 F · Agent-Patterns
 
 > **Intent:** Bewertet Agenten ergebnisorientiert — nicht nach Ausführungspfad — durch Tracking von Schritten, Tool-Nutzung und Antwortqualität.
 
@@ -5171,7 +5182,7 @@ async def evaluate_agent(case: AgentEvalCase) -> AgentEvalResult:
 
 ### 13.6 Multi-Turn Memory Management Pattern
 
-> **Kategorie:** F · Agent-Patterns
+> **Kategorie:** 🤖 F · Agent-Patterns
 
 > **Intent:** Hält den LLM-Gesprächskontext bei langen Konversationen innerhalb der Kontextfenster-Grenzen durch Rolling Window, Summary Compression und Entity Memory.
 
@@ -5267,7 +5278,7 @@ class ConversationMemory:
 
 ### 14.1 Hybrid RAG with RRF Pattern
 
-> **Kategorie:** A · RAG & Retrieval
+> **Kategorie:** 🔍 A · RAG & Retrieval
 
 > **Intent:** Kombiniert semantische Vektorsuche mit lexikalischem BM25-Retrieval durch Reciprocal Rank Fusion zu einem überlegenen Hybrid-Ranking.
 
@@ -5352,7 +5363,7 @@ async def hybrid_search(
 
 ### 14.2 Adaptive Query Boosting Pattern
 
-> **Kategorie:** A · RAG & Retrieval
+> **Kategorie:** 🔍 A · RAG & Retrieval
 
 > **Intent:** Verstärkt Retrieval-Scores gezielt je nach Query-Typ: Eigennamen profitieren von hohem Boost, konzeptuelle Fragen von niedrigerem.
 
@@ -5439,7 +5450,7 @@ async function boostedSearch(query: string) {
 
 ### 14.3 LLM Query Expansion Pattern
 
-> **Kategorie:** A · RAG & Retrieval
+> **Kategorie:** 🔍 A · RAG & Retrieval
 
 > **Intent:** Verbessert den Retrieval-Recall kurzer Queries durch LLM-generierte Varianten — mit Cache und Budget-Tracking zur Kostenkontrolle.
 
@@ -5531,7 +5542,7 @@ async expandQuery(query: string, userId: string): Promise<string[]> {
 
 ### 14.4 Model Priority Chain Pattern
 
-> **Kategorie:** D · LLM-Integration & Routing
+> **Kategorie:** 🔀 D · LLM-Integration & Routing
 
 > **Intent:** Löst das LLM-Modell zur Laufzeit über eine 4-stufige Prioritätskette auf: expliziter Request → Service-Config → Katalog-Default → ENV-Fallback.
 
@@ -5667,7 +5678,7 @@ Typische Ersparnisse: 60–80 % der LLM-Kosten durch konsequentes Downgrading au
 
 ### 14.5 Token Budget Management Pattern
 
-> **Kategorie:** B · Prompt Engineering
+> **Kategorie:** ✏️ B · Prompt Engineering
 
 > **Intent:** Verhindert Kontextfenster-Überschreitungen durch Token-zählendes Budget-Management, das System-Messages priorisiert und neueste Nachrichten bevorzugt.
 
@@ -5781,7 +5792,7 @@ class TokenCounter {
 
 ### 14.6 Versioned Prompt Management Pattern
 
-> **Kategorie:** B · Prompt Engineering
+> **Kategorie:** ✏️ B · Prompt Engineering
 
 > **Intent:** Macht System-Prompts ohne Deployment-Änderung aktualisierbar und rollback-fähig durch datenbankgestützte Versionierung mit Pointer-Swap.
 
@@ -5884,7 +5895,7 @@ class SystemPromptService {
 
 ### 14.7 Cross-Encoder Reranking Pattern
 
-> **Kategorie:** A · RAG & Retrieval
+> **Kategorie:** 🔍 A · RAG & Retrieval
 
 > **Intent:** Bewertet Retrieval-Kandidaten durch ein neuronales Cross-Encoder-Modell gemeinsam mit der Query — für drastisch präziseres Ranking als reine Embedding-Ähnlichkeit.
 
@@ -6017,7 +6028,7 @@ async def two_stage_retrieval(
 
 ### 14.8 HNSW / ANN Index Tuning Pattern
 
-> **Kategorie:** A · RAG & Retrieval
+> **Kategorie:** 🔍 A · RAG & Retrieval
 
 > **Intent:** Optimiert die HNSW-Indexparameter der Vektordatenbank für den gewünschten Precision/Speed-Trade-off — statt Default-Werte in Produktion zu übernehmen.
 
@@ -6182,7 +6193,7 @@ def measure_recall(
 
 ### 15.1 LLM Response Validator Pattern
 
-> **Kategorie:** C · LLM-Output-Verarbeitung
+> **Kategorie:** ⚙️ C · LLM-Output-Verarbeitung
 
 > **Intent:** Repariert häufige LLM-Strukturfehler (fehlende Felder, falsche Listenformate, leere Strings) automatisch vor der Schema-Validierung — mit Audit-Trail.
 
@@ -6302,7 +6313,7 @@ Der Vorteil gegenüber einem einzelnen Score: Bei niedriger Gesamt-Confidence ze
 
 ### 15.2 Validation Feedback Loop Pattern
 
-> **Kategorie:** C · LLM-Output-Verarbeitung
+> **Kategorie:** ⚙️ C · LLM-Output-Verarbeitung
 
 > **Intent:** Erhöht Retry-Erfolgsraten drastisch, indem konkrete Pydantic-Validierungsfehler strukturiert als Korrekturanweisung an den LLM zurückgegeben werden.
 
@@ -6396,7 +6407,7 @@ Bitte korrigiere diese Fehler:
 
 ### 15.3 Semantic Deduplication Pattern
 
-> **Kategorie:** A · RAG & Retrieval
+> **Kategorie:** 🔍 A · RAG & Retrieval
 
 > **Intent:** Erkennt semantisch gleiche Regeln mit unterschiedlicher Formulierung durch Embedding-Ähnlichkeitsvergleich und behält die qualitativ beste Instanz.
 
@@ -6497,7 +6508,7 @@ class SemanticDeduplicator:
 
 ### 15.4 Circuit Breaker Pattern
 
-> **Kategorie:** D · LLM-Integration & Routing
+> **Kategorie:** 🔀 D · LLM-Integration & Routing
 
 > **Intent:** Verhindert Cascading Failures bei LLM-API-Ausfällen durch einen 3-Zustands-Automaten, der anhaltende Fehler erkennt und Requests temporär blockiert.
 
@@ -6628,7 +6639,7 @@ class ResilientLLMClient:
 
 ### 15.5 Fallback Hierarchy Pattern
 
-> **Kategorie:** C · LLM-Output-Verarbeitung
+> **Kategorie:** ⚙️ C · LLM-Output-Verarbeitung
 
 > **Intent:** Stellt sicher, dass kritische Pflichtfelder niemals null sind, durch eine 5-stufige Fallback-Kette von direkter LLM-Antwort bis zu Pattern-Matching.
 
@@ -6729,7 +6740,7 @@ def _extract_norm_hierarchy_fallback(self, raw_rule, document_context=None):
 
 ### 15.6 Fail-Fast Policy Pattern
 
-> **Kategorie:** D · LLM-Integration & Routing
+> **Kategorie:** 🔀 D · LLM-Integration & Routing
 
 > **Intent:** Macht Fehler in KI-Pipelines sofort sichtbar durch strikte Exception-Propagation statt stiller Fallbacks, die schwer debuggbare Zustände erzeugen.
 
@@ -6824,7 +6835,7 @@ async def endpoint_extract_metadata(doc_id: str) -> dict:
 
 ### 16.1 LLM-Cost-Tracking Pattern
 
-> **Kategorie:** I · Betrieb & Infrastruktur
+> **Kategorie:** 🖥️ I · Betrieb & Infrastruktur
 
 > **Intent:** Verfolgt Token-Verbrauch und Kosten pro Request, Modell und Aufgabentyp in Echtzeit — als Basis für Budget-Alerts, Model-Routing-Entscheidungen und Kostenoptimierung.
 
@@ -6946,7 +6957,7 @@ async def tracked_llm_call(
 
 ### 16.2 Per-User Budget Limits
 
-> **Kategorie:** I · Betrieb & Infrastruktur
+> **Kategorie:** 🖥️ I · Betrieb & Infrastruktur
 
 > **Intent:** Begrenzt LLM-Kosten pro Nutzer oder Tenant durch ein Budget-System mit Redis-Countern — verhindert Kostenmissbrauch in Multi-User-Systemen.
 
@@ -7061,7 +7072,7 @@ class BudgetManager:
 
 ### 17.1 Tenant-Isolierung in LLM-Pipelines
 
-> **Kategorie:** I · Betrieb & Infrastruktur | J · Sicherheit
+> **Kategorie:** 🖥️ I · Betrieb & Infrastruktur | J · Sicherheit
 
 > **Intent:** Stellt sicher, dass Daten, Prompts, Caches und Rate-Limits zwischen verschiedenen Kunden (Tenants) in einer geteilten Infrastruktur vollständig isoliert sind.
 
@@ -7176,7 +7187,7 @@ def get_tenant_rate_limit(tenant_tier: str) -> int:
 
 ### 17.2 Tenant-spezifisches System-Prompt-Management
 
-> **Kategorie:** B · Prompt Engineering | I · Betrieb & Infrastruktur
+> **Kategorie:** ✏️ B · Prompt Engineering | I · Betrieb & Infrastruktur
 
 > **Intent:** Ermöglicht pro-Tenant-Konfiguration von LLM-Verhalten (Sprache, Domäne, Ton, Einschränkungen) ohne Code-Deployments — durch datenbankgestützte Prompt-Templates.
 
@@ -7570,3 +7581,18 @@ Für den Entwickler bedeutet das: Das Erlernen eines Pattern-Katalogs ist keine 
 ## Hinweise zur Diagramm-Darstellung
 
 Die Mermaid-Diagramme in diesem Dokument erfordern einen Renderer mit Mermaid-Unterstützung (z. B. GitHub, GitLab, Obsidian, VS Code mit Erweiterung). Alle Diagramme sind mit einer kurzen Textbeschreibung direkt darunter versehen — diese dienen als Fallback, wenn das Diagramm nicht gerendert wird.
+
+
+---
+
+## Changelog
+
+| Version | Datum | Änderungen |
+|---|---|---|
+| 1.5 | 2026-04 | Konsolidierung von 82 auf 67 Muster: Streichung nicht-LLM-spezifischer Muster (Infrastruktur, Code-Organisation, Forecast, Validation & Plausibility, Ranking & Recommendation); Verschmelzungen als Varianten (Per-Model Throttling, CI-Integration, Embedding-/Chunk-Cache, Capability-aware Routing, Document-Context-Boost, Kosten-basiertes Routing, Cache Invalidation, Schema-Design-Richtlinien, Multi-dimensionales Confidence Scoring, Prompt-Context-Engineering); LLM Metrics in Observability verschoben (neu 8.2); Master-Referenztabelle und Navigations-Hilfen durchgängig neu generiert |
+| 1.4 | 2026-04 | KI-Schulden-Abschnitt definitorisch ausgebaut; Anhang „Patterns als Steuerungssprache für Coding-Agents"; Code-Konventionen und Tech-Stack-Voraussetzungen; Bibliografie; Nummerierungs-Konsolidierung (4.1b Output Guardrails, 11.6 Prefill, 13.5 Prompt-Caching als eigene Muster; doppeltes Tool-Use-Muster entfernt); Business-Muster-Tabellen strukturell korrigiert; Acute-Bugs in 11.1 und 11.2 behoben; Mermaid-Labels auf `<br/>` umgestellt |
+| 1.3 | 2026-04 | Produkt-unabhängige Konzept-Code-Schicht für 7.1, 6.1, 7.2, 3.2, 9.1 (Konzept + Produkt-Mapping-Tabelle); Migrations-Leitfaden ergänzt; Lösung-Abschnitte mit Warum-Erklärungen erweitert; Ghost-Header bereinigt; veraltete 20.3-Referenz entfernt |
+| 1.2 | 2026-04 | Sektionsnummern bereinigt (18=Kosten, 19=Multi-Tenancy); vollständige Master-Referenztabelle (82 Muster — Erweiterung gegenüber v1.0 hauptsächlich durch Sektion 14 „Erweiterte RAG-Muster", Sektion 15 „LLM-Robustheit" und feinere Aufteilung der Sicherheits- und Evals-Muster); Anti-Patterns-Sektion (18 Einträge in 7 Kategorien); Schnelldiagnose-Tabelle erweitert (5 neue Zeilen); fehlende ## Sektions-Header ergänzt; Business-Muster-Intro präzisiert |
+| 1.1 | 2026-04 | Zielgruppen-Sektion, Tech-Stack, Quick-Start, Systemarchitektur-Diagramm, Schwierigkeitsgrade, Anti-Pattern-Callouts, rollenbasierte Navigation; Sektionen 18 (Kosten-Management), 19 (Multi-Tenancy) ergänzt; frühere Sektion 16 (Allgemeine Backend-Muster) entfernt; PII-Redaktion (4.2) ergänzt |
+| 1.0 | 2026-01 | Erstveröffentlichung — 17 Sektionen, 14 Business-Muster, 39+ technische Muster |
+
